@@ -30,11 +30,8 @@ const Navigation = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src={platoIcon} alt="Plato" className="w-8 h-8 brightness-0 invert" />
-            <div className="flex items-center space-x-1">
-              <span className="text-2xl font-semibold tracking-tight text-foreground">Plato</span>
-              <span className="text-2xl font-semibold tracking-tight text-primary">AI</span>
-            </div>
+            <img src={platoIcon} alt="Platodata" className="w-8 h-8 brightness-0 invert" />
+            <span className="text-2xl font-semibold tracking-tight text-primary">Platodata</span>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
