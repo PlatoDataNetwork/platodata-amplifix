@@ -14,7 +14,7 @@ const Stats = () => {
             <p className="text-primary text-sm font-medium tracking-wide uppercase">
               Content Syndication
             </p>
-            <h2 className="text-5xl md:text-6xl font-bold leading-tight">
+            <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
               AI Powered Press Release
               <br />
               and Content Syndication
