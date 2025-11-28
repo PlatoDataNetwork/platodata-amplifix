@@ -21,7 +21,7 @@ const Developers = () => {
             workflows, and accelerate your development journey.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in flex flex-col">
               <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <Code2 className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
