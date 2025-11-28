@@ -11,7 +11,7 @@ const Security = () => {
               <p className="text-primary text-sm font-medium tracking-wide uppercase">
                 Multi Layered Security Protocol
               </p>
-              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+              <h2 className="text-5xl md:text-6xl font-bold leading-tight">
                 Safeguarding Your Data in an Ultra Secure Private Network
               </h2>
               <p className="text-xl text-muted-foreground leading-relaxed">
@@ -72,7 +72,7 @@ const Security = () => {
               <p className="text-primary text-sm font-medium tracking-wide uppercase">
                 Digital Watermarking
               </p>
-              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+              <h2 className="text-5xl md:text-6xl font-bold leading-tight">
                 Create, Embed and Validate Your Content Onchain
               </h2>
               <p className="text-xl text-muted-foreground leading-relaxed">

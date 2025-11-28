@@ -22,7 +22,7 @@ const Blog = () => {
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <p className="text-primary text-sm font-medium tracking-wide uppercase">Blog</p>
-            <h2 className="text-4xl md:text-5xl font-bold">Latest news on Plato</h2>
+            <h2 className="text-5xl md:text-6xl font-bold">Latest news on Plato</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
