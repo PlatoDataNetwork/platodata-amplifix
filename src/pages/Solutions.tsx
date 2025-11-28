@@ -118,7 +118,7 @@ const Solutions = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="pt-24 relative">
+      <section className="pt-20 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16 animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
