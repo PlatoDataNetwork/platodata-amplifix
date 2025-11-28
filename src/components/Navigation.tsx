@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
 
 const Navigation = () => {
@@ -29,10 +30,10 @@ const Navigation = () => {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]">
+          <Link to="/" className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]">
             <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
             <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
 
 const Footer = () => {
@@ -7,10 +8,10 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
-              <div className="flex items-center space-x-3 mb-6">
+              <Link to="/" className="flex items-center space-x-3 mb-6 cursor-pointer hover:opacity-80 transition-opacity">
                 <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
                 <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
-              </div>
+              </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Plato Technologies Inc. A NYC based AI Web3 Venture Lab dedicated to building 
                 vertically focused data intelligence products.
