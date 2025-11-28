@@ -1,4 +1,6 @@
 import { Code2, GitBranch, Terminal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Developers = () => {
   return (
@@ -25,9 +27,14 @@ const Developers = () => {
                 <Code2 className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Clean APIs</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed mb-6">
                 RESTful and GraphQL endpoints designed for seamless integration and developer productivity.
               </p>
+              <Link to="/solutions">
+                <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+                  Learn More
+                </Button>
+              </Link>
             </div>
             
             <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -35,9 +42,14 @@ const Developers = () => {
                 <GitBranch className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Version Control</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed mb-6">
                 Semantic versioning for stability, compatibility, and predictable updates across releases.
               </p>
+              <Link to="/solutions">
+                <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+                  Learn More
+                </Button>
+              </Link>
             </div>
             
             <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in" style={{ animationDelay: '0.2s' }}>
@@ -45,9 +57,14 @@ const Developers = () => {
                 <Terminal className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-3">CLI Tools</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed mb-6">
                 Powerful command-line utilities that streamline workflows and boost development efficiency.
               </p>
+              <Link to="/solutions">
+                <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+                  Learn More
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
