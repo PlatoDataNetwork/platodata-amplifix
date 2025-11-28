@@ -19,28 +19,34 @@ const Developers = () => {
             workflows, and accelerate your development journey.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-            <div className="p-6 rounded-xl bg-card border border-border">
-              <Code2 className="w-10 h-10 text-primary mb-4 mx-auto" />
-              <h4 className="font-semibold mb-2">Clean APIs</h4>
-              <p className="text-sm text-muted-foreground">
-                RESTful and GraphQL endpoints
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
+            <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <Code2 className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Clean APIs</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                RESTful and GraphQL endpoints designed for seamless integration and developer productivity.
               </p>
             </div>
             
-            <div className="p-6 rounded-xl bg-card border border-border">
-              <GitBranch className="w-10 h-10 text-primary mb-4 mx-auto" />
-              <h4 className="font-semibold mb-2">Version Control</h4>
-              <p className="text-sm text-muted-foreground">
-                Semantic versioning for stability
+            <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <GitBranch className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Version Control</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Semantic versioning for stability, compatibility, and predictable updates across releases.
               </p>
             </div>
             
-            <div className="p-6 rounded-xl bg-card border border-border">
-              <Terminal className="w-10 h-10 text-primary mb-4 mx-auto" />
-              <h4 className="font-semibold mb-2">CLI Tools</h4>
-              <p className="text-sm text-muted-foreground">
-                Powerful command-line utilities
+            <div className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <Terminal className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">CLI Tools</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Powerful command-line utilities that streamline workflows and boost development efficiency.
               </p>
             </div>
           </div>
