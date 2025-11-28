@@ -1,4 +1,4 @@
-import { Zap, Box, FileCode2, Users, Shield, Plug } from "lucide-react";
+import { Zap, Box, FileCode2, Users, Shield, Plug, Brain, Hexagon, Code } from "lucide-react";
 
 const Features = () => {
   const features = [
@@ -31,6 +31,21 @@ const Features = () => {
       icon: Plug,
       title: "API Functionality",
       description: "Easily integrate powerful tools with flexible, scalable APIs for limitless possibilities.",
+    },
+    {
+      icon: Brain,
+      title: "AI Development",
+      description: "Build intelligent solutions with cutting-edge machine learning and AI technologies.",
+    },
+    {
+      icon: Hexagon,
+      title: "Web3 Development",
+      description: "Create decentralized applications with blockchain technology and Web3 infrastructure.",
+    },
+    {
+      icon: Code,
+      title: "Software Development",
+      description: "Develop robust, scalable software solutions tailored to your business needs.",
     },
   ];
 
