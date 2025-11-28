@@ -1,3 +1,5 @@
+import platoIcon from "@/assets/plato-icon.png";
+
 const Footer = () => {
   return (
     <footer className="py-20 border-t border-border">
@@ -5,9 +7,9 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <span className="text-2xl font-bold">PLATO</span>
-                <span className="text-2xl font-bold text-primary">AI</span>
+              <div className="flex items-center space-x-3 mb-6">
+                <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
+                <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Plato Technologies Inc. A NYC based AI Web3 Venture Lab dedicated to building 
