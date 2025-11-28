@@ -66,21 +66,21 @@ const Features = () => {
             return (
               <div
                 key={index}
-                className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in"
+                className="group p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--card-glow)] animate-fade-in flex flex-col"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <Icon className="w-7 h-7 text-primary" />
+                <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6">
+                  <Icon className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">{feature.description}</p>
-                {index < 3 && (
-                  <Link to="/solutions">
-                    <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+                <h3 className="text-xl font-semibold mb-4 text-foreground">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">{feature.description}</p>
+                {index < 3 ? (
+                  <Link to="/solutions" className="w-full">
+                    <Button variant="secondary" size="lg" className="w-full bg-secondary hover:bg-secondary/80 text-foreground">
                       Learn More
                     </Button>
                   </Link>
-                )}
+                ) : null}
               </div>
             );
           })}
