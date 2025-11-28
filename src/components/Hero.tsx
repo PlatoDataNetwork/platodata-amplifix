@@ -20,7 +20,7 @@ const Hero = () => {
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Web3 AI code creation, automation, and vertical data Intelligence.
             <br />
-            A decentralized, consensus-driven AI network ensuring trust & transparency.
+            <span className="whitespace-nowrap">A decentralized, consensus-driven AI network ensuring trust & transparency.</span>
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
