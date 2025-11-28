@@ -7,7 +7,7 @@ const Mission = () => {
             <p className="text-primary text-sm font-medium tracking-wide uppercase">
               The Power of Generative AI Reimagined
             </p>
-            <h2 className="text-5xl md:text-6xl font-bold leading-tight">
+            <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
               We are on a mission to disrupt
               <br />
               the data intelligence market
