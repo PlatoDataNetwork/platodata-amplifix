@@ -22,15 +22,6 @@ const Hero = () => {
             <br />
             <span className="whitespace-nowrap">A decentralized, consensus-driven AI network ensuring trust & transparency.</span>
           </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <button className="px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full font-medium transition-all hover:scale-105">
-              Get Started
-            </button>
-            <button className="px-8 py-4 border border-border hover:bg-secondary rounded-full font-medium transition-all">
-              Learn More
-            </button>
-          </div>
         </div>
       </div>
 
