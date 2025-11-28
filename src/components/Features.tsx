@@ -52,6 +52,12 @@ const Features = () => {
   return (
     <section className="py-32 relative" id="solutions">
       <div className="container mx-auto px-6">
+        <div className="text-center mb-16 animate-fade-in">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Solutions</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Discover powerful tools and services designed to accelerate your digital transformation with cutting-edge technology and secure infrastructure.
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
