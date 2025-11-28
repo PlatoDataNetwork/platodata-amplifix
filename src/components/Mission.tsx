@@ -8,9 +8,7 @@ const Mission = () => {
               The Power of Generative AI Reimagined
             </p>
             <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
-              We are on a mission to disrupt
-              <br />
-              the data intelligence market
+              We are the intersection of Web3 and AI.
             </h2>
           </div>
           
