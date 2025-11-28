@@ -3,6 +3,21 @@ import { Zap, Box, FileCode2, Users, Shield, Plug, Brain, Hexagon, Code } from "
 const Features = () => {
   const features = [
     {
+      icon: Brain,
+      title: "AI Development",
+      description: "Build intelligent solutions with cutting-edge machine learning and AI technologies.",
+    },
+    {
+      icon: Hexagon,
+      title: "Web3 Development",
+      description: "Create decentralized applications with blockchain technology and Web3 infrastructure.",
+    },
+    {
+      icon: Code,
+      title: "Software Development",
+      description: "Develop robust, scalable software solutions tailored to your business needs.",
+    },
+    {
       icon: Zap,
       title: "Fast & Seamless",
       description: "Experience lightning-fast, frictionless interactions that keep you ahead of the curve.",
@@ -31,21 +46,6 @@ const Features = () => {
       icon: Plug,
       title: "API Functionality",
       description: "Easily integrate powerful tools with flexible, scalable APIs for limitless possibilities.",
-    },
-    {
-      icon: Brain,
-      title: "AI Development",
-      description: "Build intelligent solutions with cutting-edge machine learning and AI technologies.",
-    },
-    {
-      icon: Hexagon,
-      title: "Web3 Development",
-      description: "Create decentralized applications with blockchain technology and Web3 infrastructure.",
-    },
-    {
-      icon: Code,
-      title: "Software Development",
-      description: "Develop robust, scalable software solutions tailored to your business needs.",
     },
   ];
 
