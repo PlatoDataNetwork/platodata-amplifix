@@ -1,4 +1,6 @@
 import { Zap, Box, FileCode2, Users, Shield, Plug, Brain, Hexagon, Code } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Features = () => {
   const features = [
@@ -71,7 +73,14 @@ const Features = () => {
                   <Icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                <p className="text-muted-foreground leading-relaxed mb-6">{feature.description}</p>
+                {index < 3 && (
+                  <Link to="/solutions">
+                    <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+                      Learn More
+                    </Button>
+                  </Link>
+                )}
               </div>
             );
           })}
