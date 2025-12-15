@@ -12,13 +12,9 @@ const Hero = () => {
           </div>
           
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent">
-              Secure network protocol
-            </span>
+            Secure network protocol
             <br />
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent" style={{ animationDelay: '0.5s' }}>
-              for the next web
-            </span>
+            for the next web
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
