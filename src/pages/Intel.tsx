@@ -2,7 +2,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Search, LayoutGrid, List } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +22,11 @@ const ARTICLES_PER_PAGE = 24;
 
 const Intel = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [activeSearch, setActiveSearch] = useState(searchParams.get("q") || "");
-  const [selectedVertical, setSelectedVertical] = useState(searchParams.get("vertical") || "all");
+  const selectedVertical = "all"; // Main Intel page shows all articles
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
 
   // Fetch unique verticals using RPC function
@@ -115,8 +116,11 @@ const Intel = () => {
   };
 
   const handleVerticalChange = (value: string) => {
-    setSelectedVertical(value);
-    updateParams({ vertical: value, page: "1" });
+    if (value === "all") {
+      navigate("/intel");
+    } else {
+      navigate(`/intel/${value}`);
+    }
   };
 
   const formatDate = (dateString: string) => {
