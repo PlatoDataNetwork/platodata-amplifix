@@ -329,7 +329,7 @@ const Intel = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-medium text-sm text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-medium text-base text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title}
                         </h3>
                         {article.excerpt && (
