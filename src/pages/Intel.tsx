@@ -307,7 +307,7 @@ const Intel = () => {
                   key={article.id} 
                   to={`/intel/${generateArticleSlug(article)}`}
                 >
-                  <Card className="bg-card border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
+                  <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
                     <CardContent className="p-0">
                       {article.image_url && (
                         <div className="h-48 overflow-hidden">
@@ -329,7 +329,7 @@ const Intel = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-medium text-sm text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title}
                         </h3>
                         {article.excerpt && (
