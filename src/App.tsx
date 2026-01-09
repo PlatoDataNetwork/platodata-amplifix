@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
 import Intel from "./pages/Intel";
 import IntelVertical from "./pages/IntelVertical";
+import ArticlePage from "./pages/ArticlePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/intel" element={<Intel />} />
-          <Route path="/intel/:slugOrVertical" element={<IntelVertical />} />
+          <Route path="/intel/:vertical" element={<IntelVertical />} />
+          <Route path="/w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
