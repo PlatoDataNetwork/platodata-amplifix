@@ -186,7 +186,7 @@ const Intel = () => {
       
       {/* Hero Section */}
       <section className="pt-32 pb-8 px-6">
-        <div className="container mx-auto max-w-6xl text-center">
+        <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
             Platodata Intelligence
           </h1>
@@ -198,7 +198,7 @@ const Intel = () => {
 
       {/* Search, Filter & View Controls */}
       <section className="px-6 pb-8">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
             {/* Search Bar */}
             <div className="flex flex-1 gap-2">
@@ -260,7 +260,7 @@ const Intel = () => {
 
       {/* Articles Grid/List */}
       <section className="px-6 pb-12">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto">
           {isLoading ? (
             viewMode === "cards" ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -411,7 +411,7 @@ const Intel = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <section className="px-6 pb-20">
-          <div className="container mx-auto max-w-6xl">
+          <div className="container mx-auto">
             <div className="flex items-center justify-center gap-2">
               <Button
                 variant="outline"
