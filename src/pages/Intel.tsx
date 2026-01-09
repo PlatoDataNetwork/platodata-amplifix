@@ -201,19 +201,17 @@ const Intel = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
             {/* Search Bar */}
-            <div className="flex flex-1 max-w-lg gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="pl-10 bg-transparent border-border"
-                />
-              </div>
-              <Button onClick={handleSearch} className="px-6">
+            <div className="relative flex-1 max-w-lg">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="pl-10 pr-24 bg-transparent border-border"
+              />
+              <Button onClick={handleSearch} size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8">
                 Search
               </Button>
             </div>
