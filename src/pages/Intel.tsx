@@ -210,7 +210,7 @@ const Intel = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="pl-10 bg-secondary border-border"
+                  className="pl-10 bg-transparent border-border"
                 />
               </div>
               <Button onClick={handleSearch} className="px-6">
@@ -220,7 +220,7 @@ const Intel = () => {
             
             {/* Vertical Dropdown */}
             <Select value={selectedVertical} onValueChange={handleVerticalChange}>
-              <SelectTrigger className="w-full md:w-48 bg-secondary border-border">
+              <SelectTrigger className="w-full md:w-48 bg-transparent border-border">
                 <SelectValue placeholder="All Verticals" />
               </SelectTrigger>
               <SelectContent className="bg-card border-border z-50">
