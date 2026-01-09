@@ -358,7 +358,7 @@ const Intel = () => {
                   key={article.id} 
                   to={`/intel/${generateArticleSlug(article)}`}
                 >
-                  <Card className="bg-card border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
+                  <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
                     <CardContent className="p-0 flex flex-col md:flex-row">
                       {article.image_url && (
                         <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
@@ -384,7 +384,7 @@ const Intel = () => {
                               {formatDate(article.published_at)}
                             </span>
                           </div>
-                          <h3 className="font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                          <h3 className="font-medium text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
                             {article.title}
                           </h3>
                           {article.excerpt && (
