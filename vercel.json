@@ -2,7 +2,19 @@
   "routes": [
     { 
       "src": "/sitemap.xml", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap"
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap.xml"
+    },
+    { 
+      "src": "/page-sitemap.xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=page-sitemap.xml"
+    },
+    { 
+      "src": "/vertical-sitemap.xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=vertical-sitemap.xml"
+    },
+    { 
+      "src": "/post-sitemap(\\d+).xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=post-sitemap$1.xml"
     },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
