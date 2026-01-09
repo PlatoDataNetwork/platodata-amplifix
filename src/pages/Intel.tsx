@@ -333,7 +333,7 @@ const Intel = () => {
                           {article.title}
                         </h3>
                         {article.excerpt && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                          <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
                             {article.excerpt}
                           </p>
                         )}
@@ -388,7 +388,7 @@ const Intel = () => {
                             {article.title}
                           </h3>
                           {article.excerpt && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
+                            <p className="text-sm text-muted-foreground line-clamp-3">
                               {article.excerpt}
                             </p>
                           )}
