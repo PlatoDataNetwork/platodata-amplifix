@@ -186,11 +186,11 @@ const Intel = () => {
       
       {/* Hero Section */}
       <section className="pt-32 pb-8 px-6">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-6xl text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
             Platodata Intelligence
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence.
           </p>
         </div>
