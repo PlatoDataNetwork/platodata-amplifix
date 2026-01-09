@@ -32,6 +32,7 @@ const KNOWN_VERTICALS = [
 ];
 
 const ARTICLES_PER_PAGE = 24;
+const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 
 const IntelVertical = () => {
   const { slugOrVertical } = useParams<{ slugOrVertical: string }>();
@@ -333,17 +334,15 @@ const IntelVertical = () => {
         </section>
 
         {/* Featured Image */}
-        {article.image_url && (
-          <section className="px-6 pb-8">
-            <div className="container mx-auto max-w-4xl">
-              <img
-                src={article.image_url}
-                alt={article.title}
-                className="w-full rounded-lg object-cover max-h-[500px]"
-              />
-            </div>
-          </section>
-        )}
+        <section className="px-6 pb-8">
+          <div className="container mx-auto max-w-4xl">
+            <img
+              src={article.image_url || DEFAULT_ARTICLE_IMAGE}
+              alt={article.title}
+              className="w-full rounded-lg object-cover max-h-[500px]"
+            />
+          </div>
+        </section>
 
         {/* Article Content */}
         <section className="px-6 pb-12">
@@ -405,15 +404,13 @@ const IntelVertical = () => {
                     to={`/intel/${generateArticleSlug(related)}`}
                     className="group"
                   >
-                    {related.image_url && (
-                      <div className="h-32 rounded-lg overflow-hidden mb-3">
-                        <img
-                          src={related.image_url}
-                          alt={related.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
+                    <div className="h-32 rounded-lg overflow-hidden mb-3">
+                      <img
+                        src={related.image_url || DEFAULT_ARTICLE_IMAGE}
+                        alt={related.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                     <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 text-sm">
                       {related.title}
                     </h3>
@@ -557,15 +554,13 @@ const IntelVertical = () => {
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
                     <CardContent className="p-0">
-                      {article.image_url && (
-                        <div className="h-48 overflow-hidden">
-                          <img
-                            src={article.image_url}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={article.image_url || DEFAULT_ARTICLE_IMAGE}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
                       <div className="p-6">
                         <div className="flex items-center gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
@@ -608,15 +603,13 @@ const IntelVertical = () => {
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
                     <CardContent className="p-0 flex flex-col md:flex-row">
-                      {article.image_url && (
-                        <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
-                          <img
-                            src={article.image_url}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
+                      <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
+                        <img
+                          src={article.image_url || DEFAULT_ARTICLE_IMAGE}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
                       <div className="p-5 flex flex-col justify-between flex-1">
                         <div>
                           <div className="flex items-center gap-3 mb-2">

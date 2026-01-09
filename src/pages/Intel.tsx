@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 
 const ARTICLES_PER_PAGE = 24;
+const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 
 const Intel = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -311,15 +312,13 @@ const Intel = () => {
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
                     <CardContent className="p-0">
-                      {article.image_url && (
-                        <div className="h-48 overflow-hidden">
-                          <img
-                            src={article.image_url}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={article.image_url || DEFAULT_ARTICLE_IMAGE}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
                       <div className="p-6">
                         <div className="flex items-center gap-2 mb-3">
                           <Badge variant="outline" className="text-xs">
@@ -362,15 +361,13 @@ const Intel = () => {
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
                     <CardContent className="p-0 flex flex-col md:flex-row">
-                      {article.image_url && (
-                        <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
-                          <img
-                            src={article.image_url}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
+                      <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
+                        <img
+                          src={article.image_url || DEFAULT_ARTICLE_IMAGE}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
                       <div className="p-5 flex flex-col justify-between flex-1">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
