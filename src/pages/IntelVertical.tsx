@@ -18,9 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const ARTICLES_PER_PAGE = 24;
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
+const SITE_URL = "https://www.platodata.io";
 
 const IntelVertical = () => {
   const { vertical } = useParams<{ vertical: string }>();
@@ -183,8 +185,36 @@ const IntelVertical = () => {
     return pages;
   };
 
+  const verticalName = formatVerticalName(vertical || "");
+  const pageTitle = `${verticalName} Intelligence | Platodata`;
+  const pageDescription = `Stay updated with the latest ${verticalName} news, insights, and intelligence from Platodata.`;
+  const pageUrl = `${SITE_URL}/intel/${vertical}`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        <meta property="og:site_name" content="Platodata" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={pageUrl} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={pageUrl} />
+      </Helmet>
+      
       <Navigation />
       
       {/* Hero Section */}

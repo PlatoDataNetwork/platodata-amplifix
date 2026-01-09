@@ -18,9 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const ARTICLES_PER_PAGE = 24;
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
+const SITE_URL = "https://www.platodata.io";
 
 const Intel = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -187,6 +189,29 @@ const Intel = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Platodata Intelligence | AI, Web3 & Emerging Tech News</title>
+        <meta name="description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/intel`} />
+        <meta property="og:title" content="Platodata Intelligence | AI, Web3 & Emerging Tech News" />
+        <meta property="og:description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        <meta property="og:site_name" content="Platodata" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={`${SITE_URL}/intel`} />
+        <meta name="twitter:title" content="Platodata Intelligence | AI, Web3 & Emerging Tech News" />
+        <meta name="twitter:description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={`${SITE_URL}/intel`} />
+      </Helmet>
+      
       <Navigation />
       
       {/* Hero Section */}
