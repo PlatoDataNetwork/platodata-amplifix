@@ -201,7 +201,7 @@ const Intel = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
             {/* Search Bar */}
-            <div className="flex flex-1 gap-2">
+            <div className="flex flex-1 max-w-md gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
