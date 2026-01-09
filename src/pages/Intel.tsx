@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Search, LayoutGrid, List } from "lucide-react";
+import { decodeHtmlEntities } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -331,11 +332,11 @@ const Intel = () => {
                           )}
                         </div>
                         <h3 className="font-medium text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                          {article.title}
+                          {decodeHtmlEntities(article.title)}
                         </h3>
                         {article.excerpt && (
                           <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                            {article.excerpt}
+                            {decodeHtmlEntities(article.excerpt)}
                           </p>
                         )}
                         <div className="flex items-center justify-between">
@@ -384,11 +385,11 @@ const Intel = () => {
                             </span>
                           </div>
                           <h3 className="font-medium text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                            {article.title}
+                            {decodeHtmlEntities(article.title)}
                           </h3>
                           {article.excerpt && (
                             <p className="text-sm text-muted-foreground line-clamp-3">
-                              {article.excerpt}
+                              {decodeHtmlEntities(article.excerpt)}
                             </p>
                           )}
                         </div>
