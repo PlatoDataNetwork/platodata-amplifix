@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Search, LayoutGrid, List, ArrowLeft } from "lucide-react";
+import { decodeHtmlEntities } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -315,7 +316,7 @@ const IntelVertical = () => {
             </div>
             
             <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-              {article.title}
+              {decodeHtmlEntities(article.title)}
             </h1>
             
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
@@ -412,7 +413,7 @@ const IntelVertical = () => {
                       />
                     </div>
                     <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 text-sm">
-                      {related.title}
+                      {decodeHtmlEntities(related.title)}
                     </h3>
                   </Link>
                 ))}
@@ -573,11 +574,11 @@ const IntelVertical = () => {
                           )}
                         </div>
                         <h3 className="font-medium text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                          {article.title}
+                          {decodeHtmlEntities(article.title)}
                         </h3>
                         {article.excerpt && (
                           <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                            {article.excerpt}
+                            {decodeHtmlEntities(article.excerpt)}
                           </p>
                         )}
                         <div className="flex items-center justify-between">
@@ -626,11 +627,11 @@ const IntelVertical = () => {
                             </span>
                           </div>
                           <h3 className="font-medium text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                            {article.title}
+                            {decodeHtmlEntities(article.title)}
                           </h3>
                           {article.excerpt && (
                             <p className="text-sm text-muted-foreground line-clamp-3">
-                              {article.excerpt}
+                              {decodeHtmlEntities(article.excerpt)}
                             </p>
                           )}
                         </div>
