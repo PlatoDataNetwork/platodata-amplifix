@@ -7,8 +7,10 @@ import { ArrowLeft } from "lucide-react";
 import { decodeHtmlEntities } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Helmet } from "react-helmet-async";
 
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
+const SITE_URL = "https://www.platodata.io";
 
 const ArticlePage = () => {
   const { postId, vertical, slug } = useParams<{ postId: string; vertical: string; slug: string }>();
@@ -109,8 +111,43 @@ const ArticlePage = () => {
     );
   }
 
+  const pageTitle = decodeHtmlEntities(article.title);
+  const pageDescription = article.excerpt 
+    ? decodeHtmlEntities(article.excerpt).slice(0, 160) 
+    : `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on Platodata.`;
+  const pageImage = article.image_url || `${SITE_URL}${DEFAULT_ARTICLE_IMAGE}`;
+  const pageUrl = `${SITE_URL}${generateArticleUrl(article)}`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{pageTitle} | Platodata Intelligence</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:site_name" content="Platodata" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={pageUrl} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        
+        {/* Article specific */}
+        <meta property="article:published_time" content={article.published_at} />
+        {article.author && <meta property="article:author" content={article.author} />}
+        <meta property="article:section" content={formatVerticalName(article.vertical_slug)} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={pageUrl} />
+      </Helmet>
+      
       <Navigation />
       
       {/* Article Header */}
