@@ -65,8 +65,7 @@ const ArticlePage = () => {
     const titleSlug = article.title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .slice(0, 80);
+      .replace(/\s+/g, "-");
     return `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
   };
 
