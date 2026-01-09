@@ -1,5 +1,9 @@
 {
   "routes": [
+    { 
+      "src": "/sitemap.xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap"
+    },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
   ]
