@@ -350,12 +350,7 @@ const IntelVertical = () => {
           <div className="container mx-auto max-w-4xl">
             {article.content ? (
               <div 
-                className="prose prose-invert prose-lg max-w-none
-                  prose-headings:text-foreground 
-                  prose-p:text-muted-foreground 
-                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                  prose-strong:text-foreground
-                  prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground"
+                className="article-content"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
             ) : article.excerpt ? (
