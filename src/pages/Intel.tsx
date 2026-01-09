@@ -140,13 +140,13 @@ const Intel = () => {
       .join(" ");
   };
 
-  const generateArticleSlug = (article: { title: string; post_id: number | null }) => {
-    const slug = article.title
+  const generateArticleUrl = (article: { title: string; post_id: number | null; vertical_slug: string }) => {
+    const titleSlug = article.title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .slice(0, 80);
-    return article.post_id ? `${slug}-${article.post_id}` : slug;
+    return `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
   };
 
   // Generate page numbers to display
@@ -309,7 +309,7 @@ const Intel = () => {
               {articles?.map((article) => (
                 <Link 
                   key={article.id} 
-                  to={`/intel/${generateArticleSlug(article)}`}
+                  to={generateArticleUrl(article)}
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
                     <CardContent className="p-0">
@@ -358,7 +358,7 @@ const Intel = () => {
               {articles?.map((article) => (
                 <Link 
                   key={article.id} 
-                  to={`/intel/${generateArticleSlug(article)}`}
+                  to={generateArticleUrl(article)}
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
                     <CardContent className="p-0 flex flex-col md:flex-row">
