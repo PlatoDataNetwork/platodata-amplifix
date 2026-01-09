@@ -28,17 +28,38 @@ const Intel = () => {
   const [selectedVertical, setSelectedVertical] = useState(searchParams.get("vertical") || "all");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
 
-  // Fetch unique verticals
+  // Fetch unique verticals - get all distinct values
   const { data: verticals } = useQuery({
     queryKey: ["intel-verticals"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("articles")
-        .select("vertical_slug")
-        .limit(1000);
-      if (error) throw error;
-      const uniqueVerticals = [...new Set(data.map((a) => a.vertical_slug))];
-      return uniqueVerticals.sort();
+      // Fetch in batches to get all unique verticals
+      const allVerticals: string[] = [];
+      let offset = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("articles")
+          .select("vertical_slug")
+          .range(offset, offset + batchSize - 1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          data.forEach((a) => {
+            if (!allVerticals.includes(a.vertical_slug)) {
+              allVerticals.push(a.vertical_slug);
+            }
+          });
+          offset += batchSize;
+          hasMore = data.length === batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      return allVerticals.sort();
     },
   });
 
