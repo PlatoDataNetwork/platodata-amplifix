@@ -199,7 +199,7 @@ const Intel = () => {
       {/* Search, Filter & View Controls */}
       <section className="px-6 pb-8">
         <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
             {/* Search Bar */}
             <div className="flex flex-1 gap-2">
               <div className="relative flex-1">
