@@ -136,15 +136,35 @@ Deno.serve(async (req) => {
     const postSitemapMatch = path.match(/^post-sitemap(\d+)\.xml$/);
     if (postSitemapMatch) {
       const pageNum = parseInt(postSitemapMatch[1], 10);
-      const offset = (pageNum - 1) * ARTICLES_PER_SITEMAP;
+      const startOffset = (pageNum - 1) * ARTICLES_PER_SITEMAP;
+      
+      // Fetch articles in batches of 1000 (Supabase default limit)
+      const BATCH_SIZE = 1000;
+      const allArticles: Array<{
+        title: string;
+        post_id: number;
+        vertical_slug: string;
+        published_at: string;
+        updated_at: string | null;
+      }> = [];
+      
+      for (let i = 0; i < ARTICLES_PER_SITEMAP; i += BATCH_SIZE) {
+        const { data: batch, error: batchError } = await supabase
+          .from("articles")
+          .select("title, post_id, vertical_slug, published_at, updated_at")
+          .order("published_at", { ascending: false })
+          .range(startOffset + i, startOffset + i + BATCH_SIZE - 1);
 
-      const { data: articles, error: articlesError } = await supabase
-        .from("articles")
-        .select("title, post_id, vertical_slug, published_at, updated_at")
-        .order("published_at", { ascending: false })
-        .range(offset, offset + ARTICLES_PER_SITEMAP - 1);
+        if (batchError) throw batchError;
+        
+        if (!batch || batch.length === 0) break;
+        allArticles.push(...batch);
+        
+        // If we got less than BATCH_SIZE, no more articles to fetch
+        if (batch.length < BATCH_SIZE) break;
+      }
 
-      if (articlesError) throw articlesError;
+      const articles = allArticles;
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
