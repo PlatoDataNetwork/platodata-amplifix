@@ -20,6 +20,7 @@ const Navigation = () => {
     { name: "Protocol", href: "#protocol" },
     { name: "Security", href: "#security" },
     { name: "Resources", href: "#resources" },
+    { name: "Intel", href: "/intel", isRoute: true },
   ];
 
   return (
@@ -37,13 +38,23 @@ const Navigation = () => {
 
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.name}
-              </a>
+              link.isRoute ? (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ) : (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </a>
+              )
             ))}
           </div>
 
