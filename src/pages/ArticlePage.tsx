@@ -71,6 +71,20 @@ const ArticlePage = () => {
     return `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
   };
 
+  // Generate excerpt from content by stripping HTML and taking first ~160 chars
+  const generateExcerpt = (content: string | null, maxLength: number = 160): string => {
+    if (!content) return "";
+    // Strip HTML tags
+    const strippedContent = content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    // Decode HTML entities
+    const decodedContent = decodeHtmlEntities(strippedContent);
+    if (decodedContent.length <= maxLength) return decodedContent;
+    // Truncate at word boundary
+    const truncated = decodedContent.slice(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+    return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + "...";
+  };
+
   if (articleLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -112,9 +126,11 @@ const ArticlePage = () => {
   }
 
   const pageTitle = decodeHtmlEntities(article.title);
-  const pageDescription = article.excerpt 
+  // Use existing excerpt or auto-generate from content
+  const autoExcerpt = article.excerpt 
     ? decodeHtmlEntities(article.excerpt).slice(0, 160) 
-    : `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on Platodata.`;
+    : generateExcerpt(article.content, 160);
+  const pageDescription = autoExcerpt || `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on Platodata.`;
   const pageImage = article.image_url || `${SITE_URL}${DEFAULT_ARTICLE_IMAGE}`;
   const pageUrl = `${SITE_URL}${generateArticleUrl(article)}`;
 
