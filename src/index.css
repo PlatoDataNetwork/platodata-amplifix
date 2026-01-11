@@ -99,7 +99,7 @@ html {
 
 /* Article content styling */
 .article-content {
-  @apply text-foreground leading-relaxed;
+  @apply text-foreground leading-relaxed text-base md:text-lg;
 }
 
 .article-content h1 {
@@ -127,7 +127,7 @@ html {
 }
 
 .article-content p {
-  @apply text-base md:text-lg leading-relaxed mb-4 text-muted-foreground;
+  @apply text-base md:text-lg leading-relaxed mb-5 text-muted-foreground;
 }
 
 .article-content a {
@@ -145,11 +145,11 @@ html {
 }
 
 .article-content ul {
-  @apply list-disc list-inside mb-4 space-y-2 text-muted-foreground;
+  @apply list-disc pl-6 mb-5 space-y-2 text-muted-foreground;
 }
 
 .article-content ol {
-  @apply list-decimal list-inside mb-4 space-y-2 text-muted-foreground;
+  @apply list-decimal pl-6 mb-5 space-y-2 text-muted-foreground;
 }
 
 .article-content li {
@@ -162,7 +162,7 @@ html {
 }
 
 .article-content blockquote {
-  @apply border-l-4 border-primary pl-6 py-2 my-6 italic text-muted-foreground bg-muted/30 rounded-r-lg;
+  @apply border-l-4 border-primary pl-6 py-4 my-6 italic text-muted-foreground bg-muted/30 rounded-r-lg;
 }
 
 .article-content code {
@@ -170,7 +170,7 @@ html {
 }
 
 .article-content pre {
-  @apply bg-muted p-4 rounded-lg overflow-x-auto mb-4;
+  @apply bg-muted p-4 rounded-lg overflow-x-auto mb-5;
 }
 
 .article-content pre code {
@@ -215,4 +215,16 @@ html {
 
 .article-content mark {
   @apply bg-primary/20 text-foreground px-1 rounded;
+}
+
+/* Handle br tags with proper spacing */
+.article-content br {
+  @apply block;
+  content: "";
+  margin-top: 1rem;
+}
+
+/* Handle consecutive br tags */
+.article-content br + br {
+  margin-top: 0.5rem;
 }
