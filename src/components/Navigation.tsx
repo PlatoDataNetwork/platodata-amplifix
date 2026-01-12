@@ -59,6 +59,8 @@ const Navigation = () => {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* GTranslate Widget - notranslate prevents translation of language names */}
+            <div className="gtranslate_wrapper notranslate hidden md:block"></div>
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">
               Staking
             </Button>
