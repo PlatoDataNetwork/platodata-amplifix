@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -59,8 +60,10 @@ const Navigation = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* GTranslate Widget - notranslate prevents translation of language names */}
-            <div className="gtranslate_wrapper notranslate hidden md:block"></div>
+            {/* Language Selector */}
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">
               Staking
             </Button>
