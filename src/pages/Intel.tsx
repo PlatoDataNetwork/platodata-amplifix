@@ -123,7 +123,7 @@ const Intel = () => {
     if (value === "all") {
       navigate("/intel");
     } else {
-      navigate(`/intel/${value}`);
+      navigate(`/w3ai/vertical/${value}`);
     }
   };
 
