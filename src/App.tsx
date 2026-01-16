@@ -24,7 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/solutions" element={<Solutions />} />
             <Route path="/intel" element={<Intel />} />
-            <Route path="/intel/:vertical" element={<IntelVertical />} />
+            <Route path="/w3ai/vertical/:vertical" element={<IntelVertical />} />
             <Route path="/w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
