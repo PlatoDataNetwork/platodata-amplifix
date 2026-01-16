@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
       if (verticals) {
         for (const v of verticals) {
           xml += `  <url>
-    <loc>${SITE_URL}/intel/${v.vertical_slug}</loc>
+    <loc>${SITE_URL}/w3ai/vertical/${v.vertical_slug}</loc>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
   </url>
