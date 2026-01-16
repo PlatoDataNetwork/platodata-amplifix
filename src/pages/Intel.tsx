@@ -20,6 +20,9 @@ const Intel = () => {
   });
 
   const formatVerticalName = (slug: string) => {
+    // Handle special cases
+    if (slug === "ar-vr") return "AR/VR";
+    
     return slug
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
