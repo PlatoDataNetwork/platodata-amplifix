@@ -1,1 +1,4 @@
 project_id = "tmmerifhwscgicmncndl"
+
+[functions.articles-api]
+verify_jwt = false
