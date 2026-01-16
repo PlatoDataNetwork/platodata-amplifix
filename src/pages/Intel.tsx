@@ -86,7 +86,7 @@ const Intel = () => {
                   to={`/w3ai/vertical/${vertical}`}
                   className="group"
                 >
-                  <div className="bg-transparent border border-border rounded-lg p-6 h-24 flex items-center justify-center hover:border-primary/50 hover:scale-105 transition-all duration-300">
+                  <div className="bg-transparent border border-border rounded-lg p-6 h-24 flex items-center justify-center hover:border-primary/50 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
                     <span className="text-foreground font-bold text-lg md:text-xl text-center group-hover:text-primary transition-colors">
                       {formatVerticalName(vertical)}
                     </span>
