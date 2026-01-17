@@ -8,11 +8,13 @@ import { decodeHtmlEntities } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 const SITE_URL = "https://www.platodata.io";
 
 const ArticlePage = () => {
+  const { siteName } = useSiteSettings();
   const { postId, vertical, slug } = useParams<{ postId: string; vertical: string; slug: string }>();
 
   // Fetch single article by post_id
@@ -130,14 +132,14 @@ const ArticlePage = () => {
   const autoExcerpt = article.excerpt 
     ? decodeHtmlEntities(article.excerpt).slice(0, 160) 
     : generateExcerpt(article.content, 160);
-  const pageDescription = autoExcerpt || `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on Platodata.`;
+  const pageDescription = autoExcerpt || `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on ${siteName}.`;
   const pageImage = article.image_url || `${SITE_URL}${DEFAULT_ARTICLE_IMAGE}`;
   const pageUrl = `${SITE_URL}${generateArticleUrl(article)}`;
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{pageTitle} | Platodata Intelligence</title>
+        <title>{pageTitle} | {siteName} Intelligence</title>
         <meta name="description" content={pageDescription} />
         
         {/* Open Graph / Facebook */}
@@ -146,7 +148,7 @@ const ArticlePage = () => {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={pageImage} />
-        <meta property="og:site_name" content="Platodata" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -173,11 +175,11 @@ const ArticlePage = () => {
             "image": pageImage,
             "author": {
               "@type": "Person",
-              "name": article.author || "Platodata"
+              "name": article.author || siteName
             },
             "publisher": {
               "@type": "Organization",
-              "name": "Platodata",
+              "name": siteName,
               "logo": {
                 "@type": "ImageObject",
                 "url": `${SITE_URL}/favicon.png`
