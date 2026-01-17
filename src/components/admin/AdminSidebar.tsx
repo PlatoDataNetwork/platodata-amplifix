@@ -4,7 +4,9 @@ import {
   LayoutDashboard, 
   Users, 
   Settings,
-  ChevronDown 
+  ChevronDown,
+  Tags,
+  Layers
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,7 +27,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -33,6 +35,8 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
+  const isArticlesSection = ["articles", "new-article", "tags", "verticals"].includes(currentView);
+
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent className="pt-4">
@@ -60,7 +64,7 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
                       className="w-full"
-                      isActive={currentView === "articles" || currentView === "new-article"}
+                      isActive={isArticlesSection}
                     >
                       <FileText className="w-4 h-4" />
                       <span>Articles</span>
@@ -85,6 +89,24 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         >
                           <Plus className="w-3 h-3" />
                           <span>New Article</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("tags")}
+                          isActive={currentView === "tags"}
+                        >
+                          <Tags className="w-3 h-3" />
+                          <span>Tags</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("verticals")}
+                          isActive={currentView === "verticals"}
+                        >
+                          <Layers className="w-3 h-3" />
+                          <span>Verticals</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
