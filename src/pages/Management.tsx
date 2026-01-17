@@ -1,14 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, LogOut, Shield, Users, FileText, Settings } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import ArticleManagement from "@/components/admin/ArticleManagement";
+
+type View = "dashboard" | "articles";
 
 const Management = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading, signOut } = useAuth();
+  const [currentView, setCurrentView] = useState<View>("dashboard");
+
+  // Fetch article count
+  const { data: articleCount } = useQuery({
+    queryKey: ["admin-article-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("articles")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user && isAdmin,
+  });
+
+  // Fetch vertical count
+  const { data: verticalCount } = useQuery({
+    queryKey: ["admin-vertical-count"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_article_verticals");
+      if (error) throw error;
+      return data?.length || 0;
+    },
+    enabled: !!user && isAdmin,
+  });
 
   // Redirect if not logged in or not admin
   useEffect(() => {
@@ -64,83 +94,92 @@ const Management = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">Welcome, Admin</h2>
-          <p className="text-muted-foreground">
-            Manage your platform from this dashboard.
-          </p>
-        </div>
-
-        {/* Dashboard Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle className="text-foreground">Articles</CardTitle>
-              <CardDescription>Manage articles and content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                View, edit, and organize all published articles across verticals.
+        {currentView === "dashboard" ? (
+          <>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-2">Welcome, Admin</h2>
+              <p className="text-muted-foreground">
+                Manage your platform from this dashboard.
               </p>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <Users className="w-6 h-6 text-primary" />
+            {/* Dashboard Cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card 
+                className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer"
+                onClick={() => setCurrentView("articles")}
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                    <FileText className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-foreground">Articles</CardTitle>
+                  <CardDescription>Manage articles and content</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    View, edit, and organize all published articles across verticals.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer opacity-60">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                    <Users className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-foreground">Users</CardTitle>
+                  <CardDescription>Manage user accounts and roles</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    View user activity, manage roles, and handle permissions.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer opacity-60">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                    <Settings className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-foreground">Settings</CardTitle>
+                  <CardDescription>Platform configuration</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Configure site settings, API keys, and integrations.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Stats Section */}
+            <div className="mt-12">
+              <h3 className="text-xl font-semibold text-foreground mb-4">Quick Stats</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <p className="text-2xl font-bold text-primary">{articleCount ?? "--"}</p>
+                  <p className="text-sm text-muted-foreground">Total Articles</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <p className="text-2xl font-bold text-primary">{verticalCount ?? "--"}</p>
+                  <p className="text-sm text-muted-foreground">Verticals</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <p className="text-2xl font-bold text-primary">--</p>
+                  <p className="text-sm text-muted-foreground">Users</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <p className="text-2xl font-bold text-primary">--</p>
+                  <p className="text-sm text-muted-foreground">API Calls Today</p>
+                </div>
               </div>
-              <CardTitle className="text-foreground">Users</CardTitle>
-              <CardDescription>Manage user accounts and roles</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                View user activity, manage roles, and handle permissions.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <Settings className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle className="text-foreground">Settings</CardTitle>
-              <CardDescription>Platform configuration</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Configure site settings, API keys, and integrations.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Stats Section */}
-        <div className="mt-12">
-          <h3 className="text-xl font-semibold text-foreground mb-4">Quick Stats</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-2xl font-bold text-primary">--</p>
-              <p className="text-sm text-muted-foreground">Total Articles</p>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-2xl font-bold text-primary">--</p>
-              <p className="text-sm text-muted-foreground">Verticals</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-2xl font-bold text-primary">--</p>
-              <p className="text-sm text-muted-foreground">Users</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-2xl font-bold text-primary">--</p>
-              <p className="text-sm text-muted-foreground">API Calls Today</p>
-            </div>
-          </div>
-        </div>
+          </>
+        ) : currentView === "articles" ? (
+          <ArticleManagement onBack={() => setCurrentView("dashboard")} />
+        ) : null}
       </main>
     </div>
   );
