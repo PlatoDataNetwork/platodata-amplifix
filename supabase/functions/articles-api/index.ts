@@ -39,22 +39,33 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url)
     const vertical = url.searchParams.get('vertical')
-    const limit = parseInt(url.searchParams.get('limit') || '50')
+    const category = url.searchParams.get('category')
+    const limitParam = url.searchParams.get('limit')
+    const limit = limitParam !== null ? parseInt(limitParam) : 50
     const offset = parseInt(url.searchParams.get('offset') || '0')
     const includeTranslations = url.searchParams.get('include_translations') === 'true'
 
-    console.log(`Fetching articles - vertical: ${vertical}, limit: ${limit}, offset: ${offset}, includeTranslations: ${includeTranslations}`)
+    console.log(`Fetching articles - vertical: ${vertical}, category: ${category}, limit: ${limit}, offset: ${offset}, includeTranslations: ${includeTranslations}`)
 
     // Build the query
     let query = supabase
       .from('articles')
       .select('id, post_id, title, excerpt, content, author, published_at, read_time, category, vertical_slug, image_url, external_url, metadata, created_at, updated_at', { count: 'exact' })
       .order('published_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+
+    // Apply range only if limit > 0 (limit=0 means fetch all)
+    if (limit > 0) {
+      query = query.range(offset, offset + limit - 1)
+    }
 
     // Apply vertical filter if provided
     if (vertical) {
       query = query.eq('vertical_slug', vertical)
+    }
+
+    // Apply category filter if provided
+    if (category) {
+      query = query.eq('category', category)
     }
 
     const { data: articles, error: articlesError, count } = await query
