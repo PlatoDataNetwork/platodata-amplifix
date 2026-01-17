@@ -31,7 +31,7 @@ type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals";
 
 interface AdminSidebarProps {
   currentView: View;
-  onViewChange: (view: View) => void;
+  onViewChange: (view: View, verticalSlug?: string) => void;
 }
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {

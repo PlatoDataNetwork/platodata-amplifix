@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -49,20 +49,29 @@ type Article = Tables<"articles">;
 
 interface ArticleManagementProps {
   onBack: () => void;
+  initialVertical?: string;
 }
 
 type View = "list" | "create" | "edit";
 
 const ITEMS_PER_PAGE = 10;
 
-const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
+const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) => {
   const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<View>("list");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVertical, setSelectedVertical] = useState<string>("all");
+  const [selectedVertical, setSelectedVertical] = useState<string>(initialVertical || "all");
   const [currentPage, setCurrentPage] = useState(1);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [deletingArticle, setDeletingArticle] = useState<Article | null>(null);
+
+  // Update filter when initialVertical changes
+  useEffect(() => {
+    if (initialVertical) {
+      setSelectedVertical(initialVertical);
+      setCurrentPage(1);
+    }
+  }, [initialVertical]);
 
   // Fetch verticals for filter
   const { data: verticals } = useQuery({
