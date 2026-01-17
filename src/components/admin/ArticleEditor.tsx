@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye } from "lucide-react";
 import RichTextEditor from "./RichTextEditor";
+import ImageUpload from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Article = Tables<"articles">;
@@ -255,23 +256,11 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
               <h3 className="font-semibold text-foreground">Media & Links</h3>
 
               <div className="space-y-2">
-                <Label htmlFor="image_url">Featured Image URL</Label>
-                <Input
-                  id="image_url"
+                <Label>Featured Image</Label>
+                <ImageUpload
                   value={form.image_url}
-                  onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
-                  placeholder="https://..."
+                  onChange={(url) => setForm((f) => ({ ...f, image_url: url }))}
                 />
-                {form.image_url && (
-                  <img
-                    src={form.image_url}
-                    alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg mt-2"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                )}
               </div>
 
               <div className="space-y-2">
