@@ -36,6 +36,56 @@ const Index = () => {
         
         {/* Canonical URL */}
         <link rel="canonical" href={SITE_URL} />
+        
+        {/* JSON-LD Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Plato Technologies Inc",
+            "alternateName": "Platodata",
+            "url": SITE_URL,
+            "logo": `${SITE_URL}/favicon.png`,
+            "description": "Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency.",
+            "sameAs": [
+              "https://twitter.com/PlatoDataIO"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "url": SITE_URL
+            },
+            "founder": {
+              "@type": "Organization",
+              "name": "Plato Technologies Inc"
+            },
+            "knowsAbout": [
+              "Artificial Intelligence",
+              "Web3",
+              "Blockchain",
+              "Data Intelligence",
+              "Decentralized Networks"
+            ]
+          })}
+        </script>
+        
+        {/* JSON-LD WebSite Schema for Sitelinks Search */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Platodata",
+            "url": SITE_URL,
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": `${SITE_URL}/intel?q={search_term_string}`
+              },
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
       </Helmet>
       
       <Navigation />
