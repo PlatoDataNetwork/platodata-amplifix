@@ -3,24 +3,31 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const GoogleAnalytics = () => {
-  // Fetch Google Analytics ID from settings
-  const { data: gaId } = useQuery({
-    queryKey: ["site-settings", "google_analytics_id"],
+  // Fetch analytics settings
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings", "analytics-scripts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("value")
-        .eq("key", "google_analytics_id")
-        .maybeSingle();
+        .select("key, value")
+        .in("key", ["google_analytics_id", "custom_header_scripts"]);
 
       if (error) throw error;
-      return data?.value || null;
+      
+      const settingsMap: Record<string, string> = {};
+      data?.forEach((s) => {
+        settingsMap[s.key] = s.value || "";
+      });
+      return settingsMap;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
+  const gaId = settings?.google_analytics_id;
+  const customScripts = settings?.custom_header_scripts;
+
+  // Inject Google Analytics
   useEffect(() => {
-    // Only load if we have a valid GA ID
     if (!gaId || gaId.trim() === "") return;
 
     // Check if script already exists
@@ -45,7 +52,6 @@ const GoogleAnalytics = () => {
     `;
     document.head.appendChild(inlineScript);
 
-    // Cleanup on unmount
     return () => {
       const gaScript = document.getElementById("ga-script");
       const gaConfig = document.getElementById("ga-config");
@@ -54,7 +60,57 @@ const GoogleAnalytics = () => {
     };
   }, [gaId]);
 
-  return null; // This component doesn't render anything
+  // Inject custom header scripts
+  useEffect(() => {
+    if (!customScripts || customScripts.trim() === "") return;
+
+    // Check if already injected
+    const existingContainer = document.getElementById("custom-header-scripts");
+    if (existingContainer) {
+      existingContainer.remove();
+    }
+
+    // Create a container div to hold the scripts
+    const container = document.createElement("div");
+    container.id = "custom-header-scripts";
+    container.innerHTML = customScripts;
+
+    // Extract and execute scripts properly
+    const scripts = container.querySelectorAll("script");
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement("script");
+      
+      // Copy attributes
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      
+      // Copy inline content
+      if (oldScript.innerHTML) {
+        newScript.innerHTML = oldScript.innerHTML;
+      }
+      
+      document.head.appendChild(newScript);
+    });
+
+    // Also append non-script elements (like meta tags, link tags, etc.)
+    const nonScripts = Array.from(container.children).filter(
+      (el) => el.tagName.toLowerCase() !== "script"
+    );
+    nonScripts.forEach((el) => {
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.setAttribute("data-custom-header", "true");
+      document.head.appendChild(clone);
+    });
+
+    return () => {
+      // Cleanup custom scripts and elements
+      document.querySelectorAll("#custom-header-scripts script").forEach((s) => s.remove());
+      document.querySelectorAll("[data-custom-header]").forEach((el) => el.remove());
+    };
+  }, [customScripts]);
+
+  return null;
 };
 
 export default GoogleAnalytics;
