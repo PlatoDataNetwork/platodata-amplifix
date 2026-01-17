@@ -5,10 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const SITE_URL = "https://www.platodata.io";
 
 const Intel = () => {
+  const { siteName } = useSiteSettings();
+  const pageTitle = `${siteName} Intelligence | AI, Web3 & Emerging Tech News`;
+  const pageDescription = `Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from ${siteName}.`;
   // Fetch unique verticals using RPC function
   const { data: verticals, isLoading } = useQuery({
     queryKey: ["intel-verticals"],
@@ -33,22 +37,22 @@ const Intel = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Platodata Intelligence | AI, Web3 & Emerging Tech News</title>
-        <meta name="description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${SITE_URL}/intel`} />
-        <meta property="og:title" content="Platodata Intelligence | AI, Web3 & Emerging Tech News" />
-        <meta property="og:description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
-        <meta property="og:site_name" content="Platodata" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={`${SITE_URL}/intel`} />
-        <meta name="twitter:title" content="Platodata Intelligence | AI, Web3 & Emerging Tech News" />
-        <meta name="twitter:description" content="Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence from Platodata." />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
         {/* Canonical URL */}
