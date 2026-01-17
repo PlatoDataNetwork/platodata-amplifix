@@ -35,7 +35,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     excerpt: article?.excerpt || "",
     content: article?.content || "",
     author: article?.author || "",
-    category: article?.category || "",
     vertical_slug: article?.vertical_slug || "",
     image_url: article?.image_url || "",
     external_url: article?.external_url || "",
@@ -106,7 +105,7 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
       excerpt: form.excerpt.trim() || null,
       content: form.content || null,
       author: form.author.trim() || null,
-      category: form.category.trim() || null,
+      category: null,
       vertical_slug: form.vertical_slug,
       image_url: form.image_url.trim() || null,
       external_url: form.external_url.trim() || null,
@@ -231,15 +230,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  value={form.category}
-                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  placeholder="e.g., News, Tutorial..."
-                />
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="read_time">Read Time</Label>
