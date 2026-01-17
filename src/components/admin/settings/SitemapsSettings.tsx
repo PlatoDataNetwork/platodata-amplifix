@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Map, Copy, ExternalLink } from "lucide-react";
 
 const SitemapsSettings = () => {
-  const sitemapUrl = "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap";
+  const sitemapUrl = "https://www.platodata.io/sitemap.xml";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(sitemapUrl);
