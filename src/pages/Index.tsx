@@ -8,30 +8,33 @@ import Developers from "@/components/Developers";
 import Blog from "@/components/Blog";
 import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet-async";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const SITE_URL = "https://www.platodata.io";
 
 const Index = () => {
+  const { siteName, siteDescription } = useSiteSettings();
+  const pageTitle = `${siteName} - Secure Network Protocol for the Next Web`;
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>Plato AI - Secure Network Protocol for the Next Web</title>
-        <meta name="description" content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency." />
+        <title>{pageTitle}</title>
+        <meta name="description" content={siteDescription} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
-        <meta property="og:title" content="Plato AI - Secure Network Protocol for the Next Web" />
-        <meta property="og:description" content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency." />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={siteDescription} />
         <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
-        <meta property="og:site_name" content="Platodata" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@PlatoDataIO" />
         <meta name="twitter:url" content={SITE_URL} />
-        <meta name="twitter:title" content="Plato AI - Secure Network Protocol for the Next Web" />
-        <meta name="twitter:description" content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency." />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
         {/* Canonical URL */}
@@ -42,11 +45,11 @@ const Index = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Plato Technologies Inc",
-            "alternateName": "Platodata",
+            "name": siteName,
+            "alternateName": siteName,
             "url": SITE_URL,
             "logo": `${SITE_URL}/favicon.png`,
-            "description": "Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency.",
+            "description": siteDescription,
             "sameAs": [
               "https://twitter.com/PlatoDataIO"
             ],
@@ -74,7 +77,7 @@ const Index = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "Platodata",
+            "name": siteName,
             "url": SITE_URL,
             "potentialAction": {
               "@type": "SearchAction",
