@@ -1,0 +1,118 @@
+import { 
+  FileText, 
+  Plus, 
+  LayoutDashboard, 
+  Users, 
+  Settings,
+  ChevronDown 
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+type View = "dashboard" | "articles" | "new-article";
+
+interface AdminSidebarProps {
+  currentView: View;
+  onViewChange: (view: View) => void;
+}
+
+const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
+  return (
+    <Sidebar className="border-r border-border">
+      <SidebarContent className="pt-4">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+            Menu
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Dashboard */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("dashboard")}
+                  isActive={currentView === "dashboard"}
+                  className="w-full"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Articles with sub-menu */}
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      className="w-full"
+                      isActive={currentView === "articles" || currentView === "new-article"}
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Articles</span>
+                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("articles")}
+                          isActive={currentView === "articles"}
+                        >
+                          <FileText className="w-3 h-3" />
+                          <span>All Articles</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("new-article")}
+                          isActive={currentView === "new-article"}
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>New Article</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Users - coming soon */}
+              <SidebarMenuItem>
+                <SidebarMenuButton disabled className="w-full opacity-50">
+                  <Users className="w-4 h-4" />
+                  <span>Users</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Settings - coming soon */}
+              <SidebarMenuItem>
+                <SidebarMenuButton disabled className="w-full opacity-50">
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+};
+
+export default AdminSidebar;
