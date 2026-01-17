@@ -27,34 +27,38 @@ const ITEMS_PER_PAGE = 30;
 const VerticalsManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch verticals with article counts using SQL aggregation
-  const { data: verticals, isLoading } = useQuery({
-    queryKey: ["admin-verticals-detailed"],
+  // Fetch all unique verticals first
+  const { data: uniqueVerticals, isLoading: isLoadingVerticals } = useQuery({
+    queryKey: ["admin-verticals-list"],
     queryFn: async () => {
-      // Use RPC or direct query with count aggregation
-      const { data, error } = await supabase
-        .from("articles")
-        .select("vertical_slug")
-        .not("vertical_slug", "is", null)
-        .not("vertical_slug", "eq", "");
-
+      const { data, error } = await supabase.rpc("get_article_verticals");
       if (error) throw error;
-
-      // Count articles per vertical
-      const counts: Record<string, number> = {};
-      data?.forEach((article) => {
-        const slug = article.vertical_slug;
-        if (slug) {
-          counts[slug] = (counts[slug] || 0) + 1;
-        }
-      });
-
-      // Convert to array and sort by count descending
-      return Object.entries(counts)
-        .map(([slug, count]) => ({ slug, count }))
-        .sort((a, b) => b.count - a.count);
+      return data?.map((v) => v.vertical_slug) ?? [];
     },
   });
+
+  // Fetch article counts per vertical
+  const { data: verticals, isLoading: isLoadingCounts } = useQuery({
+    queryKey: ["admin-verticals-counts", uniqueVerticals],
+    enabled: !!uniqueVerticals && uniqueVerticals.length > 0,
+    queryFn: async () => {
+      // Fetch counts for each vertical individually
+      const countsPromises = uniqueVerticals!.map(async (slug) => {
+        const { count, error } = await supabase
+          .from("articles")
+          .select("*", { count: "exact", head: true })
+          .eq("vertical_slug", slug);
+        
+        if (error) throw error;
+        return { slug, count: count ?? 0 };
+      });
+
+      const results = await Promise.all(countsPromises);
+      return results.sort((a, b) => b.count - a.count);
+    },
+  });
+
+  const isLoading = isLoadingVerticals || isLoadingCounts;
 
   const formatVerticalName = (slug: string) => {
     return slug
