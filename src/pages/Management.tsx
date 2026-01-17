@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, LogOut, Shield, Users, FileText, Settings } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import ArticleManagement from "@/components/admin/ArticleManagement";
+import ArticleEditor from "@/components/admin/ArticleEditor";
 
-type View = "dashboard" | "articles";
+type View = "dashboard" | "articles" | "new-article";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -68,33 +71,10 @@ const Management = () => {
     return null;
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Admin Management | Platodata</title>
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
-      
-      {/* Header */}
-      <header className="border-b border-border bg-card/50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {currentView === "dashboard" ? (
+  const renderContent = () => {
+    switch (currentView) {
+      case "dashboard":
+        return (
           <>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-foreground mb-2">Welcome, Admin</h2>
@@ -177,10 +157,57 @@ const Management = () => {
               </div>
             </div>
           </>
-        ) : currentView === "articles" ? (
-          <ArticleManagement onBack={() => setCurrentView("dashboard")} />
-        ) : null}
-      </main>
+        );
+      case "articles":
+        return <ArticleManagement onBack={() => setCurrentView("dashboard")} />;
+      case "new-article":
+        return (
+          <ArticleEditor 
+            onBack={() => setCurrentView("articles")} 
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Admin Management | Platodata</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
+      <SidebarProvider defaultOpen>
+        <div className="min-h-screen flex w-full">
+          <AdminSidebar currentView={currentView} onViewChange={setCurrentView} />
+          
+          <div className="flex-1 flex flex-col">
+            {/* Header */}
+            <header className="border-b border-border bg-card/50">
+              <div className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <SidebarTrigger className="-ml-2" />
+                  <Shield className="w-6 h-6 text-primary" />
+                  <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">{user.email}</span>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="flex-1 p-6 overflow-auto">
+              {renderContent()}
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
     </div>
   );
 };
