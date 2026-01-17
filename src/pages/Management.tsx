@@ -11,8 +11,10 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import ArticleManagement from "@/components/admin/ArticleManagement";
 import ArticleEditor from "@/components/admin/ArticleEditor";
+import TagsManagement from "@/components/admin/TagsManagement";
+import VerticalsManagement from "@/components/admin/VerticalsManagement";
 
-type View = "dashboard" | "articles" | "new-article";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -166,6 +168,10 @@ const Management = () => {
             onBack={() => setCurrentView("articles")} 
           />
         );
+      case "tags":
+        return <TagsManagement />;
+      case "verticals":
+        return <VerticalsManagement />;
       default:
         return null;
     }
