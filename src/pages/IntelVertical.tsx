@@ -19,12 +19,14 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ARTICLES_PER_PAGE = 24;
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 const SITE_URL = "https://www.platodata.io";
 
 const IntelVertical = () => {
+  const { siteName } = useSiteSettings();
   const { vertical } = useParams<{ vertical: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -186,8 +188,8 @@ const IntelVertical = () => {
   };
 
   const verticalName = formatVerticalName(vertical || "");
-  const pageTitle = `${verticalName} Intelligence | Platodata`;
-  const pageDescription = `Stay updated with the latest ${verticalName} news, insights, and intelligence from Platodata.`;
+  const pageTitle = `${verticalName} Intelligence | ${siteName}`;
+  const pageDescription = `Stay updated with the latest ${verticalName} news, insights, and intelligence from ${siteName}.`;
   const pageUrl = `${SITE_URL}/intel/${vertical}`;
 
   return (
@@ -202,7 +204,7 @@ const IntelVertical = () => {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
-        <meta property="og:site_name" content="Platodata" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />

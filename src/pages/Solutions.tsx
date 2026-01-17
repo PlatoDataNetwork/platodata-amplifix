@@ -4,10 +4,14 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const SITE_URL = "https://www.platodata.io";
 
 const Solutions = () => {
+  const { siteName } = useSiteSettings();
+  const pageTitle = `Solutions | AI, Web3 & Software Development | ${siteName}`;
+  const pageDescription = "Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development.";
   const solutions = [
     {
       id: "ai-development",
@@ -119,23 +123,23 @@ const Solutions = () => {
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>Solutions | AI, Web3 & Software Development | Platodata</title>
-        <meta name="description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${SITE_URL}/solutions`} />
-        <meta property="og:title" content="Solutions | AI, Web3 & Software Development | Platodata" />
-        <meta property="og:description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
-        <meta property="og:site_name" content="Platodata" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@PlatoDataIO" />
         <meta name="twitter:url" content={`${SITE_URL}/solutions`} />
-        <meta name="twitter:title" content="Solutions | AI, Web3 & Software Development | Platodata" />
-        <meta name="twitter:description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
         {/* Canonical URL */}
