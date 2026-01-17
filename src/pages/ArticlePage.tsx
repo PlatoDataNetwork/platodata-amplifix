@@ -162,6 +162,70 @@ const ArticlePage = () => {
         
         {/* Canonical URL */}
         <link rel="canonical" href={pageUrl} />
+        
+        {/* JSON-LD Article Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": pageTitle,
+            "description": pageDescription,
+            "image": pageImage,
+            "author": {
+              "@type": "Person",
+              "name": article.author || "Platodata"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Platodata",
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${SITE_URL}/favicon.png`
+              }
+            },
+            "datePublished": article.published_at,
+            "dateModified": article.updated_at || article.published_at,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": pageUrl
+            },
+            "articleSection": formatVerticalName(article.vertical_slug),
+            "keywords": [formatVerticalName(article.vertical_slug), article.category].filter(Boolean).join(", ")
+          })}
+        </script>
+        
+        {/* JSON-LD BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": SITE_URL
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Intelligence",
+                "item": `${SITE_URL}/intel`
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": formatVerticalName(article.vertical_slug),
+                "item": `${SITE_URL}/w3ai/vertical/${article.vertical_slug}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": pageTitle
+              }
+            ]
+          })}
+        </script>
       </Helmet>
       
       <Navigation />
