@@ -3,6 +3,9 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+
+const SITE_URL = "https://www.platodata.io";
 
 const Solutions = () => {
   const solutions = [
@@ -115,6 +118,30 @@ const Solutions = () => {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Solutions | AI, Web3 & Software Development | Platodata</title>
+        <meta name="description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/solutions`} />
+        <meta property="og:title" content="Solutions | AI, Web3 & Software Development | Platodata" />
+        <meta property="og:description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        <meta property="og:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        <meta property="og:site_name" content="Platodata" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@PlatoDataIO" />
+        <meta name="twitter:url" content={`${SITE_URL}/solutions`} />
+        <meta name="twitter:title" content="Solutions | AI, Web3 & Software Development | Platodata" />
+        <meta name="twitter:description" content="Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development." />
+        <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={`${SITE_URL}/solutions`} />
+      </Helmet>
+      
       <Navigation />
       
       {/* Hero Section */}
