@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -13,12 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye } from "lucide-react";
+import { ArrowLeft, Save, Eye, X, Plus } from "lucide-react";
 import RichTextEditor from "./RichTextEditor";
 import ImageUpload from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Article = Tables<"articles">;
+type Tag = Tables<"tags">;
 
 interface ArticleEditorProps {
   article?: Article | null;
@@ -40,6 +42,9 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     read_time: article?.read_time || "",
   });
 
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagSelectOpen, setTagSelectOpen] = useState(false);
+
   // Fetch verticals for dropdown
   const { data: verticals } = useQuery({
     queryKey: ["admin-verticals"],
@@ -50,13 +55,66 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     },
   });
 
+  // Fetch all tags
+  const { data: allTags } = useQuery({
+    queryKey: ["admin-tags-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tags")
+        .select("*")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch existing article tags when editing
+  const { data: existingArticleTags } = useQuery({
+    queryKey: ["article-tags", article?.id],
+    queryFn: async () => {
+      if (!article?.id) return [];
+      const { data, error } = await supabase
+        .from("article_tags")
+        .select("tag_id")
+        .eq("article_id", article.id);
+      if (error) throw error;
+      return data.map((t) => t.tag_id);
+    },
+    enabled: !!article?.id,
+  });
+
+  // Set initial tags when editing
+  useEffect(() => {
+    if (existingArticleTags) {
+      setSelectedTagIds(existingArticleTags);
+    }
+  }, [existingArticleTags]);
+
   // Create article mutation
   const createMutation = useMutation({
     mutationFn: async (data: Omit<Article, "id" | "created_at" | "updated_at" | "post_id" | "metadata">) => {
-      const { error } = await supabase.from("articles").insert(data);
+      const { data: newArticle, error } = await supabase
+        .from("articles")
+        .insert(data)
+        .select("id")
+        .single();
       if (error) throw error;
+      return newArticle;
     },
-    onSuccess: () => {
+    onSuccess: async (newArticle) => {
+      // Save article tags
+      if (selectedTagIds.length > 0 && newArticle?.id) {
+        const tagInserts = selectedTagIds.map((tag_id) => ({
+          article_id: newArticle.id,
+          tag_id,
+        }));
+        const { error } = await supabase.from("article_tags").insert(tagInserts);
+        if (error) {
+          console.error("Failed to save tags:", error);
+          toast.error("Article created but failed to save tags");
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-article-count"] });
       toast.success("Article created successfully");
@@ -74,9 +132,37 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
       const { id, ...updates } = data;
       const { error } = await supabase.from("articles").update(updates).eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: async (articleId) => {
+      // Update article tags - delete existing and insert new
+      if (articleId) {
+        // Delete existing tags
+        const { error: deleteError } = await supabase
+          .from("article_tags")
+          .delete()
+          .eq("article_id", articleId);
+        
+        if (deleteError) {
+          console.error("Failed to delete existing tags:", deleteError);
+        }
+
+        // Insert new tags
+        if (selectedTagIds.length > 0) {
+          const tagInserts = selectedTagIds.map((tag_id) => ({
+            article_id: articleId,
+            tag_id,
+          }));
+          const { error: insertError } = await supabase.from("article_tags").insert(tagInserts);
+          if (insertError) {
+            console.error("Failed to save tags:", insertError);
+            toast.error("Article updated but failed to save tags");
+          }
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
+      queryClient.invalidateQueries({ queryKey: ["article-tags", articleId] });
       toast.success("Article updated successfully");
       onSave?.();
       onBack();
@@ -118,6 +204,23 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
       createMutation.mutate(articleData);
     }
   };
+
+  const handleAddTag = (tagId: string) => {
+    if (!selectedTagIds.includes(tagId)) {
+      setSelectedTagIds([...selectedTagIds, tagId]);
+    }
+    setTagSelectOpen(false);
+  };
+
+  const handleRemoveTag = (tagId: string) => {
+    setSelectedTagIds(selectedTagIds.filter((id) => id !== tagId));
+  };
+
+  const getTagById = (tagId: string): Tag | undefined => {
+    return allTags?.find((t) => t.id === tagId);
+  };
+
+  const availableTags = allTags?.filter((t) => !selectedTagIds.includes(t.id)) || [];
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
@@ -229,7 +332,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
                 />
               </div>
 
-
               <div className="space-y-2">
                 <Label htmlFor="read_time">Read Time</Label>
                 <Input
@@ -241,8 +343,70 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
               </div>
             </div>
 
+            {/* Tags Section */}
             <div className="bg-card border border-border rounded-lg p-4 space-y-4">
-              <h3 className="font-semibold text-foreground">Media & Links</h3>
+              <h3 className="font-semibold text-foreground">Tags</h3>
+              
+              {/* Selected Tags */}
+              {selectedTagIds.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedTagIds.map((tagId) => {
+                    const tag = getTagById(tagId);
+                    if (!tag) return null;
+                    return (
+                      <Badge
+                        key={tagId}
+                        variant="secondary"
+                        className="flex items-center gap-1 pr-1"
+                      >
+                        {tag.name}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tagId)}
+                          className="ml-1 hover:bg-muted rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Add Tag Dropdown */}
+              {availableTags.length > 0 ? (
+                <Select
+                  open={tagSelectOpen}
+                  onOpenChange={setTagSelectOpen}
+                  onValueChange={handleAddTag}
+                >
+                  <SelectTrigger className="w-full">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Plus className="w-4 h-4" />
+                      <span>Add tag...</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTags.map((tag) => (
+                      <SelectItem key={tag.id} value={tag.id}>
+                        {tag.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : allTags?.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No tags available. Create tags in Tags Management first.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  All tags have been added.
+                </p>
+              )}
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-4 space-y-4">
+              <h3 className="font-semibold text-foreground">Media</h3>
 
               <div className="space-y-2">
                 <Label>Featured Image</Label>
@@ -251,7 +415,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
                   onChange={(url) => setForm((f) => ({ ...f, image_url: url }))}
                 />
               </div>
-
             </div>
           </div>
         </div>
