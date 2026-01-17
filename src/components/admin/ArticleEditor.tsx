@@ -37,7 +37,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     author: article?.author || "",
     vertical_slug: article?.vertical_slug || "",
     image_url: article?.image_url || "",
-    external_url: article?.external_url || "",
     read_time: article?.read_time || "",
   });
 
@@ -108,7 +107,7 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
       category: null,
       vertical_slug: form.vertical_slug,
       image_url: form.image_url.trim() || null,
-      external_url: form.external_url.trim() || null,
+      external_url: null,
       read_time: form.read_time.trim() || null,
       published_at: article?.published_at || new Date().toISOString(),
     };
@@ -253,15 +252,6 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="external_url">External Source URL</Label>
-                <Input
-                  id="external_url"
-                  value={form.external_url}
-                  onChange={(e) => setForm((f) => ({ ...f, external_url: e.target.value }))}
-                  placeholder="https://..."
-                />
-              </div>
             </div>
           </div>
         </div>
