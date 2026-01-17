@@ -12,14 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -36,8 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -48,10 +38,12 @@ import {
   ExternalLink, 
   ChevronLeft, 
   ChevronRight,
-  ArrowLeft 
+  ArrowLeft,
+  Plus
 } from "lucide-react";
 import { decodeHtmlEntities } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import ArticleEditor from "./ArticleEditor";
 
 type Article = Tables<"articles">;
 
@@ -59,23 +51,18 @@ interface ArticleManagementProps {
   onBack: () => void;
 }
 
+type View = "list" | "create" | "edit";
+
 const ITEMS_PER_PAGE = 10;
 
 const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
   const queryClient = useQueryClient();
+  const [currentView, setCurrentView] = useState<View>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVertical, setSelectedVertical] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [deletingArticle, setDeletingArticle] = useState<Article | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    excerpt: "",
-    author: "",
-    category: "",
-    image_url: "",
-    external_url: "",
-  });
 
   // Fetch verticals for filter
   const { data: verticals } = useQuery({
@@ -114,26 +101,6 @@ const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
     },
   });
 
-  // Update article mutation
-  const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<Article> & { id: string }) => {
-      const { id, ...data } = updates;
-      const { error } = await supabase
-        .from("articles")
-        .update(data)
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
-      setEditingArticle(null);
-      toast.success("Article updated successfully");
-    },
-    onError: (error) => {
-      toast.error(`Failed to update article: ${error.message}`);
-    },
-  });
-
   // Delete article mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -142,6 +109,7 @@ const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-article-count"] });
       setDeletingArticle(null);
       toast.success("Article deleted successfully");
     },
@@ -152,27 +120,7 @@ const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
 
   const handleEdit = (article: Article) => {
     setEditingArticle(article);
-    setEditForm({
-      title: article.title,
-      excerpt: article.excerpt || "",
-      author: article.author || "",
-      category: article.category || "",
-      image_url: article.image_url || "",
-      external_url: article.external_url || "",
-    });
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingArticle) return;
-    updateMutation.mutate({
-      id: editingArticle.id,
-      title: editForm.title,
-      excerpt: editForm.excerpt || null,
-      author: editForm.author || null,
-      category: editForm.category || null,
-      image_url: editForm.image_url || null,
-      external_url: editForm.external_url || null,
-    });
+    setCurrentView("edit");
   };
 
   const handleDelete = () => {
@@ -190,20 +138,39 @@ const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
 
   const totalPages = Math.ceil((articlesData?.totalCount || 0) / ITEMS_PER_PAGE);
 
+  // Show ArticleEditor for create/edit views
+  if (currentView === "create" || currentView === "edit") {
+    return (
+      <ArticleEditor
+        article={currentView === "edit" ? editingArticle : null}
+        onBack={() => {
+          setCurrentView("list");
+          setEditingArticle(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Article Management</h2>
-          <p className="text-muted-foreground text-sm">
-            View, edit, and delete articles
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Article Management</h2>
+            <p className="text-muted-foreground text-sm">
+              View, edit, and delete articles
+            </p>
+          </div>
         </div>
+        <Button onClick={() => setCurrentView("create")}>
+          <Plus className="w-4 h-4 mr-2" />
+          New Article
+        </Button>
       </div>
 
       {/* Filters */}
@@ -384,91 +351,6 @@ const ArticleManagement = ({ onBack }: ArticleManagementProps) => {
           </div>
         </div>
       )}
-
-      {/* Edit Dialog */}
-      <Dialog open={!!editingArticle} onOpenChange={() => setEditingArticle(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Article</DialogTitle>
-            <DialogDescription>
-              Make changes to the article. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={editForm.title}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, title: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea
-                id="excerpt"
-                value={editForm.excerpt}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, excerpt: e.target.value }))
-                }
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="author">Author</Label>
-                <Input
-                  id="author"
-                  value={editForm.author}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, author: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  value={editForm.category}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, category: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image_url">Image URL</Label>
-              <Input
-                id="image_url"
-                value={editForm.image_url}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, image_url: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="external_url">External URL</Label>
-              <Input
-                id="external_url"
-                value={editForm.external_url}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, external_url: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingArticle(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingArticle} onOpenChange={() => setDeletingArticle(null)}>
