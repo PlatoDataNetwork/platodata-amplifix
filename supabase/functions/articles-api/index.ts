@@ -1,14 +1,26 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': 'https://dashboard.platodata.io',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
 }
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
+  }
+
+  // Validate API key
+  const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key')
+  const validApiKey = Deno.env.get('ARTICLES_API_KEY')
+
+  if (!apiKey || apiKey !== validApiKey) {
+    console.error('Unauthorized: Invalid or missing API key')
+    return new Response(
+      JSON.stringify({ success: false, error: 'Unauthorized: Invalid or missing API key' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   // Only allow GET requests
