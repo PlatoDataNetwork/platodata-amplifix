@@ -11,7 +11,7 @@ const Hero = () => {
             PLATO AI
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
+          <h1 className="text-6xl md:text-8xl font-bold tracking-[-0.02em] leading-[1.1]" style={{ fontWeight: 700 }}>
             Secure network protocol
             <br />
             for the next web
