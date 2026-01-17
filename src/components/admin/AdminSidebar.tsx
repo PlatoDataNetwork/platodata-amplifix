@@ -6,7 +6,10 @@ import {
   Settings,
   ChevronDown,
   Tags,
-  Layers
+  Layers,
+  Globe,
+  BarChart3,
+  Map
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,7 +30,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -36,6 +39,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
   const isArticlesSection = ["articles", "new-article", "tags", "verticals"].includes(currentView);
+  const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps"].includes(currentView);
 
   return (
     <Sidebar className="border-r border-border">
@@ -122,13 +126,52 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {/* Settings - coming soon */}
-              <SidebarMenuItem>
-                <SidebarMenuButton disabled className="w-full opacity-50">
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {/* Settings with sub-menu */}
+              <Collapsible defaultOpen={isSettingsSection} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      className="w-full"
+                      isActive={isSettingsSection}
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>Settings</span>
+                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("settings-general")}
+                          isActive={currentView === "settings-general"}
+                        >
+                          <Globe className="w-3 h-3" />
+                          <span>General</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("settings-analytics")}
+                          isActive={currentView === "settings-analytics"}
+                        >
+                          <BarChart3 className="w-3 h-3" />
+                          <span>Analytics</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("settings-sitemaps")}
+                          isActive={currentView === "settings-sitemaps"}
+                        >
+                          <Map className="w-3 h-3" />
+                          <span>Sitemaps</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

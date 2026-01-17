@@ -13,8 +13,11 @@ import ArticleManagement from "@/components/admin/ArticleManagement";
 import ArticleEditor from "@/components/admin/ArticleEditor";
 import TagsManagement from "@/components/admin/TagsManagement";
 import VerticalsManagement from "@/components/admin/VerticalsManagement";
+import GeneralSettings from "@/components/admin/settings/GeneralSettings";
+import AnalyticsSettings from "@/components/admin/settings/AnalyticsSettings";
+import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -126,7 +129,10 @@ const Management = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer opacity-60">
+              <Card 
+                className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer"
+                onClick={() => handleViewChange("settings-general")}
+              >
                 <CardHeader>
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                     <Settings className="w-6 h-6 text-primary" />
@@ -136,7 +142,7 @@ const Management = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Configure site settings, API keys, and integrations.
+                    Configure site settings, analytics, and sitemaps.
                   </p>
                 </CardContent>
               </Card>
@@ -183,6 +189,12 @@ const Management = () => {
         return <TagsManagement />;
       case "verticals":
         return <VerticalsManagement onNavigateToArticles={(slug) => handleViewChange("articles", slug)} />;
+      case "settings-general":
+        return <GeneralSettings />;
+      case "settings-analytics":
+        return <AnalyticsSettings />;
+      case "settings-sitemaps":
+        return <SitemapsSettings />;
       default:
         return null;
     }
