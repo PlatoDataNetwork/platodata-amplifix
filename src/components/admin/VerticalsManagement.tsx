@@ -24,7 +24,11 @@ import {
 
 const ITEMS_PER_PAGE = 30;
 
-const VerticalsManagement = () => {
+interface VerticalsManagementProps {
+  onNavigateToArticles?: (slug: string) => void;
+}
+
+const VerticalsManagement = ({ onNavigateToArticles }: VerticalsManagementProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch all unique verticals first
@@ -171,7 +175,11 @@ const VerticalsManagement = () => {
               paginatedVerticals.map((vertical) => (
                 <TableRow key={vertical.slug} className="hover:bg-muted/30">
                   <TableCell className="font-medium">
-                    <Badge variant="outline" className="bg-primary/5">
+                    <Badge 
+                      variant="outline" 
+                      className={`bg-primary/5 ${onNavigateToArticles ? 'cursor-pointer hover:bg-primary/10 transition-colors' : ''}`}
+                      onClick={() => onNavigateToArticles?.(vertical.slug)}
+                    >
                       {formatVerticalName(vertical.slug)}
                     </Badge>
                   </TableCell>

@@ -20,6 +20,12 @@ const Management = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<View>("dashboard");
+  const [initialVerticalFilter, setInitialVerticalFilter] = useState<string | undefined>();
+
+  const handleViewChange = (view: View, verticalSlug?: string) => {
+    setCurrentView(view);
+    setInitialVerticalFilter(verticalSlug);
+  };
 
   // Fetch article count
   const { data: articleCount } = useQuery({
@@ -161,7 +167,12 @@ const Management = () => {
           </>
         );
       case "articles":
-        return <ArticleManagement onBack={() => setCurrentView("dashboard")} />;
+        return (
+          <ArticleManagement 
+            onBack={() => setCurrentView("dashboard")} 
+            initialVertical={initialVerticalFilter}
+          />
+        );
       case "new-article":
         return (
           <ArticleEditor 
@@ -171,7 +182,7 @@ const Management = () => {
       case "tags":
         return <TagsManagement />;
       case "verticals":
-        return <VerticalsManagement />;
+        return <VerticalsManagement onNavigateToArticles={(slug) => handleViewChange("articles", slug)} />;
       default:
         return null;
     }
@@ -186,7 +197,7 @@ const Management = () => {
 
       <SidebarProvider defaultOpen>
         <div className="min-h-screen flex w-full">
-          <AdminSidebar currentView={currentView} onViewChange={setCurrentView} />
+          <AdminSidebar currentView={currentView} onViewChange={handleViewChange} />
           
           <div className="flex-1 flex flex-col">
             {/* Header */}
