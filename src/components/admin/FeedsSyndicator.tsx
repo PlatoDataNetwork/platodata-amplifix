@@ -333,7 +333,7 @@ const FeedsSyndicator = ({
     }
 
     return (
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-4 h-4" />
@@ -351,20 +351,21 @@ const FeedsSyndicator = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Two Column Layout for Cards */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Feed Information */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Rss className="w-5 h-5 text-primary" />
-                  Feed Information
-                </CardTitle>
-                <CardDescription>
-                  Basic details about the RSS feed source
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Rss className="w-5 h-5 text-primary" />
+                {mode === "edit" ? "Feed Configuration" : "New Feed Configuration"}
+              </CardTitle>
+              <CardDescription>
+                {mode === "edit" 
+                  ? "Update the settings for this RSS feed"
+                  : "Configure all settings for your new RSS feed"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Feed Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Feed Name *</Label>
                   <Input
@@ -378,20 +379,8 @@ const FeedsSyndicator = ({
                     A friendly name to identify this feed
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="feed_url">RSS Feed URL *</Label>
-                  <Input
-                    id="feed_url"
-                    type="url"
-                    value={formData.feed_url}
-                    onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
-                    placeholder="https://example.com/feed.xml"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The full URL to the RSS or Atom feed
-                  </p>
-                </div>
+
+                {/* Target Vertical */}
                 <div className="space-y-2">
                   <Label htmlFor="vertical_slug">Target Vertical *</Label>
                   <Select
@@ -418,21 +407,24 @@ const FeedsSyndicator = ({
                     />
                   )}
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Import Settings */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-primary" />
-                  Import Settings
-                </CardTitle>
-                <CardDescription>
-                  Configure how articles are imported and published
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                {/* RSS Feed URL - Full Width */}
+                <div className="space-y-2 lg:col-span-2">
+                  <Label htmlFor="feed_url">RSS Feed URL *</Label>
+                  <Input
+                    id="feed_url"
+                    type="url"
+                    value={formData.feed_url}
+                    onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
+                    placeholder="https://example.com/feed.xml"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The full URL to the RSS or Atom feed
+                  </p>
+                </div>
+
+                {/* Import Mode */}
                 <div className="space-y-2">
                   <Label htmlFor="import_mode">Import Mode</Label>
                   <Select
@@ -453,6 +445,8 @@ const FeedsSyndicator = ({
                       : "Import excerpt and link to original article"}
                   </p>
                 </div>
+
+                {/* Article Status */}
                 <div className="space-y-2">
                   <Label htmlFor="publish_status">Article Status</Label>
                   <Select
@@ -473,130 +467,115 @@ const FeedsSyndicator = ({
                       : "Articles go live immediately"}
                   </p>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Sync Settings */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <RefreshCw className="w-5 h-5 text-primary" />
-                  Sync Settings
-                </CardTitle>
-                <CardDescription>
-                  Configure automatic synchronization
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto_sync" className="text-base font-medium">Enable Auto-sync</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically check for new articles
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto_sync"
-                    checked={formData.auto_sync}
-                    onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
-                  />
-                </div>
-                {formData.auto_sync && (
-                  <div className="space-y-2 pl-4 border-l-2 border-primary/20">
-                    <Label htmlFor="sync_interval">Sync Interval</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="sync_interval"
-                        type="number"
-                        min="1"
-                        max="168"
-                        value={formData.sync_interval_hours}
-                        onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
-                        className="w-24"
-                      />
-                      <span className="text-sm text-muted-foreground">hours</span>
+                {/* Auto-sync Toggle */}
+                <div className="space-y-2">
+                  <Label>Sync Settings</Label>
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="auto_sync" className="text-sm font-medium">Enable Auto-sync</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Automatically check for new articles
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Check every {formData.sync_interval_hours} hour{formData.sync_interval_hours !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Featured Image */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-primary" />
-                  Default Featured Image
-                </CardTitle>
-                <CardDescription>
-                  Used for all articles from this feed
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  {formData.default_image_url ? (
-                    <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
-                      <img 
-                        src={formData.default_image_url} 
-                        alt="Default featured" 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-1 right-1 h-5 w-5 shadow-lg"
-                        onClick={() => setFormData({ ...formData, default_image_url: "" })}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-muted/30 flex-shrink-0">
-                      <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
-                    </div>
-                  )}
-                  <div className="flex-1 space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
-                      <Input
-                        id="default_image_url"
-                        type="url"
-                        value={formData.default_image_url}
-                        onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
-                        placeholder="https://example.com/image.jpg"
-                        className="text-sm"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isUploadingImage}
-                      onClick={() => document.getElementById("image_upload")?.click()}
-                    >
-                      {isUploadingImage ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4 mr-2" />
-                      )}
-                      Upload
-                    </Button>
-                    <input
-                      id="image_upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
+                    <Switch
+                      id="auto_sync"
+                      checked={formData.auto_sync}
+                      onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                {/* Sync Interval */}
+                <div className="space-y-2">
+                  <Label htmlFor="sync_interval">Sync Interval</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="sync_interval"
+                      type="number"
+                      min="1"
+                      max="168"
+                      value={formData.sync_interval_hours}
+                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
+                      disabled={!formData.auto_sync}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">hours</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.auto_sync 
+                      ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
+                      : "Enable auto-sync to configure interval"}
+                  </p>
+                </div>
+
+                {/* Default Featured Image - Full Width */}
+                <div className="space-y-2 lg:col-span-2">
+                  <Label>Default Featured Image</Label>
+                  <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border">
+                    {formData.default_image_url ? (
+                      <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                        <img 
+                          src={formData.default_image_url} 
+                          alt="Default featured" 
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-5 w-5 shadow-lg"
+                          onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-background flex-shrink-0">
+                        <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
+                        <Input
+                          id="default_image_url"
+                          type="url"
+                          value={formData.default_image_url}
+                          onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
+                          placeholder="https://example.com/image.jpg"
+                          className="text-sm"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploadingImage}
+                        onClick={() => document.getElementById("image_upload")?.click()}
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4 mr-2" />
+                        )}
+                        Upload
+                      </Button>
+                      <input
+                        id="image_upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Used for all articles from this feed that don't have an image
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
