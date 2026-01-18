@@ -44,7 +44,7 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
   const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps", "settings-robots"].includes(currentView);
 
   return (
-    <Sidebar className="border-r border-border h-full" collapsible="icon">
+    <Sidebar className="border-r border-border h-[calc(100vh-65px)] top-[65px]" collapsible="icon">
       <SidebarContent className="pt-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
