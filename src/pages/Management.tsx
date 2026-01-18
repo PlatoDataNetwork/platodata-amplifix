@@ -214,28 +214,29 @@ const Management = () => {
       </Helmet>
 
       <SidebarProvider defaultOpen>
-        <div className="min-h-screen flex w-full">
-          <AdminSidebar currentView={currentView} onViewChange={handleViewChange} />
-          
-          <div className="flex-1 flex flex-col">
-            {/* Header */}
-            <header className="border-b border-border bg-card/50">
-              <div className="px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <SidebarTrigger className="-ml-2" />
-                  <Shield className="w-6 h-6 text-primary" />
-                  <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">{user.email}</span>
-                  <Button variant="outline" size="sm" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
+        <div className="min-h-screen flex flex-col w-full">
+          {/* Header - Full Width */}
+          <header className="border-b border-border bg-card/50 w-full">
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SidebarTrigger className="-ml-2" />
+                <Shield className="w-6 h-6 text-primary" />
+                <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
               </div>
-            </header>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </header>
 
+          {/* Sidebar + Content */}
+          <div className="flex flex-1 w-full">
+            <AdminSidebar currentView={currentView} onViewChange={handleViewChange} />
+            
             {/* Main Content */}
             <main className="flex-1 p-6 overflow-auto">
               {renderContent()}
