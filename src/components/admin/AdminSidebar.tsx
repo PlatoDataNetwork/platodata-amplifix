@@ -9,7 +9,8 @@ import {
   Layers,
   Globe,
   BarChart3,
-  Map
+  Map,
+  Bot
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,7 +31,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -39,7 +40,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
   const isArticlesSection = ["articles", "new-article", "tags", "verticals"].includes(currentView);
-  const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps"].includes(currentView);
+  const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps", "settings-robots"].includes(currentView);
 
   return (
     <Sidebar className="border-r border-border">
@@ -166,6 +167,15 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         >
                           <Map className="w-3 h-3" />
                           <span>Sitemaps</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("settings-robots")}
+                          isActive={currentView === "settings-robots"}
+                        >
+                          <Bot className="w-3 h-3" />
+                          <span>Robots.txt</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
