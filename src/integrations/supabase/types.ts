@@ -184,6 +184,8 @@ export type Database = {
       rss_feeds: {
         Row: {
           auto_sync: boolean
+          check_duplicate_link: boolean
+          check_duplicate_title: boolean
           created_at: string
           default_image_url: string | null
           feed_url: string
@@ -200,6 +202,8 @@ export type Database = {
         }
         Insert: {
           auto_sync?: boolean
+          check_duplicate_link?: boolean
+          check_duplicate_title?: boolean
           created_at?: string
           default_image_url?: string | null
           feed_url: string
@@ -216,6 +220,8 @@ export type Database = {
         }
         Update: {
           auto_sync?: boolean
+          check_duplicate_link?: boolean
+          check_duplicate_title?: boolean
           created_at?: string
           default_image_url?: string | null
           feed_url?: string

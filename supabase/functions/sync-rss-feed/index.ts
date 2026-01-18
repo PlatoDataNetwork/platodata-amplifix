@@ -14,6 +14,8 @@ interface RssFeed {
   import_mode: string;
   publish_status: string;
   default_image_url: string | null;
+  check_duplicate_title: boolean;
+  check_duplicate_link: boolean;
 }
 
 interface FeedItem {
@@ -182,6 +184,62 @@ function estimateReadTime(content: string): string {
   return `${minutes} min read`;
 }
 
+// Check if article is a duplicate based on title or link
+// deno-lint-ignore no-explicit-any
+async function isDuplicate(
+  supabase: any,
+  item: FeedItem,
+  checkTitle: boolean,
+  checkLink: boolean
+): Promise<boolean> {
+  if (!checkTitle && !checkLink) {
+    return false;
+  }
+
+  // Check by title
+  if (checkTitle && item.title) {
+    const { data: titleMatch } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("title", item.title)
+      .limit(1);
+    
+    if (titleMatch && titleMatch.length > 0) {
+      console.log(`Duplicate found by title: "${item.title}"`);
+      return true;
+    }
+  }
+
+  // Check by link (external_url or in metadata)
+  if (checkLink && item.link) {
+    // Check external_url field
+    const { data: linkMatch } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("external_url", item.link)
+      .limit(1);
+    
+    if (linkMatch && linkMatch.length > 0) {
+      console.log(`Duplicate found by external_url: "${item.link}"`);
+      return true;
+    }
+
+    // Also check metadata->original_url
+    const { data: metadataMatch } = await supabase
+      .from("articles")
+      .select("id")
+      .contains("metadata", { original_url: item.link })
+      .limit(1);
+    
+    if (metadataMatch && metadataMatch.length > 0) {
+      console.log(`Duplicate found by metadata original_url: "${item.link}"`);
+      return true;
+    }
+  }
+
+  return false;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -221,6 +279,7 @@ Deno.serve(async (req) => {
     
     const rssFeed = feed as RssFeed;
     console.log(`Fetching RSS feed: ${rssFeed.feed_url}`);
+    console.log(`Duplicate checking - Title: ${rssFeed.check_duplicate_title}, Link: ${rssFeed.check_duplicate_link}`);
     
     // Fetch the RSS feed
     let feedResponse;
@@ -288,14 +347,38 @@ Deno.serve(async (req) => {
     const existingGuids = new Set(existingLogs?.map(log => log.original_guid) || []);
     console.log(`Found ${existingGuids.size} previously synced items`);
     
-    // Filter new items
+    // Filter new items (not in sync logs)
     const newItems = feedItems.filter(item => !existingGuids.has(item.guid));
-    console.log(`${newItems.length} new items to import`);
+    console.log(`${newItems.length} new items to import (after GUID check)`);
     
     let articlesImported = 0;
+    let duplicatesSkipped = 0;
     
     for (const item of newItems) {
       try {
+        // Check for duplicates by title/link if enabled
+        const isDup = await isDuplicate(
+          supabase,
+          item,
+          rssFeed.check_duplicate_title,
+          rssFeed.check_duplicate_link
+        );
+        
+        if (isDup) {
+          console.log(`Skipping duplicate article: "${item.title}"`);
+          duplicatesSkipped++;
+          
+          // Still log it so we don't check again
+          await supabase.from("feed_sync_logs").insert({
+            feed_id: feedId,
+            article_id: null,
+            original_guid: item.guid,
+            original_url: item.link,
+          });
+          
+          continue;
+        }
+        
         // Prepare article data
         const isExcerptMode = rssFeed.import_mode === "excerpt_with_link";
         const articleContent = isExcerptMode ? item.description : item.content;
@@ -354,11 +437,12 @@ Deno.serve(async (req) => {
       status: "active",
     }).eq("id", feedId);
     
-    console.log(`Sync complete. Imported ${articlesImported} articles.`);
+    console.log(`Sync complete. Imported ${articlesImported} articles, skipped ${duplicatesSkipped} duplicates.`);
     
     return new Response(
       JSON.stringify({ 
         articlesImported, 
+        duplicatesSkipped,
         totalItems: feedItems.length,
         newItems: newItems.length,
       }),
