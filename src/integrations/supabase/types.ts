@@ -185,6 +185,7 @@ export type Database = {
         Row: {
           auto_sync: boolean
           created_at: string
+          default_image_url: string | null
           feed_url: string
           id: string
           import_mode: Database["public"]["Enums"]["feed_import_mode"]
@@ -200,6 +201,7 @@ export type Database = {
         Insert: {
           auto_sync?: boolean
           created_at?: string
+          default_image_url?: string | null
           feed_url: string
           id?: string
           import_mode?: Database["public"]["Enums"]["feed_import_mode"]
@@ -215,6 +217,7 @@ export type Database = {
         Update: {
           auto_sync?: boolean
           created_at?: string
+          default_image_url?: string | null
           feed_url?: string
           id?: string
           import_mode?: Database["public"]["Enums"]["feed_import_mode"]

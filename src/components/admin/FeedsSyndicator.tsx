@@ -42,7 +42,9 @@ import {
   AlertCircle,
   Rss,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  ImageIcon,
+  Upload
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -64,6 +66,7 @@ interface RssFeed {
   last_error: string | null;
   created_at: string;
   updated_at: string;
+  default_image_url: string | null;
 }
 
 interface FeedFormData {
@@ -74,6 +77,7 @@ interface FeedFormData {
   publish_status: PublishStatus;
   auto_sync: boolean;
   sync_interval_hours: number;
+  default_image_url: string;
 }
 
 const defaultFormData: FeedFormData = {
@@ -84,6 +88,7 @@ const defaultFormData: FeedFormData = {
   publish_status: "draft",
   auto_sync: false,
   sync_interval_hours: 24,
+  default_image_url: "",
 };
 
 const FeedsSyndicator = () => {
@@ -92,6 +97,7 @@ const FeedsSyndicator = () => {
   const [editingFeed, setEditingFeed] = useState<RssFeed | null>(null);
   const [formData, setFormData] = useState<FeedFormData>(defaultFormData);
   const [syncingFeedId, setSyncingFeedId] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Fetch all feeds
   const { data: feeds, isLoading: feedsLoading } = useQuery({
@@ -128,6 +134,7 @@ const FeedsSyndicator = () => {
         auto_sync: data.auto_sync,
         sync_interval_hours: data.sync_interval_hours,
         status: "active",
+        default_image_url: data.default_image_url || null,
       });
       if (error) throw error;
     },
@@ -228,7 +235,51 @@ const FeedsSyndicator = () => {
       publish_status: feed.publish_status,
       auto_sync: feed.auto_sync,
       sync_interval_hours: feed.sync_interval_hours,
+      default_image_url: feed.default_image_url || "",
     });
+  };
+
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `feed-default-${Date.now()}.${fileExt}`;
+      const filePath = `defaults/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("article-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("article-images")
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, default_image_url: publicUrl });
+      toast.success("Image uploaded successfully");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to upload image: ${errorMessage}`);
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const closeDialog = () => {
@@ -381,6 +432,69 @@ const FeedsSyndicator = () => {
                     />
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label htmlFor="default_image">Default Featured Image</Label>
+                  <p className="text-xs text-muted-foreground">
+                    This image will be used for all articles from this feed (RSS images are ignored)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {formData.default_image_url ? (
+                      <div className="relative w-20 h-20 rounded border border-border overflow-hidden">
+                        <img 
+                          src={formData.default_image_url} 
+                          alt="Default" 
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-0.5 right-0.5 h-5 w-5"
+                          onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded border border-dashed border-border flex items-center justify-center bg-muted/50">
+                        <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <Input
+                        id="default_image_url"
+                        type="url"
+                        value={formData.default_image_url}
+                        onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="mb-2"
+                      />
+                      <label htmlFor="image_upload" className="cursor-pointer">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isUploadingImage}
+                          onClick={() => document.getElementById("image_upload")?.click()}
+                        >
+                          {isUploadingImage ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          Upload Image
+                        </Button>
+                      </label>
+                      <input
+                        id="image_upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={closeDialog}>

@@ -13,6 +13,7 @@ interface RssFeed {
   status: string;
   import_mode: string;
   publish_status: string;
+  default_image_url: string | null;
 }
 
 interface FeedItem {
@@ -300,6 +301,9 @@ Deno.serve(async (req) => {
         const articleContent = isExcerptMode ? item.description : item.content;
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
+        // Use default image from feed if set, otherwise null (ignore RSS images)
+        const imageUrl = rssFeed.default_image_url || null;
+        
         // Create article
         const { data: article, error: articleError } = await supabase
           .from("articles")
@@ -310,7 +314,7 @@ Deno.serve(async (req) => {
             author: item.author || null,
             published_at: publishDate,
             vertical_slug: rssFeed.vertical_slug,
-            image_url: item.imageUrl || null,
+            image_url: imageUrl,
             external_url: isExcerptMode ? item.link : null,
             read_time: estimateReadTime(articleContent || ""),
             metadata: {
