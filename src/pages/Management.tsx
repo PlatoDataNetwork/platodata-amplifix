@@ -17,8 +17,9 @@ import GeneralSettings from "@/components/admin/settings/GeneralSettings";
 import AnalyticsSettings from "@/components/admin/settings/AnalyticsSettings";
 import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 import RobotsSettings from "@/components/admin/settings/RobotsSettings";
+import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -190,6 +191,8 @@ const Management = () => {
         return <TagsManagement />;
       case "verticals":
         return <VerticalsManagement onNavigateToArticles={(slug) => handleViewChange("articles", slug)} />;
+      case "feeds-syndicator":
+        return <FeedsSyndicator />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":

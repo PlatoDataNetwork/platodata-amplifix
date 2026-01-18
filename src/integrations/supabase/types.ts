@@ -139,6 +139,96 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_sync_logs: {
+        Row: {
+          article_id: string | null
+          feed_id: string
+          id: string
+          original_guid: string
+          original_url: string | null
+          synced_at: string
+        }
+        Insert: {
+          article_id?: string | null
+          feed_id: string
+          id?: string
+          original_guid: string
+          original_url?: string | null
+          synced_at?: string
+        }
+        Update: {
+          article_id?: string | null
+          feed_id?: string
+          id?: string
+          original_guid?: string
+          original_url?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_sync_logs_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_sync_logs_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "rss_feeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rss_feeds: {
+        Row: {
+          auto_sync: boolean
+          created_at: string
+          feed_url: string
+          id: string
+          import_mode: Database["public"]["Enums"]["feed_import_mode"]
+          last_error: string | null
+          last_synced_at: string | null
+          name: string
+          publish_status: Database["public"]["Enums"]["feed_publish_status"]
+          status: Database["public"]["Enums"]["feed_status"]
+          sync_interval_hours: number
+          updated_at: string
+          vertical_slug: string
+        }
+        Insert: {
+          auto_sync?: boolean
+          created_at?: string
+          feed_url: string
+          id?: string
+          import_mode?: Database["public"]["Enums"]["feed_import_mode"]
+          last_error?: string | null
+          last_synced_at?: string | null
+          name: string
+          publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          status?: Database["public"]["Enums"]["feed_status"]
+          sync_interval_hours?: number
+          updated_at?: string
+          vertical_slug: string
+        }
+        Update: {
+          auto_sync?: boolean
+          created_at?: string
+          feed_url?: string
+          id?: string
+          import_mode?: Database["public"]["Enums"]["feed_import_mode"]
+          last_error?: string | null
+          last_synced_at?: string | null
+          name?: string
+          publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          status?: Database["public"]["Enums"]["feed_status"]
+          sync_interval_hours?: number
+          updated_at?: string
+          vertical_slug?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           created_at: string
@@ -257,6 +347,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      feed_import_mode: "full_content" | "excerpt_with_link"
+      feed_publish_status: "publish" | "draft"
+      feed_status: "active" | "paused" | "error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -385,6 +478,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      feed_import_mode: ["full_content", "excerpt_with_link"],
+      feed_publish_status: ["publish", "draft"],
+      feed_status: ["active", "paused", "error"],
     },
   },
 } as const
