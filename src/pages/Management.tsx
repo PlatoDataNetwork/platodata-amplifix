@@ -216,10 +216,10 @@ const Management = () => {
       <SidebarProvider defaultOpen>
         <div className="min-h-screen flex flex-col w-full">
           {/* Header - Full Width */}
-          <header className="border-b border-border bg-card/50 w-full">
+          <header className="border-b border-border bg-card/50 w-full z-10">
             <div className="px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="-ml-2" />
+                <SidebarTrigger />
                 <Shield className="w-6 h-6 text-primary" />
                 <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
               </div>
@@ -234,7 +234,7 @@ const Management = () => {
           </header>
 
           {/* Sidebar + Content */}
-          <div className="flex flex-1 w-full">
+          <div className="flex flex-1 w-full overflow-hidden">
             <AdminSidebar currentView={currentView} onViewChange={handleViewChange} />
             
             {/* Main Content */}
