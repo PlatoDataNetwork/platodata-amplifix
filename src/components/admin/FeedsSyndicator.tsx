@@ -60,6 +60,8 @@ interface RssFeed {
   created_at: string;
   updated_at: string;
   default_image_url: string | null;
+  check_duplicate_title: boolean;
+  check_duplicate_link: boolean;
 }
 
 interface FeedFormData {
@@ -71,6 +73,8 @@ interface FeedFormData {
   auto_sync: boolean;
   sync_interval_hours: number;
   default_image_url: string;
+  check_duplicate_title: boolean;
+  check_duplicate_link: boolean;
 }
 
 const defaultFormData: FeedFormData = {
@@ -82,6 +86,8 @@ const defaultFormData: FeedFormData = {
   auto_sync: false,
   sync_interval_hours: 24,
   default_image_url: "",
+  check_duplicate_title: false,
+  check_duplicate_link: false,
 };
 
 interface FeedsSyndicatorProps {
@@ -145,6 +151,8 @@ const FeedsSyndicator = ({
         auto_sync: editingFeed.auto_sync,
         sync_interval_hours: editingFeed.sync_interval_hours,
         default_image_url: editingFeed.default_image_url || "",
+        check_duplicate_title: editingFeed.check_duplicate_title || false,
+        check_duplicate_link: editingFeed.check_duplicate_link || false,
       });
     }
   }, [editingFeed]);
@@ -179,6 +187,8 @@ const FeedsSyndicator = ({
         sync_interval_hours: data.sync_interval_hours,
         status: "active",
         default_image_url: data.default_image_url || null,
+        check_duplicate_title: data.check_duplicate_title,
+        check_duplicate_link: data.check_duplicate_link,
       });
       if (error) throw error;
     },
@@ -509,6 +519,42 @@ const FeedsSyndicator = ({
                     {formData.auto_sync 
                       ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
                       : "Enable auto-sync to configure interval"}
+                  </p>
+                </div>
+
+                {/* Duplicate Checking - Full Width */}
+                <div className="space-y-2 lg:col-span-2">
+                  <Label>Duplicate Checking</Label>
+                  <div className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg border">
+                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="check_duplicate_title" className="text-sm font-medium">Check by Title</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Skip articles with matching titles
+                        </p>
+                      </div>
+                      <Switch
+                        id="check_duplicate_title"
+                        checked={formData.check_duplicate_title}
+                        onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_title: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="check_duplicate_link" className="text-sm font-medium">Check by Link</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Skip articles with matching URLs
+                        </p>
+                      </div>
+                      <Switch
+                        id="check_duplicate_link"
+                        checked={formData.check_duplicate_link}
+                        onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_link: checked })}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enable to prevent importing duplicate articles that already exist in the database
                   </p>
                 </div>
 
