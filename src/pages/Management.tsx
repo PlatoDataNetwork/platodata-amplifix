@@ -214,27 +214,27 @@ const Management = () => {
       </Helmet>
 
       <SidebarProvider defaultOpen>
-        <div className="min-h-screen flex flex-col w-full">
-          {/* Header - Full Width */}
-          <header className="border-b border-border bg-card/50 w-full z-10">
-            <div className="px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SidebarTrigger />
-                <Shield className="w-6 h-6 text-primary" />
-                <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">{user.email}</span>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </div>
+        {/* Fixed Header - Full Width */}
+        <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <Shield className="w-6 h-6 text-primary" />
+              <h1 className="text-xl font-bold text-foreground">Admin Management</h1>
             </div>
-          </header>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </header>
 
-          {/* Sidebar + Content */}
-          <div className="flex flex-1 w-full overflow-hidden">
+        {/* Content with top padding for fixed header */}
+        <div className="pt-[65px] w-full">
+          <div className="min-h-[calc(100vh-65px)] flex w-full">
             <AdminSidebar currentView={currentView} onViewChange={handleViewChange} />
             
             {/* Main Content */}
