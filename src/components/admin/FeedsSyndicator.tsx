@@ -365,6 +365,7 @@ const FeedsSyndicator = ({
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 lg:grid-cols-2">
+                {/* Row 1: Feed Name + RSS Feed URL */}
                 {/* Feed Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Feed Name *</Label>
@@ -380,36 +381,8 @@ const FeedsSyndicator = ({
                   </p>
                 </div>
 
-                {/* Target Vertical */}
+                {/* RSS Feed URL */}
                 <div className="space-y-2">
-                  <Label htmlFor="vertical_slug">Target Vertical *</Label>
-                  <Select
-                    value={formData.vertical_slug}
-                    onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a vertical" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {verticals?.map((vertical: string) => (
-                        <SelectItem key={vertical} value={vertical}>
-                          {vertical}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__new__">+ Add custom...</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formData.vertical_slug === "__new__" && (
-                    <Input
-                      placeholder="Enter custom vertical slug"
-                      onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-
-                {/* RSS Feed URL - Full Width */}
-                <div className="space-y-2 lg:col-span-2">
                   <Label htmlFor="feed_url">RSS Feed URL *</Label>
                   <Input
                     id="feed_url"
@@ -424,48 +397,79 @@ const FeedsSyndicator = ({
                   </p>
                 </div>
 
-                {/* Import Mode */}
-                <div className="space-y-2">
-                  <Label htmlFor="import_mode">Import Mode</Label>
-                  <Select
-                    value={formData.import_mode}
-                    onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full_content">Full Content</SelectItem>
-                      <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {formData.import_mode === "full_content" 
-                      ? "Import the complete article content"
-                      : "Import excerpt and link to original article"}
-                  </p>
-                </div>
+                {/* Row 2: Target Vertical + Import Mode + Article Status (3 columns) */}
+                <div className="lg:col-span-2 grid gap-6 lg:grid-cols-3">
+                  {/* Target Vertical */}
+                  <div className="space-y-2">
+                    <Label htmlFor="vertical_slug">Target Vertical *</Label>
+                    <Select
+                      value={formData.vertical_slug}
+                      onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a vertical" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {verticals?.map((vertical: string) => (
+                          <SelectItem key={vertical} value={vertical}>
+                            {vertical}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="__new__">+ Add custom...</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {formData.vertical_slug === "__new__" && (
+                      <Input
+                        placeholder="Enter custom vertical slug"
+                        onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
 
-                {/* Article Status */}
-                <div className="space-y-2">
-                  <Label htmlFor="publish_status">Article Status</Label>
-                  <Select
-                    value={formData.publish_status}
-                    onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Save as Draft</SelectItem>
-                      <SelectItem value="publish">Publish Immediately</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {formData.publish_status === "draft" 
-                      ? "Review articles before publishing"
-                      : "Articles go live immediately"}
-                  </p>
+                  {/* Import Mode */}
+                  <div className="space-y-2">
+                    <Label htmlFor="import_mode">Import Mode</Label>
+                    <Select
+                      value={formData.import_mode}
+                      onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full_content">Full Content</SelectItem>
+                        <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {formData.import_mode === "full_content" 
+                        ? "Import the complete article content"
+                        : "Import excerpt and link to original article"}
+                    </p>
+                  </div>
+
+                  {/* Article Status */}
+                  <div className="space-y-2">
+                    <Label htmlFor="publish_status">Article Status</Label>
+                    <Select
+                      value={formData.publish_status}
+                      onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Save as Draft</SelectItem>
+                        <SelectItem value="publish">Publish Immediately</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {formData.publish_status === "draft" 
+                        ? "Review articles before publishing"
+                        : "Articles go live immediately"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Auto-sync Toggle */}
