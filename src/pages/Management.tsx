@@ -65,19 +65,6 @@ const Management = () => {
     enabled: !!user && isAdmin,
   });
 
-  // Fetch tags count
-  const { data: tagsCount } = useQuery({
-    queryKey: ["admin-tags-count"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("tags")
-        .select("*", { count: "exact", head: true });
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!user && isAdmin,
-  });
-
   // Fetch RSS feeds count
   const { data: feedsCount } = useQuery({
     queryKey: ["admin-feeds-count"],
@@ -188,7 +175,7 @@ const Management = () => {
             {/* Stats Section */}
             <div className="mt-12">
               <h3 className="text-xl font-semibold text-foreground mb-4">Quick Stats</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div 
                   className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => setCurrentView("articles")}
@@ -202,13 +189,6 @@ const Management = () => {
                 >
                   <p className="text-2xl font-bold text-primary">{verticalCount ?? "--"}</p>
                   <p className="text-sm text-muted-foreground">Verticals</p>
-                </div>
-                <div 
-                  className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setCurrentView("tags")}
-                >
-                  <p className="text-2xl font-bold text-primary">{tagsCount ?? "--"}</p>
-                  <p className="text-sm text-muted-foreground">Tags</p>
                 </div>
                 <div 
                   className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
