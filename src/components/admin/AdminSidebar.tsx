@@ -11,7 +11,8 @@ import {
   BarChart3,
   Map,
   Bot,
-  Rss
+  Rss,
+  ScrollText
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,7 +33,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -41,7 +42,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
   const isArticlesSection = ["articles", "new-article", "tags", "verticals"].includes(currentView);
-  const isFeedsSection = ["feeds-syndicator", "new-feed", "edit-feed"].includes(currentView);
+  const isFeedsSection = ["feeds-syndicator", "new-feed", "edit-feed", "feeds-logs"].includes(currentView);
   const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps", "settings-robots"].includes(currentView);
 
   return (
@@ -152,6 +153,15 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         >
                           <Plus className="w-3 h-3" />
                           <span>Add Feed</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("feeds-logs")}
+                          isActive={currentView === "feeds-logs"}
+                        >
+                          <ScrollText className="w-3 h-3" />
+                          <span>Logs</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
