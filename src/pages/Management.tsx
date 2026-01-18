@@ -18,8 +18,9 @@ import AnalyticsSettings from "@/components/admin/settings/AnalyticsSettings";
 import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 import RobotsSettings from "@/components/admin/settings/RobotsSettings";
 import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
+import FeedSyncLogs from "@/components/admin/FeedSyncLogs";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -240,6 +241,8 @@ const Management = () => {
             onBack={() => setCurrentView("feeds-syndicator")} 
           />
         );
+      case "feeds-logs":
+        return <FeedSyncLogs />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":
