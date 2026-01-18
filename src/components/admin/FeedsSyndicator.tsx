@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +35,8 @@ import {
   Loader2,
   ExternalLink,
   ImageIcon,
-  Upload
+  Upload,
+  ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -91,10 +83,22 @@ const defaultFormData: FeedFormData = {
   default_image_url: "",
 };
 
-const FeedsSyndicator = () => {
+interface FeedsSyndicatorProps {
+  mode?: "list" | "add" | "edit";
+  editFeedId?: string;
+  onAddFeed?: () => void;
+  onEditFeed?: (feedId: string) => void;
+  onBack?: () => void;
+}
+
+const FeedsSyndicator = ({ 
+  mode = "list", 
+  editFeedId, 
+  onAddFeed, 
+  onEditFeed,
+  onBack 
+}: FeedsSyndicatorProps) => {
   const queryClient = useQueryClient();
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingFeed, setEditingFeed] = useState<RssFeed | null>(null);
   const [formData, setFormData] = useState<FeedFormData>(defaultFormData);
   const [syncingFeedId, setSyncingFeedId] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -111,6 +115,45 @@ const FeedsSyndicator = () => {
       return data as RssFeed[];
     },
   });
+
+  // Fetch single feed for editing
+  const { data: editingFeed, isLoading: editFeedLoading } = useQuery({
+    queryKey: ["rss-feed", editFeedId],
+    queryFn: async () => {
+      if (!editFeedId) return null;
+      const { data, error } = await supabase
+        .from("rss_feeds")
+        .select("*")
+        .eq("id", editFeedId)
+        .single();
+      if (error) throw error;
+      return data as RssFeed;
+    },
+    enabled: mode === "edit" && !!editFeedId,
+  });
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editingFeed) {
+      setFormData({
+        name: editingFeed.name,
+        feed_url: editingFeed.feed_url,
+        vertical_slug: editingFeed.vertical_slug,
+        import_mode: editingFeed.import_mode,
+        publish_status: editingFeed.publish_status,
+        auto_sync: editingFeed.auto_sync,
+        sync_interval_hours: editingFeed.sync_interval_hours,
+        default_image_url: editingFeed.default_image_url || "",
+      });
+    }
+  }, [editingFeed]);
+
+  // Reset form when mode changes to add
+  useEffect(() => {
+    if (mode === "add") {
+      setFormData(defaultFormData);
+    }
+  }, [mode]);
 
   // Fetch verticals for dropdown
   const { data: verticals } = useQuery({
@@ -140,9 +183,8 @@ const FeedsSyndicator = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rss-feeds"] });
-      setIsAddDialogOpen(false);
-      setFormData(defaultFormData);
       toast.success("Feed added successfully");
+      onBack?.();
     },
     onError: (error) => {
       toast.error(`Failed to add feed: ${error.message}`);
@@ -152,14 +194,16 @@ const FeedsSyndicator = () => {
   // Update feed mutation
   const updateFeedMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<FeedFormData> }) => {
-      const { error } = await supabase.from("rss_feeds").update(data).eq("id", id);
+      const { error } = await supabase.from("rss_feeds").update({
+        ...data,
+        default_image_url: data.default_image_url || null,
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rss-feeds"] });
-      setEditingFeed(null);
-      setFormData(defaultFormData);
       toast.success("Feed updated successfully");
+      onBack?.();
     },
     onError: (error) => {
       toast.error(`Failed to update feed: ${error.message}`);
@@ -218,25 +262,11 @@ const FeedsSyndicator = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingFeed) {
-      updateFeedMutation.mutate({ id: editingFeed.id, data: formData });
+    if (mode === "edit" && editFeedId) {
+      updateFeedMutation.mutate({ id: editFeedId, data: formData });
     } else {
       createFeedMutation.mutate(formData);
     }
-  };
-
-  const openEditDialog = (feed: RssFeed) => {
-    setEditingFeed(feed);
-    setFormData({
-      name: feed.name,
-      feed_url: feed.feed_url,
-      vertical_slug: feed.vertical_slug,
-      import_mode: feed.import_mode,
-      publish_status: feed.publish_status,
-      auto_sync: feed.auto_sync,
-      sync_interval_hours: feed.sync_interval_hours,
-      default_image_url: feed.default_image_url || "",
-    });
   };
 
   // Handle image upload
@@ -244,13 +274,11 @@ const FeedsSyndicator = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Image must be less than 5MB");
       return;
@@ -282,12 +310,6 @@ const FeedsSyndicator = () => {
     }
   };
 
-  const closeDialog = () => {
-    setIsAddDialogOpen(false);
-    setEditingFeed(null);
-    setFormData(defaultFormData);
-  };
-
   const getStatusBadge = (status: FeedStatus) => {
     switch (status) {
       case "active":
@@ -299,192 +321,197 @@ const FeedsSyndicator = () => {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Feeds Syndicator</h2>
-          <p className="text-muted-foreground">
-            Import and republish articles from RSS feeds
-          </p>
+  // Render the form for add/edit modes
+  if (mode === "add" || mode === "edit") {
+    if (mode === "edit" && editFeedLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-        <Dialog open={isAddDialogOpen || !!editingFeed} onOpenChange={(open) => {
-          if (!open) closeDialog();
-          else setIsAddDialogOpen(true);
-        }}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Feed
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>{editingFeed ? "Edit Feed" : "Add New RSS Feed"}</DialogTitle>
-                <DialogDescription>
-                  {editingFeed 
-                    ? "Update the feed configuration" 
-                    : "Add an RSS feed to import articles automatically"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Feed Name</Label>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">
+              {mode === "edit" ? "Edit RSS Feed" : "Add New RSS Feed"}
+            </h2>
+            <p className="text-muted-foreground">
+              {mode === "edit" 
+                ? "Update the feed configuration" 
+                : "Add an RSS feed to import articles automatically"}
+            </p>
+          </div>
+        </div>
+
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+              <div className="space-y-2">
+                <Label htmlFor="name">Feed Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., TechCrunch AI"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="feed_url">RSS Feed URL</Label>
+                <Input
+                  id="feed_url"
+                  type="url"
+                  value={formData.feed_url}
+                  onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
+                  placeholder="https://example.com/feed.xml"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vertical_slug">Target Vertical</Label>
+                <Select
+                  value={formData.vertical_slug}
+                  onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a vertical" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {verticals?.map((vertical: string) => (
+                      <SelectItem key={vertical} value={vertical}>
+                        {vertical}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__new__">+ Add custom...</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formData.vertical_slug === "__new__" && (
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., TechCrunch AI"
-                    required
+                    placeholder="Enter custom vertical slug"
+                    onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
+                    className="mt-2"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="feed_url">RSS Feed URL</Label>
-                  <Input
-                    id="feed_url"
-                    type="url"
-                    value={formData.feed_url}
-                    onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
-                    placeholder="https://example.com/feed.xml"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vertical_slug">Target Vertical</Label>
-                  <Select
-                    value={formData.vertical_slug}
-                    onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a vertical" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {verticals?.map((vertical: string) => (
-                        <SelectItem key={vertical} value={vertical}>
-                          {vertical}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__new__">+ Add custom...</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formData.vertical_slug === "__new__" && (
-                    <Input
-                      placeholder="Enter custom vertical slug"
-                      onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="import_mode">Import Mode</Label>
-                  <Select
-                    value={formData.import_mode}
-                    onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full_content">Full Content</SelectItem>
-                      <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="publish_status">Article Status</Label>
-                  <Select
-                    value={formData.publish_status}
-                    onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Save as Draft</SelectItem>
-                      <SelectItem value="publish">Publish Immediately</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto_sync">Auto-sync</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically sync at regular intervals
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto_sync"
-                    checked={formData.auto_sync}
-                    onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
-                  />
-                </div>
-                {formData.auto_sync && (
-                  <div className="space-y-2">
-                    <Label htmlFor="sync_interval">Sync Interval (hours)</Label>
-                    <Input
-                      id="sync_interval"
-                      type="number"
-                      min="1"
-                      max="168"
-                      value={formData.sync_interval_hours}
-                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
-                    />
-                  </div>
                 )}
-                <div className="space-y-2">
-                  <Label htmlFor="default_image">Default Featured Image</Label>
-                  <p className="text-xs text-muted-foreground">
-                    This image will be used for all articles from this feed (RSS images are ignored)
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="import_mode">Import Mode</Label>
+                <Select
+                  value={formData.import_mode}
+                  onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_content">Full Content</SelectItem>
+                    <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="publish_status">Article Status</Label>
+                <Select
+                  value={formData.publish_status}
+                  onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Save as Draft</SelectItem>
+                    <SelectItem value="publish">Publish Immediately</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto_sync">Auto-sync</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically sync at regular intervals
                   </p>
-                  <div className="flex items-center gap-2">
-                    {formData.default_image_url ? (
-                      <div className="relative w-20 h-20 rounded border border-border overflow-hidden">
-                        <img 
-                          src={formData.default_image_url} 
-                          alt="Default" 
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-0.5 right-0.5 h-5 w-5"
-                          onClick={() => setFormData({ ...formData, default_image_url: "" })}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="w-20 h-20 rounded border border-dashed border-border flex items-center justify-center bg-muted/50">
-                        <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <Input
-                        id="default_image_url"
-                        type="url"
-                        value={formData.default_image_url}
-                        onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
-                        placeholder="https://example.com/image.jpg"
-                        className="mb-2"
+                </div>
+                <Switch
+                  id="auto_sync"
+                  checked={formData.auto_sync}
+                  onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
+                />
+              </div>
+
+              {formData.auto_sync && (
+                <div className="space-y-2">
+                  <Label htmlFor="sync_interval">Sync Interval (hours)</Label>
+                  <Input
+                    id="sync_interval"
+                    type="number"
+                    min="1"
+                    max="168"
+                    value={formData.sync_interval_hours}
+                    onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="default_image">Default Featured Image</Label>
+                <p className="text-sm text-muted-foreground">
+                  This image will be used for all articles from this feed (RSS images are ignored)
+                </p>
+                <div className="flex items-start gap-4 mt-3">
+                  {formData.default_image_url ? (
+                    <div className="relative w-32 h-32 rounded-lg border border-border overflow-hidden flex-shrink-0">
+                      <img 
+                        src={formData.default_image_url} 
+                        alt="Default" 
+                        className="w-full h-full object-cover"
                       />
-                      <label htmlFor="image_upload" className="cursor-pointer">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={isUploadingImage}
-                          onClick={() => document.getElementById("image_upload")?.click()}
-                        >
-                          {isUploadingImage ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4 mr-2" />
-                          )}
-                          Upload Image
-                        </Button>
-                      </label>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50 flex-shrink-0">
+                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-3">
+                    <Input
+                      id="default_image_url"
+                      type="url"
+                      value={formData.default_image_url}
+                      onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isUploadingImage}
+                        onClick={() => document.getElementById("image_upload")?.click()}
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4 mr-2" />
+                        )}
+                        Upload Image
+                      </Button>
                       <input
                         id="image_upload"
                         type="file"
@@ -496,8 +523,9 @@ const FeedsSyndicator = () => {
                   </div>
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={closeDialog}>
+
+              <div className="flex items-center gap-3 pt-4 border-t">
+                <Button type="button" variant="outline" onClick={onBack}>
                   Cancel
                 </Button>
                 <Button 
@@ -507,12 +535,30 @@ const FeedsSyndicator = () => {
                   {(createFeedMutation.isPending || updateFeedMutation.isPending) && (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   )}
-                  {editingFeed ? "Update Feed" : "Add Feed"}
+                  {mode === "edit" ? "Update Feed" : "Add Feed"}
                 </Button>
-              </DialogFooter>
+              </div>
             </form>
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Render the list view
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Feeds Syndicator</h2>
+          <p className="text-muted-foreground">
+            Import and republish articles from RSS feeds
+          </p>
+        </div>
+        <Button onClick={onAddFeed}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Feed
+        </Button>
       </div>
 
       {feedsLoading ? (
@@ -538,7 +584,15 @@ const FeedsSyndicator = () => {
                   <TableRow key={feed.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Rss className="w-4 h-4 text-muted-foreground" />
+                        {feed.default_image_url ? (
+                          <img 
+                            src={feed.default_image_url} 
+                            alt="" 
+                            className="w-8 h-8 rounded object-cover"
+                          />
+                        ) : (
+                          <Rss className="w-4 h-4 text-muted-foreground" />
+                        )}
                         <div>
                           <p className="font-medium">{feed.name}</p>
                           <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -615,7 +669,7 @@ const FeedsSyndicator = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => openEditDialog(feed)}
+                          onClick={() => onEditFeed?.(feed.id)}
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -663,7 +717,7 @@ const FeedsSyndicator = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Button onClick={onAddFeed}>
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Feed
             </Button>

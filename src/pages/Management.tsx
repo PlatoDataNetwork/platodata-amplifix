@@ -19,17 +19,26 @@ import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 import RobotsSettings from "@/components/admin/settings/RobotsSettings";
 import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [initialVerticalFilter, setInitialVerticalFilter] = useState<string | undefined>();
+  const [editingFeedId, setEditingFeedId] = useState<string | undefined>();
 
   const handleViewChange = (view: View, verticalSlug?: string) => {
     setCurrentView(view);
     setInitialVerticalFilter(verticalSlug);
+    if (view !== "edit-feed") {
+      setEditingFeedId(undefined);
+    }
+  };
+
+  const handleEditFeed = (feedId: string) => {
+    setEditingFeedId(feedId);
+    setCurrentView("edit-feed");
   };
 
   // Fetch article count
@@ -192,7 +201,27 @@ const Management = () => {
       case "verticals":
         return <VerticalsManagement onNavigateToArticles={(slug) => handleViewChange("articles", slug)} />;
       case "feeds-syndicator":
-        return <FeedsSyndicator />;
+        return (
+          <FeedsSyndicator 
+            onAddFeed={() => setCurrentView("new-feed")} 
+            onEditFeed={handleEditFeed}
+          />
+        );
+      case "new-feed":
+        return (
+          <FeedsSyndicator 
+            mode="add" 
+            onBack={() => setCurrentView("feeds-syndicator")} 
+          />
+        );
+      case "edit-feed":
+        return (
+          <FeedsSyndicator 
+            mode="edit" 
+            editFeedId={editingFeedId}
+            onBack={() => setCurrentView("feeds-syndicator")} 
+          />
+        );
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":
