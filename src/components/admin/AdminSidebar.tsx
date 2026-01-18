@@ -10,7 +10,8 @@ import {
   Globe,
   BarChart3,
   Map,
-  Bot
+  Bot,
+  Rss
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,7 +32,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -118,6 +119,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
+              {/* Feeds Syndicator */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("feeds-syndicator")}
+                  isActive={currentView === "feeds-syndicator"}
+                  className="w-full"
+                >
+                  <Rss className="w-4 h-4" />
+                  <span>Feeds Syndicator</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               {/* Users - coming soon */}
               <SidebarMenuItem>
