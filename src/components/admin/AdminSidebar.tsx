@@ -130,7 +130,7 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                       isActive={isFeedsSection}
                     >
                       <Rss className="w-4 h-4" />
-                      <span>Feeds</span>
+                      <span>Feed Syndicator</span>
                       <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
