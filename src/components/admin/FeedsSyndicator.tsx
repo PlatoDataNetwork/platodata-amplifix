@@ -36,7 +36,8 @@ import {
   ExternalLink,
   ImageIcon,
   Upload,
-  ArrowLeft
+  ArrowLeft,
+  Settings
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -332,7 +333,7 @@ const FeedsSyndicator = ({
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-4 h-4" />
@@ -344,27 +345,67 @@ const FeedsSyndicator = ({
             <p className="text-muted-foreground">
               {mode === "edit" 
                 ? "Update the feed configuration" 
-                : "Add an RSS feed to import articles automatically"}
+                : "Configure your RSS feed to automatically import articles"}
             </p>
           </div>
         </div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-              <div className="space-y-2">
-                <Label htmlFor="name">Feed Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., TechCrunch AI"
-                  required
-                />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Rss className="w-5 h-5 text-primary" />
+                Feed Information
+              </CardTitle>
+              <CardDescription>
+                Basic details about the RSS feed source
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Feed Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., TechCrunch AI"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    A friendly name to identify this feed
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vertical_slug">Target Vertical *</Label>
+                  <Select
+                    value={formData.vertical_slug}
+                    onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a vertical" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {verticals?.map((vertical: string) => (
+                        <SelectItem key={vertical} value={vertical}>
+                          {vertical}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__new__">+ Add custom...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {formData.vertical_slug === "__new__" && (
+                    <Input
+                      placeholder="Enter custom vertical slug"
+                      onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
+                      className="mt-2"
+                    />
+                  )}
+                </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="feed_url">RSS Feed URL</Label>
+                <Label htmlFor="feed_url">RSS Feed URL *</Label>
                 <Input
                   id="feed_url"
                   type="url"
@@ -373,72 +414,87 @@ const FeedsSyndicator = ({
                   placeholder="https://example.com/feed.xml"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  The full URL to the RSS or Atom feed
+                </p>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="vertical_slug">Target Vertical</Label>
-                <Select
-                  value={formData.vertical_slug}
-                  onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a vertical" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {verticals?.map((vertical: string) => (
-                      <SelectItem key={vertical} value={vertical}>
-                        {vertical}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="__new__">+ Add custom...</SelectItem>
-                  </SelectContent>
-                </Select>
-                {formData.vertical_slug === "__new__" && (
-                  <Input
-                    placeholder="Enter custom vertical slug"
-                    onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
-                    className="mt-2"
-                  />
-                )}
+          {/* Import Settings */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" />
+                Import Settings
+              </CardTitle>
+              <CardDescription>
+                Configure how articles are imported and published
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="import_mode">Import Mode</Label>
+                  <Select
+                    value={formData.import_mode}
+                    onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full_content">Full Content</SelectItem>
+                      <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.import_mode === "full_content" 
+                      ? "Import the complete article content"
+                      : "Import excerpt and link to original article"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="publish_status">Article Status</Label>
+                  <Select
+                    value={formData.publish_status}
+                    onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Save as Draft</SelectItem>
+                      <SelectItem value="publish">Publish Immediately</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.publish_status === "draft" 
+                      ? "Review articles before publishing"
+                      : "Articles go live immediately"}
+                  </p>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="import_mode">Import Mode</Label>
-                <Select
-                  value={formData.import_mode}
-                  onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full_content">Full Content</SelectItem>
-                    <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="publish_status">Article Status</Label>
-                <Select
-                  value={formData.publish_status}
-                  onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Save as Draft</SelectItem>
-                    <SelectItem value="publish">Publish Immediately</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+          {/* Sync Settings */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" />
+                Sync Settings
+              </CardTitle>
+              <CardDescription>
+                Configure automatic synchronization
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
                 <div className="space-y-0.5">
-                  <Label htmlFor="auto_sync">Auto-sync</Label>
+                  <Label htmlFor="auto_sync" className="text-base font-medium">Enable Auto-sync</Label>
                   <p className="text-sm text-muted-foreground">
-                    Automatically sync at regular intervals
+                    Automatically check for new articles at regular intervals
                   </p>
                 </div>
                 <Switch
@@ -447,50 +503,68 @@ const FeedsSyndicator = ({
                   onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
                 />
               </div>
-
               {formData.auto_sync && (
-                <div className="space-y-2">
-                  <Label htmlFor="sync_interval">Sync Interval (hours)</Label>
-                  <Input
-                    id="sync_interval"
-                    type="number"
-                    min="1"
-                    max="168"
-                    value={formData.sync_interval_hours}
-                    onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
-                  />
+                <div className="space-y-2 pl-4 border-l-2 border-primary/20">
+                  <Label htmlFor="sync_interval">Sync Interval</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="sync_interval"
+                      type="number"
+                      min="1"
+                      max="168"
+                      value={formData.sync_interval_hours}
+                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">hours</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Check for new articles every {formData.sync_interval_hours} hour{formData.sync_interval_hours !== 1 ? 's' : ''}
+                  </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="default_image">Default Featured Image</Label>
-                <p className="text-sm text-muted-foreground">
-                  This image will be used for all articles from this feed (RSS images are ignored)
-                </p>
-                <div className="flex items-start gap-4 mt-3">
-                  {formData.default_image_url ? (
-                    <div className="relative w-32 h-32 rounded-lg border border-border overflow-hidden flex-shrink-0">
-                      <img 
-                        src={formData.default_image_url} 
-                        alt="Default" 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-1 right-1 h-6 w-6"
-                        onClick={() => setFormData({ ...formData, default_image_url: "" })}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50 flex-shrink-0">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="flex-1 space-y-3">
+          {/* Featured Image */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-primary" />
+                Default Featured Image
+              </CardTitle>
+              <CardDescription>
+                This image will be used for all articles imported from this feed. RSS images are ignored.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start gap-6">
+                {formData.default_image_url ? (
+                  <div className="relative w-40 h-28 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                    <img 
+                      src={formData.default_image_url} 
+                      alt="Default featured" 
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-7 w-7 shadow-lg"
+                      onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="w-40 h-28 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-muted/30 flex-shrink-0">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground/50 mb-1" />
+                    <span className="text-xs text-muted-foreground">No image</span>
+                  </div>
+                )}
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="default_image_url">Image URL</Label>
                     <Input
                       id="default_image_url"
                       type="url"
@@ -498,49 +572,53 @@ const FeedsSyndicator = ({
                       onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
                       placeholder="https://example.com/image.jpg"
                     />
-                    <div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={isUploadingImage}
-                        onClick={() => document.getElementById("image_upload")?.click()}
-                      >
-                        {isUploadingImage ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Upload className="w-4 h-4 mr-2" />
-                        )}
-                        Upload Image
-                      </Button>
-                      <input
-                        id="image_upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
-                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">or</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isUploadingImage}
+                      onClick={() => document.getElementById("image_upload")?.click()}
+                    >
+                      {isUploadingImage ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4 mr-2" />
+                      )}
+                      Upload from computer
+                    </Button>
+                    <input
+                      id="image_upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-center gap-3 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={onBack}>
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createFeedMutation.isPending || updateFeedMutation.isPending}
-                >
-                  {(createFeedMutation.isPending || updateFeedMutation.isPending) && (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  )}
-                  {mode === "edit" ? "Update Feed" : "Add Feed"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2">
+            <Button type="button" variant="ghost" onClick={onBack}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              size="lg"
+              disabled={createFeedMutation.isPending || updateFeedMutation.isPending}
+            >
+              {(createFeedMutation.isPending || updateFeedMutation.isPending) && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              {mode === "edit" ? "Save Changes" : "Add Feed"}
+            </Button>
+          </div>
+        </form>
       </div>
     );
   }
