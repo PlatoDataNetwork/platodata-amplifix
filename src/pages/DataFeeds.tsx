@@ -28,19 +28,30 @@ const DataFeeds = () => {
     },
   });
 
-  // Fetch article counts per vertical
+  // Fetch article counts per vertical using proper count query
   const { data: articleCounts } = useQuery({
     queryKey: ["feed-article-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("articles")
-        .select("vertical_slug");
-      if (error) throw error;
+      // Fetch counts for each vertical individually using count
+      const allVerticals = await supabase.rpc("get_article_verticals");
+      if (allVerticals.error) throw allVerticals.error;
       
       const counts: Record<string, number> = {};
-      data?.forEach((article) => {
-        counts[article.vertical_slug] = (counts[article.vertical_slug] || 0) + 1;
-      });
+      const verticalsData = allVerticals.data as { vertical_slug: string }[];
+      
+      // Batch fetch counts for all verticals
+      await Promise.all(
+        verticalsData.map(async (v) => {
+          const { count, error } = await supabase
+            .from("articles")
+            .select("*", { count: "exact", head: true })
+            .eq("vertical_slug", v.vertical_slug);
+          if (!error && count !== null) {
+            counts[v.vertical_slug] = count;
+          }
+        })
+      );
+      
       return counts;
     },
   });
