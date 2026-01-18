@@ -64,7 +64,7 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
               </SidebarMenuItem>
 
               {/* Articles with sub-menu */}
-              <Collapsible defaultOpen className="group/collapsible">
+              <Collapsible defaultOpen={isArticlesSection} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
