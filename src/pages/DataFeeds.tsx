@@ -28,6 +28,23 @@ const DataFeeds = () => {
     },
   });
 
+  // Fetch article counts per vertical
+  const { data: articleCounts } = useQuery({
+    queryKey: ["feed-article-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("vertical_slug");
+      if (error) throw error;
+      
+      const counts: Record<string, number> = {};
+      data?.forEach((article) => {
+        counts[article.vertical_slug] = (counts[article.vertical_slug] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const formatVerticalName = (slug: string) => {
     if (slug === "ar-vr") return "AR/VR";
     if (slug === "artificial-intelligence") return "AI";
@@ -53,9 +70,14 @@ const DataFeeds = () => {
 
   const FeedCard = ({ vertical }: { vertical: string }) => (
     <div className="bg-card border border-border rounded-lg p-5 hover:border-primary/50 transition-all duration-300">
-      <h3 className="text-lg font-bold text-foreground mb-4">
-        {formatVerticalName(vertical)}
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-foreground">
+          {formatVerticalName(vertical)}
+        </h3>
+        <span className="text-sm text-muted-foreground">
+          {articleCounts?.[vertical] || 0} articles
+        </span>
+      </div>
       <div className="flex items-center gap-4">
         <Link
           to={getContentUrl(vertical)}
@@ -67,7 +89,7 @@ const DataFeeds = () => {
           href={getFeedUrl(vertical, "rss")}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-orange-500 hover:text-orange-400 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
         >
           <Rss className="w-4 h-4" />
           RSS
@@ -76,7 +98,7 @@ const DataFeeds = () => {
           href={getFeedUrl(vertical, "json")}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-400 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
         >
           <FileJson className="w-4 h-4" />
           JSON
