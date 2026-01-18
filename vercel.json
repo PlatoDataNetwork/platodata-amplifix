@@ -20,6 +20,22 @@
       "src": "/post-sitemap(\\d+).xml", 
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=post-sitemap$1.xml"
     },
+    {
+      "src": "/feed.xml",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed"
+    },
+    {
+      "src": "/feed.json",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed"
+    },
+    {
+      "src": "/feed/([^/]+).xml",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed?vertical=$1"
+    },
+    {
+      "src": "/feed/([^/]+).json",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed?vertical=$1"
+    },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
   ]
