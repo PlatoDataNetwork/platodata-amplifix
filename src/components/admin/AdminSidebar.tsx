@@ -32,7 +32,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -41,6 +41,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
   const isArticlesSection = ["articles", "new-article", "tags", "verticals"].includes(currentView);
+  const isFeedsSection = ["feeds-syndicator", "new-feed", "edit-feed"].includes(currentView);
   const isSettingsSection = ["settings-general", "settings-analytics", "settings-sitemaps", "settings-robots"].includes(currentView);
 
   return (
@@ -120,17 +121,43 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 </SidebarMenuItem>
               </Collapsible>
 
-              {/* Feeds Syndicator */}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => onViewChange("feeds-syndicator")}
-                  isActive={currentView === "feeds-syndicator"}
-                  className="w-full"
-                >
-                  <Rss className="w-4 h-4" />
-                  <span>Feeds Syndicator</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {/* Feeds with sub-menu */}
+              <Collapsible defaultOpen={isFeedsSection} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      className="w-full"
+                      isActive={isFeedsSection}
+                    >
+                      <Rss className="w-4 h-4" />
+                      <span>Feeds</span>
+                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("feeds-syndicator")}
+                          isActive={currentView === "feeds-syndicator"}
+                        >
+                          <Rss className="w-3 h-3" />
+                          <span>All Feeds</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => onViewChange("new-feed")}
+                          isActive={currentView === "new-feed"}
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Feed</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Users - coming soon */}
               <SidebarMenuItem>
