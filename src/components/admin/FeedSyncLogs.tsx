@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Table, 
   TableBody, 
@@ -18,9 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, FileText, ExternalLink, CheckCircle, XCircle, Rss, ChevronLeft, ChevronRight } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, FileText, ExternalLink, CheckCircle, XCircle, Rss, ChevronLeft, ChevronRight, CalendarIcon, X } from "lucide-react";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface FeedSyncLog {
   id: string;
@@ -42,6 +45,8 @@ const PAGE_SIZE = 50;
 const FeedSyncLogs = () => {
   const [selectedFeed, setSelectedFeed] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   // Fetch all feeds for filter dropdown
   const { data: feeds } = useQuery({
@@ -56,9 +61,21 @@ const FeedSyncLogs = () => {
     },
   });
 
+  // Build date filter conditions
+  const getDateFilters = () => {
+    const filters: { start?: string; end?: string } = {};
+    if (startDate) {
+      filters.start = startOfDay(startDate).toISOString();
+    }
+    if (endDate) {
+      filters.end = endOfDay(endDate).toISOString();
+    }
+    return filters;
+  };
+
   // Fetch total count for pagination
   const { data: totalCount } = useQuery({
-    queryKey: ["feed-sync-logs-count", selectedFeed],
+    queryKey: ["feed-sync-logs-count", selectedFeed, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       let query = supabase
         .from("feed_sync_logs")
@@ -68,15 +85,23 @@ const FeedSyncLogs = () => {
         query = query.eq("feed_id", selectedFeed);
       }
 
+      const dateFilters = getDateFilters();
+      if (dateFilters.start) {
+        query = query.gte("synced_at", dateFilters.start);
+      }
+      if (dateFilters.end) {
+        query = query.lte("synced_at", dateFilters.end);
+      }
+
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
     },
   });
 
-  // Fetch stats (all logs for selected feed)
+  // Fetch stats (all logs for selected feed and date range)
   const { data: stats } = useQuery({
-    queryKey: ["feed-sync-logs-stats", selectedFeed],
+    queryKey: ["feed-sync-logs-stats", selectedFeed, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       let query = supabase
         .from("feed_sync_logs")
@@ -84,6 +109,14 @@ const FeedSyncLogs = () => {
 
       if (selectedFeed !== "all") {
         query = query.eq("feed_id", selectedFeed);
+      }
+
+      const dateFilters = getDateFilters();
+      if (dateFilters.start) {
+        query = query.gte("synced_at", dateFilters.start);
+      }
+      if (dateFilters.end) {
+        query = query.lte("synced_at", dateFilters.end);
       }
 
       const { data, error } = await query;
@@ -99,7 +132,7 @@ const FeedSyncLogs = () => {
 
   // Fetch paginated sync logs
   const { data: logs, isLoading } = useQuery({
-    queryKey: ["feed-sync-logs", selectedFeed, currentPage],
+    queryKey: ["feed-sync-logs", selectedFeed, currentPage, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       const from = (currentPage - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -119,6 +152,14 @@ const FeedSyncLogs = () => {
 
       if (selectedFeed !== "all") {
         query = query.eq("feed_id", selectedFeed);
+      }
+
+      const dateFilters = getDateFilters();
+      if (dateFilters.start) {
+        query = query.gte("synced_at", dateFilters.start);
+      }
+      if (dateFilters.end) {
+        query = query.lte("synced_at", dateFilters.end);
       }
 
       const { data, error } = await query;
@@ -144,8 +185,26 @@ const FeedSyncLogs = () => {
 
   const handleFeedChange = (value: string) => {
     setSelectedFeed(value);
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    setCurrentPage(1);
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    setCurrentPage(1);
+  };
+
+  const clearDateFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setCurrentPage(1);
+  };
+
+  const hasDateFilters = startDate || endDate;
 
   return (
     <div className="space-y-6">
@@ -190,34 +249,109 @@ const FeedSyncLogs = () => {
         </Card>
       </div>
 
-      {/* Filter & Table */}
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Rss className="w-5 h-5 text-primary" />
-                Sync History
-              </CardTitle>
-              <CardDescription>
-                {totalCount !== undefined && totalCount > 0
-                  ? `Showing ${startRecord}-${endRecord} of ${totalCount} records`
-                  : "No records found"}
-              </CardDescription>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Rss className="w-5 h-5 text-primary" />
+                  Sync History
+                </CardTitle>
+                <CardDescription>
+                  {totalCount !== undefined && totalCount > 0
+                    ? `Showing ${startRecord}-${endRecord} of ${totalCount} records`
+                    : "No records found"}
+                </CardDescription>
+              </div>
+              <Select value={selectedFeed} onValueChange={handleFeedChange}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by feed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Feeds</SelectItem>
+                  {feeds?.map(feed => (
+                    <SelectItem key={feed.id} value={feed.id}>
+                      {feed.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={selectedFeed} onValueChange={handleFeedChange}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filter by feed" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Feeds</SelectItem>
-                {feeds?.map(feed => (
-                  <SelectItem key={feed.id} value={feed.id}>
-                    {feed.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            {/* Date Range Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">From:</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "w-[140px] justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={handleStartDateChange}
+                      disabled={(date) => (endDate ? date > endDate : false) || date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">To:</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "w-[140px] justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "MMM d, yyyy") : "End date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={handleEndDateChange}
+                      disabled={(date) => (startDate ? date < startDate : false) || date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {hasDateFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearDateFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Clear dates
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
