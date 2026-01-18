@@ -16,8 +16,9 @@ import VerticalsManagement from "@/components/admin/VerticalsManagement";
 import GeneralSettings from "@/components/admin/settings/GeneralSettings";
 import AnalyticsSettings from "@/components/admin/settings/AnalyticsSettings";
 import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
+import RobotsSettings from "@/components/admin/settings/RobotsSettings";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -195,6 +196,8 @@ const Management = () => {
         return <AnalyticsSettings />;
       case "settings-sitemaps":
         return <SitemapsSettings />;
+      case "settings-robots":
+        return <RobotsSettings />;
       default:
         return null;
     }
