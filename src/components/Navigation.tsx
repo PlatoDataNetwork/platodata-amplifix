@@ -22,6 +22,7 @@ const Navigation = () => {
     { name: "Security", href: "#security" },
     { name: "Resources", href: "#resources" },
     { name: "Intel", href: "/intel", isRoute: true },
+    { name: "Data Feeds", href: "/feed.xml", isExternal: true },
   ];
 
   return (
@@ -47,6 +48,16 @@ const Navigation = () => {
                 >
                   {link.name}
                 </Link>
+              ) : link.isExternal ? (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </a>
               ) : (
                 <a
                   key={link.name}
