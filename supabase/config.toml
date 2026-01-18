@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.auto-sync-feeds]
 verify_jwt = false
+
+[functions.rss-feed]
+verify_jwt = false
+
+[functions.json-feed]
+verify_jwt = false

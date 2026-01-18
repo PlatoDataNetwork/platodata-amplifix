@@ -3,7 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const DEFAULT_ROBOTS_TXT = `User-agent: *
 Allow: /
 
-Sitemap: https://www.platodata.io/sitemap.xml`;
+Sitemap: https://www.platodata.io/sitemap.xml
+
+# RSS/JSON Feeds
+# Main feed: https://www.platodata.io/feed.xml
+# JSON feed: https://www.platodata.io/feed.json`;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
