@@ -16,11 +16,11 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { name: "About", href: "#about" },
-    { name: "Solutions", href: "#solutions" },
-    { name: "Protocol", href: "#protocol" },
-    { name: "Security", href: "#security" },
-    { name: "Resources", href: "#resources" },
+    { name: "About", href: "/#about" },
+    { name: "Solutions", href: "/#solutions" },
+    { name: "Protocol", href: "/#protocol" },
+    { name: "Security", href: "/#security" },
+    { name: "Resources", href: "/#resources" },
     { name: "Intel", href: "/intel", isRoute: true },
     { name: "Data Feeds", href: "/data-feeds", isRoute: true },
   ];
