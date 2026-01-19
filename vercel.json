@@ -5,12 +5,20 @@
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/robots-txt"
     },
     { 
+      "src": "/sitemap_index.xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap_index.xml"
+    },
+    { 
       "src": "/sitemap.xml", 
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap.xml"
     },
     { 
       "src": "/page-sitemap.xml", 
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=page-sitemap.xml"
+    },
+    { 
+      "src": "/category-sitemap.xml", 
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=category-sitemap.xml"
     },
     { 
       "src": "/vertical-sitemap.xml", 
