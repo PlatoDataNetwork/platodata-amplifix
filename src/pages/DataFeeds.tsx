@@ -25,29 +25,24 @@ const DataFeeds = () => {
     },
   });
 
-  // Fetch article counts per vertical using proper count query
+  // Fetch article counts per vertical using a single aggregation query
   const { data: articleCounts } = useQuery({
-    queryKey: ["feed-article-counts"],
+    queryKey: ["feed-article-counts", verticals],
+    enabled: !!verticals && verticals.length > 0,
     queryFn: async () => {
-      // Fetch counts for each vertical individually using count
-      const allVerticals = await supabase.rpc("get_article_verticals");
-      if (allVerticals.error) throw allVerticals.error;
+      // Fetch all articles with just the vertical_slug to count them
+      const { data, error } = await supabase
+        .from("articles")
+        .select("vertical_slug");
       
+      if (error) throw error;
+      
+      // Count articles per vertical
       const counts: Record<string, number> = {};
-      const verticalsData = allVerticals.data as { vertical_slug: string }[];
-      
-      // Batch fetch counts for all verticals
-      await Promise.all(
-        verticalsData.map(async (v) => {
-          const { count, error } = await supabase
-            .from("articles")
-            .select("*", { count: "exact", head: true })
-            .eq("vertical_slug", v.vertical_slug);
-          if (!error && count !== null) {
-            counts[v.vertical_slug] = count;
-          }
-        })
-      );
+      data?.forEach((article) => {
+        const slug = article.vertical_slug;
+        counts[slug] = (counts[slug] || 0) + 1;
+      });
       
       return counts;
     },
@@ -68,8 +63,8 @@ const DataFeeds = () => {
     return type === "rss" ? `${baseUrl}/${vertical}.xml` : `${baseUrl}/${vertical}.json`;
   };
 
-  const getApiUrl = (vertical: string) => {
-    return `https://tmmerifhwscgicmncndl.supabase.co/functions/v1/articles-api?vertical=${vertical}`;
+  const getApiDocsUrl = () => {
+    return "/api-docs";
   };
 
   const getContentUrl = (vertical: string) => {
@@ -93,14 +88,12 @@ const DataFeeds = () => {
           Data
         </span>
         <div className="flex items-center gap-3">
-          <a
-            href={getApiUrl(vertical)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to={getApiDocsUrl()}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             API
-          </a>
+          </Link>
           <a
             href={getFeedUrl(vertical, "rss")}
             target="_blank"

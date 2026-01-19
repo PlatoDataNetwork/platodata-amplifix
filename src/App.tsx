@@ -12,6 +12,7 @@ import Intel from "./pages/Intel";
 import IntelVertical from "./pages/IntelVertical";
 import ArticlePage from "./pages/ArticlePage";
 import DataFeeds from "./pages/DataFeeds";
+import ApiDocs from "./pages/ApiDocs";
 import Login from "./pages/Login";
 import Management from "./pages/Management";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/w3ai/vertical/:vertical" element={<IntelVertical />} />
               <Route path="/w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
               <Route path="/data-feeds" element={<DataFeeds />} />
+              <Route path="/api-docs" element={<ApiDocs />} />
               <Route path="/login" element={<Login />} />
               <Route path="/management" element={<Management />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
