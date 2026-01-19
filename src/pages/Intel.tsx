@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
+import { useLangRouting } from "@/hooks/useLangRouting";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -23,6 +24,7 @@ const SITE_URL = "https://www.platodata.io";
 const Intel = () => {
   const { siteName } = useSiteSettings();
   const navigate = useNavigate();
+  const { withLang } = useLangRouting();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   
@@ -52,14 +54,14 @@ const Intel = () => {
 
   const handleVerticalChange = (value: string) => {
     if (value !== "all") {
-      navigate(`/w3ai/vertical/${value}`);
+      navigate(withLang(`/w3ai/vertical/${value}`));
     }
   };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
       // Navigate to first vertical with search query, or could implement global search
-      navigate(`/w3ai/vertical/${verticals?.[0] || 'artificial-intelligence'}?q=${encodeURIComponent(searchQuery)}`);
+      navigate(withLang(`/w3ai/vertical/${verticals?.[0] || 'artificial-intelligence'}?q=${encodeURIComponent(searchQuery)}`));
     }
   };
 
@@ -196,7 +198,7 @@ const Intel = () => {
               {filteredVerticals?.map((vertical) => (
                 <Link 
                   key={vertical} 
-                  to={`/w3ai/vertical/${vertical}`}
+                  to={withLang(`/w3ai/vertical/${vertical}`)}
                   className="group"
                 >
                   <div className="bg-transparent border border-border rounded-lg p-6 h-32 flex items-center justify-center hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
@@ -212,7 +214,7 @@ const Intel = () => {
               {filteredVerticals?.map((vertical) => (
                 <Link 
                   key={vertical} 
-                  to={`/w3ai/vertical/${vertical}`}
+                  to={withLang(`/w3ai/vertical/${vertical}`)}
                   className="group block"
                 >
                   <div className="bg-transparent border border-border rounded-lg px-6 py-4 flex items-center justify-between hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
