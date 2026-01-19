@@ -62,41 +62,28 @@ Deno.serve(async (req) => {
       });
     };
 
-    // Get last modified date for post sitemaps
-    const getPostSitemapLastMod = async (pageNum: number) => {
-      const startOffset = (pageNum - 1) * ARTICLES_PER_SITEMAP;
-      const { data } = await supabase
-        .from("articles")
-        .select("updated_at, published_at")
-        .order("published_at", { ascending: false })
-        .range(startOffset, startOffset)
-        .limit(1);
-      
-      if (data && data.length > 0) {
-        return formatDate(data[0].updated_at || data[0].published_at);
-      }
-      return new Date().toISOString();
-    };
-
     // Main sitemap index (supports both sitemap_index.xml and sitemap.xml)
     if (path === "sitemap_index.xml" || path === "sitemap.xml") {
-      // Get total article count to determine number of post sitemaps
+      // Get total article count and latest article date in a single efficient query
       const { count, error: countError } = await supabase
         .from("articles")
         .select("*", { count: "exact", head: true });
 
       if (countError) throw countError;
 
+      // Get the most recent article date for lastmod
+      const { data: latestArticle } = await supabase
+        .from("articles")
+        .select("updated_at, published_at")
+        .order("published_at", { ascending: false })
+        .limit(1);
+
       const totalArticles = count || 0;
       const numPostSitemaps = Math.ceil(totalArticles / ARTICLES_PER_SITEMAP);
       const now = new Date().toISOString();
-
-      // Get actual last modified dates for each sitemap
-      const postSitemapLastMods: string[] = [];
-      for (let i = 1; i <= numPostSitemaps; i++) {
-        const lastMod = await getPostSitemapLastMod(i);
-        postSitemapLastMods.push(lastMod);
-      }
+      const latestMod = latestArticle && latestArticle.length > 0 
+        ? formatDate(latestArticle[0].updated_at || latestArticle[0].published_at)
+        : now;
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<?xml-stylesheet type="text/xsl" href="${SITE_URL}/sitemap.xsl"?>\n`;
@@ -114,11 +101,11 @@ Deno.serve(async (req) => {
       xml += `\t\t<lastmod>${now}</lastmod>\n`;
       xml += `\t</sitemap>\n`;
 
-      // Post sitemaps
+      // Post sitemaps - use the latest article date for all (more efficient)
       for (let i = 1; i <= numPostSitemaps; i++) {
         xml += `\t<sitemap>\n`;
         xml += `\t\t<loc>${SITE_URL}/post-sitemap${i}.xml</loc>\n`;
-        xml += `\t\t<lastmod>${postSitemapLastMods[i - 1]}</lastmod>\n`;
+        xml += `\t\t<lastmod>${latestMod}</lastmod>\n`;
         xml += `\t</sitemap>\n`;
       }
 
