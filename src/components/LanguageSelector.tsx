@@ -54,6 +54,17 @@ const LanguageSelector = () => {
     setIsOpen(false);
 
     const newPath = buildPathForLang(lang.code);
+    
+    if (lang.code === "en") {
+      // For English, clear cookies and do a hard navigation to reset Google Translate
+      document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.documentElement.setAttribute("lang", "en");
+      // Hard reload to ensure clean English content
+      window.location.href = newPath;
+      return;
+    }
+    
     navigate(newPath, { replace: true });
     applyGoogleTranslateLanguage(lang.code);
   };
