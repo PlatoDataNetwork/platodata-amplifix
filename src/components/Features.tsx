@@ -1,8 +1,11 @@
 import { Zap, Box, FileCode2, Users, Shield, Plug, Brain, Hexagon, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLangRouting } from "@/hooks/useLangRouting";
 
 const Features = () => {
+  const { withLang } = useLangRouting();
+
   const features = [
     {
       icon: Brain,
@@ -57,7 +60,8 @@ const Features = () => {
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight mb-4">Our Solutions</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover powerful tools and services designed to accelerate your digital transformation with cutting-edge technology and secure infrastructure.
+            Discover powerful tools and services designed to accelerate your digital transformation with cutting-edge
+            technology and secure infrastructure.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -75,8 +79,12 @@ const Features = () => {
                 <h3 className="text-xl font-semibold mb-4 text-foreground">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">{feature.description}</p>
                 {index < 3 ? (
-                  <Link to="/solutions" className="w-full">
-                    <Button variant="secondary" size="lg" className="w-full bg-secondary hover:bg-secondary/80 text-foreground">
+                  <Link to={withLang("/solutions")} className="w-full">
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="w-full bg-secondary hover:bg-secondary/80 text-foreground"
+                    >
                       Learn More
                     </Button>
                   </Link>

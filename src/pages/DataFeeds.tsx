@@ -7,11 +7,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Rss, FileJson } from "lucide-react";
+import { useLangRouting } from "@/hooks/useLangRouting";
 
 const SITE_URL = "https://www.platodata.io";
 
 const DataFeeds = () => {
   const { siteName } = useSiteSettings();
+  const { withLang } = useLangRouting();
   const pageTitle = `Data Feeds | ${siteName}`;
   const pageDescription = `Subscribe to ${siteName} RSS and JSON feeds for AI, Web3, and emerging technology news. Get real-time updates in your favorite feed reader.`;
 
@@ -64,7 +66,7 @@ const DataFeeds = () => {
   };
 
   const getApiDocsUrl = () => {
-    return "/api-docs";
+    return withLang("/api-docs");
   };
 
   const getContentUrl = (vertical: string) => {

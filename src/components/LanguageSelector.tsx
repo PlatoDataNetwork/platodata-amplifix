@@ -1,65 +1,23 @@
-import { useState, useEffect, useRef } from "react";
-import { Globe, ChevronDown } from "lucide-react";
-
-interface Language {
-  code: string;
-  name: string;
-  flag: string;
-}
-
-const languages: Language[] = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "ar", name: "Arabic", flag: "🇸🇦" },
-  { code: "bn", name: "Bengali", flag: "🇧🇩" },
-  { code: "zh-CN", name: "Chinese (Simplified)", flag: "🇨🇳" },
-  { code: "zh-TW", name: "Chinese (Traditional)", flag: "🇹🇼" },
-  { code: "da", name: "Danish", flag: "🇩🇰" },
-  { code: "nl", name: "Dutch", flag: "🇳🇱" },
-  { code: "et", name: "Estonian", flag: "🇪🇪" },
-  { code: "fi", name: "Finnish", flag: "🇫🇮" },
-  { code: "fr", name: "French", flag: "🇫🇷" },
-  { code: "de", name: "German", flag: "🇩🇪" },
-  { code: "el", name: "Greek", flag: "🇬🇷" },
-  { code: "iw", name: "Hebrew", flag: "🇮🇱" },
-  { code: "hi", name: "Hindi", flag: "🇮🇳" },
-  { code: "hu", name: "Hungarian", flag: "🇭🇺" },
-  { code: "id", name: "Indonesian", flag: "🇮🇩" },
-  { code: "it", name: "Italian", flag: "🇮🇹" },
-  { code: "ja", name: "Japanese", flag: "🇯🇵" },
-  { code: "km", name: "Khmer", flag: "🇰🇭" },
-  { code: "ko", name: "Korean", flag: "🇰🇷" },
-  { code: "no", name: "Norwegian", flag: "🇳🇴" },
-  { code: "fa", name: "Persian", flag: "🇮🇷" },
-  { code: "pl", name: "Polish", flag: "🇵🇱" },
-  { code: "pt", name: "Portuguese", flag: "🇵🇹" },
-  { code: "pa", name: "Punjabi", flag: "🇮🇳" },
-  { code: "ro", name: "Romanian", flag: "🇷🇴" },
-  { code: "ru", name: "Russian", flag: "🇷🇺" },
-  { code: "sl", name: "Slovenian", flag: "🇸🇮" },
-  { code: "es", name: "Spanish", flag: "🇪🇸" },
-  { code: "sv", name: "Swedish", flag: "🇸🇪" },
-  { code: "th", name: "Thai", flag: "🇹🇭" },
-  { code: "tr", name: "Turkish", flag: "🇹🇷" },
-  { code: "uk", name: "Ukrainian", flag: "🇺🇦" },
-  { code: "ur", name: "Urdu", flag: "🇵🇰" },
-  { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
-];
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Globe } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { LANGUAGES, type Language, isSupportedLanguage } from "@/lib/i18nLanguages";
+import { applyGoogleTranslateLanguage } from "@/lib/googleTranslate";
 
 const LanguageSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState<Language>(languages[0]);
+  const [currentLang, setCurrentLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Detect current language from cookie or localStorage
+  // Keep selection in sync with the URL prefix (e.g. /nl/...).
   useEffect(() => {
-    const savedLang = localStorage.getItem("selectedLanguage");
-    if (savedLang) {
-      const foundLang = languages.find(l => l.code === savedLang);
-      if (foundLang) {
-        setCurrentLang(foundLang);
-      }
-    }
-  }, []);
+    const seg0 = location.pathname.split("/").filter(Boolean)[0];
+    const langFromUrl = isSupportedLanguage(seg0) ? seg0 : "en";
+    const found = LANGUAGES.find((l) => l.code === langFromUrl) || LANGUAGES[0];
+    setCurrentLang(found);
+  }, [location.pathname]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -72,78 +30,32 @@ const LanguageSelector = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load Google Translate script
-  useEffect(() => {
-    // Check if script already exists
-    if (document.getElementById("google-translate-script")) return;
+  const buildPathForLang = (targetLang: string) => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const first = segments[0];
+    const hasLangPrefix = isSupportedLanguage(first);
 
-    // Add Google Translate initialization
-    (window as any).googleTranslateElementInit = () => {
-      new (window as any).google.translate.TranslateElement(
-        {
-          pageLanguage: "en",
-          autoDisplay: false,
-        },
-        "google_translate_element"
-      );
-    };
+    if (targetLang === "en") {
+      if (hasLangPrefix) segments.shift();
+      return "/" + segments.join("/") + location.search + location.hash;
+    }
 
-    // Add the script
-    const script = document.createElement("script");
-    script.id = "google-translate-script";
-    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-    script.async = true;
-    document.body.appendChild(script);
+    if (hasLangPrefix) {
+      segments[0] = targetLang;
+    } else {
+      segments.unshift(targetLang);
+    }
 
-    // Hide the default Google Translate widget
-    const style = document.createElement("style");
-    style.textContent = `
-      #google_translate_element { display: none !important; }
-      .goog-te-banner-frame { display: none !important; }
-      .skiptranslate { display: none !important; }
-      body { top: 0 !important; }
-      .goog-te-gadget { display: none !important; }
-    `;
-    document.head.appendChild(style);
-  }, []);
+    return "/" + segments.join("/") + location.search + location.hash;
+  };
 
   const handleLanguageSelect = (lang: Language) => {
     setCurrentLang(lang);
     setIsOpen(false);
-    localStorage.setItem("selectedLanguage", lang.code);
 
-    // Trigger Google Translate
-    const selectElement = document.querySelector(".goog-te-combo") as HTMLSelectElement;
-    
-    if (selectElement) {
-      if (lang.code === "en") {
-        // Reset to original language
-        selectElement.value = "";
-        selectElement.dispatchEvent(new Event("change"));
-        // Also try to restore original
-        const iframe = document.querySelector(".goog-te-menu-frame") as HTMLIFrameElement;
-        if (iframe) {
-          const innerDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          const restoreLink = innerDoc?.querySelector(".goog-te-menu2-item span.text:first-child");
-          if (restoreLink) {
-            (restoreLink as HTMLElement).click();
-          }
-        }
-        // Fallback: reload the page without translation
-        const currentUrl = window.location.href;
-        if (currentUrl.includes("googtrans")) {
-          window.location.href = window.location.pathname + window.location.search;
-        }
-      } else {
-        selectElement.value = lang.code;
-        selectElement.dispatchEvent(new Event("change"));
-      }
-    } else {
-      // If Google Translate hasn't loaded yet, set a cookie and reload
-      document.cookie = `googtrans=/en/${lang.code}; path=/`;
-      document.cookie = `googtrans=/en/${lang.code}; path=/; domain=${window.location.hostname}`;
-      window.location.reload();
-    }
+    const newPath = buildPathForLang(lang.code);
+    navigate(newPath, { replace: true });
+    applyGoogleTranslateLanguage(lang.code);
   };
 
   return (
@@ -154,13 +66,15 @@ const LanguageSelector = () => {
         aria-label="Select language"
       >
         <Globe className="w-4 h-4" />
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto rounded-lg border border-border bg-popover shadow-xl z-[100] animate-in fade-in-0 zoom-in-95">
           <div className="p-1">
-            {languages.map((lang) => (
+            {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageSelect(lang)}

@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
 import LanguageSelector from "@/components/LanguageSelector";
+import { useLangRouting } from "@/hooks/useLangRouting";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { withLang } = useLangRouting();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,22 +30,27 @@ const Navigation = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-background/80 backdrop-blur-xl border-b border-border" : "bg-transparent"
+        isScrolled
+          ? "bg-background/80 backdrop-blur-xl border-b border-border"
+          : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]">
+          <Link
+            to={withLang("/")}
+            className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]"
+          >
             <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
             <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
+            {navLinks.map((link) =>
               link.isRoute ? (
                 <Link
                   key={link.name}
-                  to={link.href}
+                  to={withLang(link.href)}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.name}
@@ -51,13 +58,13 @@ const Navigation = () => {
               ) : (
                 <a
                   key={link.name}
-                  href={link.href}
+                  href={withLang(link.href)}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.name}
                 </a>
-              )
-            ))}
+              ),
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
