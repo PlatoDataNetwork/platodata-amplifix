@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { Rss, FileJson, TrendingUp, List } from "lucide-react";
+import { Rss, FileJson, TrendingUp, List, Braces } from "lucide-react";
 
 const SITE_URL = "https://www.platodata.io";
 
@@ -71,6 +71,10 @@ const DataFeeds = () => {
     return type === "rss" ? `${baseUrl}/${vertical}.xml` : `${baseUrl}/${vertical}.json`;
   };
 
+  const getApiUrl = (vertical: string) => {
+    return `https://tmmerifhwscgicmncndl.supabase.co/functions/v1/articles-api?vertical=${vertical}`;
+  };
+
   const getContentUrl = (vertical: string) => {
     return `/w3ai/vertical/${vertical}`;
   };
@@ -89,31 +93,42 @@ const DataFeeds = () => {
           {articleCounts?.[vertical] || 0} articles
         </span>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Link
           to={getContentUrl(vertical)}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          Content
+          Data
         </Link>
-        <a
-          href={getFeedUrl(vertical, "rss")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-        >
-          <Rss className="w-4 h-4" />
-          RSS
-        </a>
-        <a
-          href={getFeedUrl(vertical, "json")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-        >
-          <FileJson className="w-4 h-4" />
-          JSON
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href={getApiUrl(vertical)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            <Braces className="w-4 h-4" />
+            API
+          </a>
+          <a
+            href={getFeedUrl(vertical, "rss")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            <Rss className="w-4 h-4" />
+            RSS
+          </a>
+          <a
+            href={getFeedUrl(vertical, "json")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            <FileJson className="w-4 h-4" />
+            JSON
+          </a>
+        </div>
       </div>
     </div>
   );
