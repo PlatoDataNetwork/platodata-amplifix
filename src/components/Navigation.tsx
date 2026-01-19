@@ -39,10 +39,11 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <Link
             to={withLang("/")}
-            className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]"
+            className="flex items-center space-x-3 cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)] notranslate"
+            translate="no"
           >
             <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
-            <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground notranslate" translate="no">Platodata</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
