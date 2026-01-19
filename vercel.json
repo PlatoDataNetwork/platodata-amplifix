@@ -4,6 +4,10 @@
       "src": "/robots.txt", 
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/robots-txt"
     },
+    {
+      "src": "/sitemap.xsl",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap-xsl"
+    },
     { 
       "src": "/sitemap.xml", 
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap.xml"

@@ -8,11 +8,8 @@ const corsHeaders = {
 const SITE_URL = "https://www.platodata.io";
 const ARTICLES_PER_SITEMAP = 5000;
 
-// Get the XSL stylesheet URL based on the Supabase project
-const getXslUrl = () => {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  return `${supabaseUrl}/functions/v1/sitemap-xsl`;
-};
+// XSL stylesheet URL - served from the same domain to avoid CORS issues
+const XSL_URL = `${SITE_URL}/sitemap.xsl`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -65,9 +62,8 @@ Deno.serve(async (req) => {
       const numPostSitemaps = Math.ceil(totalArticles / ARTICLES_PER_SITEMAP);
       const today = new Date().toISOString().split("T")[0];
 
-      const xslUrl = getXslUrl();
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${xslUrl}"?>
+<?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>${SITE_URL}/page-sitemap.xml</loc>
@@ -93,9 +89,8 @@ Deno.serve(async (req) => {
 
     // Page sitemap - static pages
     if (path === "page-sitemap.xml") {
-      const xslUrl = getXslUrl();
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${xslUrl}"?>
+<?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${SITE_URL}/</loc>
@@ -123,9 +118,8 @@ Deno.serve(async (req) => {
 
       if (verticalsError) throw verticalsError;
 
-      const xslUrl = getXslUrl();
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${xslUrl}"?>
+<?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
@@ -178,9 +172,8 @@ Deno.serve(async (req) => {
 
       const articles = allArticles;
 
-      const xslUrl = getXslUrl();
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${xslUrl}"?>
+<?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
