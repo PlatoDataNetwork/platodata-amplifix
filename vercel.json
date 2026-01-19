@@ -40,6 +40,10 @@
       "src": "/feed/([^/]+).json",
       "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed?vertical=$1"
     },
+    {
+      "src": "/share/article/(\\d+)",
+      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=$1"
+    },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
   ]
