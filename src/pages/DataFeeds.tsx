@@ -6,12 +6,9 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { Rss, FileJson, TrendingUp, List } from "lucide-react";
+import { Rss, FileJson } from "lucide-react";
 
 const SITE_URL = "https://www.platodata.io";
-
-// Popular verticals to feature at the top
-const POPULAR_VERTICALS = ["artificial-intelligence", "blockchain", "finance", "gaming"];
 
 const DataFeeds = () => {
   const { siteName } = useSiteSettings();
@@ -79,8 +76,6 @@ const DataFeeds = () => {
     return `/w3ai/vertical/${vertical}`;
   };
 
-  // Split verticals into popular and all categories
-  const popularVerticals = verticals?.filter((v) => POPULAR_VERTICALS.includes(v)) || [];
   const allVerticals = verticals || [];
 
   const FeedCard = ({ vertical }: { vertical: string }) => (
@@ -169,38 +164,9 @@ const DataFeeds = () => {
         </div>
       </section>
 
-      {/* Popular Feeds Section */}
-      {popularVerticals.length > 0 && (
-        <section className="px-6 pb-12">
-          <div className="container mx-auto">
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground">Popular Feeds</h2>
-            </div>
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {popularVerticals.map((vertical) => (
-                  <FeedCard key={vertical} vertical={vertical} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* All Feeds by Categories Section */}
+      {/* All Feeds Section */}
       <section className="px-6 pb-20">
         <div className="container mx-auto">
-          <div className="flex items-center gap-2 mb-6">
-            <List className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold text-foreground">Feeds by Categories</h2>
-          </div>
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(12)].map((_, i) => (
