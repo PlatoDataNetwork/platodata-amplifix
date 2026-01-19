@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useLangRouting } from "@/hooks/useLangRouting";
 
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 const SITE_URL = "https://www.platodata.io";
 
 const ArticlePage = () => {
   const { siteName } = useSiteSettings();
+  const { withLang } = useLangRouting();
   const { postId, vertical, slug } = useParams<{ postId: string; vertical: string; slug: string }>();
 
   // Fetch single article by post_id
@@ -117,7 +119,7 @@ const ArticlePage = () => {
           <div className="container mx-auto max-w-4xl text-center">
             <h1 className="text-3xl font-bold text-foreground mb-4">Article Not Found</h1>
             <p className="text-muted-foreground mb-6">The article you're looking for doesn't exist.</p>
-            <Link to="/intel" className="text-primary hover:underline">
+            <Link to={withLang("/intel")} className="text-primary hover:underline">
               Browse all intelligence
             </Link>
           </div>
@@ -237,14 +239,14 @@ const ArticlePage = () => {
         <div className="container mx-auto max-w-4xl">
           <div className="flex items-center gap-4 mb-6">
             <Link 
-              to="/intel" 
+              to={withLang("/intel")} 
               className="text-muted-foreground hover:text-foreground transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4 inline mr-1" />
               Back to Intelligence
             </Link>
             <Link 
-              to={`/intel/${article.vertical_slug}`}
+              to={withLang(`/intel/${article.vertical_slug}`)}
               className="text-primary hover:underline text-sm"
             >
               {formatVerticalName(article.vertical_slug)}
@@ -338,7 +340,7 @@ const ArticlePage = () => {
               {relatedArticles.map((related) => (
                 <Link 
                   key={related.id} 
-                  to={generateArticleUrl(related)}
+                  to={withLang(generateArticleUrl(related))}
                   className="group"
                 >
                   <div className="h-32 rounded-lg overflow-hidden mb-3">

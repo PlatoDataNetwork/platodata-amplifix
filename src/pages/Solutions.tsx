@@ -3,6 +3,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLangRouting } from "@/hooks/useLangRouting";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -10,6 +11,7 @@ const SITE_URL = "https://www.platodata.io";
 
 const Solutions = () => {
   const { siteName } = useSiteSettings();
+  const { withLang } = useLangRouting();
   const pageTitle = `Solutions | AI, Web3 & Software Development | ${siteName}`;
   const pageDescription = "Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development.";
   const solutions = [
@@ -246,7 +248,7 @@ const Solutions = () => {
       {/* Back to Home */}
       <section className="py-20 relative">
         <div className="container mx-auto px-6 text-center">
-          <Link to="/">
+          <Link to={withLang("/")}>
             <Button variant="ghost" size="lg">
               ← Back to Home
             </Button>
