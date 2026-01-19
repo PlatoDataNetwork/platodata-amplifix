@@ -72,7 +72,7 @@ const ArticlePage = () => {
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-");
-    return `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
+    return withLang(`/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`);
   };
 
   // Generate excerpt from content by stripping HTML and taking first ~160 chars
@@ -246,7 +246,7 @@ const ArticlePage = () => {
               Back to Intelligence
             </Link>
             <Link 
-              to={withLang(`/intel/${article.vertical_slug}`)}
+              to={withLang(`/w3ai/vertical/${article.vertical_slug}`)}
               className="text-primary hover:underline text-sm"
             >
               {formatVerticalName(article.vertical_slug)}

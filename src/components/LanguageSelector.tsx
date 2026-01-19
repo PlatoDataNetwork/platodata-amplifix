@@ -70,7 +70,7 @@ const LanguageSelector = () => {
   };
 
   return (
-    <div ref={dropdownRef} className="relative notranslate">
+    <div ref={dropdownRef} className="relative notranslate" translate="no">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-muted/50"
@@ -83,20 +83,21 @@ const LanguageSelector = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto rounded-lg border border-border bg-popover shadow-xl z-[100] animate-in fade-in-0 zoom-in-95">
+        <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto rounded-lg border border-border bg-popover shadow-xl z-[100] animate-in fade-in-0 zoom-in-95 notranslate" translate="no">
           <div className="p-1">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageSelect(lang)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors notranslate ${
                   currentLang.code === lang.code
                     ? "bg-primary/20 text-primary"
                     : "text-foreground hover:bg-muted"
                 }`}
+                translate="no"
               >
-                <span className="text-lg">{lang.flag}</span>
-                <span className="font-medium">{lang.name}</span>
+                <span className="text-lg notranslate" translate="no">{lang.flag}</span>
+                <span className="font-medium notranslate" translate="no">{lang.name}</span>
                 {currentLang.code === lang.code && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                 )}

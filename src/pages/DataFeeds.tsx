@@ -70,7 +70,7 @@ const DataFeeds = () => {
   };
 
   const getContentUrl = (vertical: string) => {
-    return `/w3ai/vertical/${vertical}`;
+    return withLang(`/w3ai/vertical/${vertical}`);
   };
 
   const allVerticals = verticals || [];

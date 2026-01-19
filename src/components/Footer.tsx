@@ -13,10 +13,11 @@ const Footer = () => {
             <div>
               <Link
                 to={withLang("/")}
-                className="flex items-center space-x-3 mb-6 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex items-center space-x-3 mb-6 cursor-pointer hover:opacity-80 transition-opacity notranslate"
+                translate="no"
               >
                 <img src={platoIcon} alt="Platodata" className="w-8 h-8" />
-                <span className="text-2xl font-bold tracking-tight text-foreground">Platodata</span>
+                <span className="text-2xl font-bold tracking-tight text-foreground notranslate" translate="no">Platodata</span>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Plato Technologies Inc. A NYC based AI Web3 Venture Lab dedicated to building
