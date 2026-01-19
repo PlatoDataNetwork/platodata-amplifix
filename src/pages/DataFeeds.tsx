@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { Rss, FileJson, TrendingUp, List, Braces } from "lucide-react";
+import { Rss, FileJson, TrendingUp, List } from "lucide-react";
 
 const SITE_URL = "https://www.platodata.io";
 
@@ -94,20 +94,16 @@ const DataFeeds = () => {
         </span>
       </div>
       <div className="flex items-center justify-between">
-        <Link
-          to={getContentUrl(vertical)}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <span className="text-sm text-muted-foreground">
           Data
-        </Link>
+        </span>
         <div className="flex items-center gap-3">
           <a
             href={getApiUrl(vertical)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Braces className="w-4 h-4" />
             API
           </a>
           <a
