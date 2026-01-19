@@ -27,6 +27,8 @@ const App = () => (
           <GoogleAnalytics />
           <Toaster />
           <Sonner />
+          {/* Hidden Google Translate element */}
+          <div id="google_translate_element" style={{ display: 'none' }} />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
