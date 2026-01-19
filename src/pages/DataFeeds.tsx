@@ -27,15 +27,16 @@ const DataFeeds = () => {
     },
   });
 
-  // Fetch article counts per vertical using a single aggregation query
+  // Fetch article counts per vertical using a single aggregation query (only published articles)
   const { data: articleCounts } = useQuery({
     queryKey: ["feed-article-counts", verticals],
     enabled: !!verticals && verticals.length > 0,
     queryFn: async () => {
-      // Fetch all articles with just the vertical_slug to count them
+      // Fetch only published articles (published_at <= now)
       const { data, error } = await supabase
         .from("articles")
-        .select("vertical_slug");
+        .select("vertical_slug")
+        .lte("published_at", new Date().toISOString());
       
       if (error) throw error;
       
