@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { useLangRouting } from "@/hooks/useLangRouting";
 import { ArrowRight, ChevronLeft, ChevronRight, Search, LayoutGrid, List } from "lucide-react";
 import { decodeHtmlEntities } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,7 @@ const IntelVertical = () => {
   const { vertical } = useParams<{ vertical: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { withLang } = useLangRouting();
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -122,9 +124,9 @@ const IntelVertical = () => {
 
   const handleVerticalChange = (value: string) => {
     if (value === "all") {
-      navigate("/intel");
+      navigate(withLang("/intel"));
     } else {
-      navigate(`/w3ai/vertical/${value}`);
+      navigate(withLang(`/w3ai/vertical/${value}`));
     }
   };
 
@@ -148,7 +150,7 @@ const IntelVertical = () => {
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-");
-    return `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
+    return withLang(`/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`);
   };
 
   const getPageNumbers = () => {
