@@ -1,3 +1,7 @@
+// Track if translation has been applied to prevent loops
+let translationApplied = false;
+let lastAppliedLang: string | null = null;
+
 function setGoogTransCookie(value: string) {
   // Set cookie for both root and current domain
   document.cookie = `googtrans=${value}; path=/`;
@@ -13,12 +17,36 @@ function getGoogleTranslateSelect(): HTMLSelectElement | null {
   return document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
 }
 
+function isPageAlreadyTranslated(): boolean {
+  return (
+    document.documentElement.classList.contains("translated-ltr") ||
+    document.documentElement.classList.contains("translated-rtl") ||
+    document.body.classList.contains("translated-ltr") ||
+    document.body.classList.contains("translated-rtl")
+  );
+}
+
+function getCurrentTranslatedLang(): string | null {
+  const select = getGoogleTranslateSelect();
+  if (select && select.value) {
+    return select.value;
+  }
+  return null;
+}
+
 function triggerTranslateSelect(langCode: string): boolean {
   const select = getGoogleTranslateSelect();
   if (!select) return false;
 
   // Google Translate uses empty value to represent original language
-  select.value = langCode === "en" ? "" : langCode;
+  const targetValue = langCode === "en" ? "" : langCode;
+  
+  // Don't trigger if already set to this value
+  if (select.value === targetValue) {
+    return true;
+  }
+  
+  select.value = targetValue;
   
   // Trigger multiple event types to ensure Google catches it
   const events = ["change", "input"];
@@ -56,10 +84,17 @@ function waitForTranslateWidget(maxWait = 5000): Promise<boolean> {
 export async function applyGoogleTranslateLanguage(langCode: string): Promise<void> {
   const target = langCode || "en";
 
+  // If same language already applied, skip
+  if (lastAppliedLang === target && (target === "en" || isPageAlreadyTranslated())) {
+    return;
+  }
+
   if (target === "en") {
     // Clear translation cookies
     clearGoogTransCookie();
     document.documentElement.setAttribute("lang", "en");
+    lastAppliedLang = "en";
+    translationApplied = false;
     
     // Try to reset via the select dropdown
     const widgetReady = await waitForTranslateWidget();
@@ -69,19 +104,15 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
       // Give it time to revert
       await new Promise(r => setTimeout(r, 300));
       
-      // If translation classes still present, we need a reload
-      const isStillTranslated = 
-        document.documentElement.classList.contains("translated-ltr") ||
-        document.documentElement.classList.contains("translated-rtl") ||
-        document.body.classList.contains("translated-ltr") ||
-        document.body.classList.contains("translated-rtl");
-        
-      if (isStillTranslated) {
-        // Remove the classes manually as a last resort
-        document.documentElement.classList.remove("translated-ltr", "translated-rtl");
-        document.body.classList.remove("translated-ltr", "translated-rtl");
-      }
+      // Remove translation classes manually
+      document.documentElement.classList.remove("translated-ltr", "translated-rtl");
+      document.body.classList.remove("translated-ltr", "translated-rtl");
     }
+    return;
+  }
+
+  // Check if already translated to this language
+  if (isPageAlreadyTranslated() && lastAppliedLang === target) {
     return;
   }
 
@@ -94,16 +125,47 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
   // Wait for widget to be ready, then trigger translation
   const widgetReady = await waitForTranslateWidget();
   if (widgetReady) {
-    triggerTranslateSelect(target);
+    const currentLang = getCurrentTranslatedLang();
+    
+    // Only trigger if not already on this language
+    if (currentLang !== target) {
+      triggerTranslateSelect(target);
+    }
+    
+    lastAppliedLang = target;
+    translationApplied = true;
   } else {
-    // Widget not ready - try reloading the page to apply translation from cookie
-    console.warn("Google Translate widget not ready, reloading to apply translation");
-    window.location.reload();
+    // Widget not ready - only reload if we haven't tried already
+    if (!translationApplied) {
+      console.warn("Google Translate widget not ready, reloading to apply translation");
+      translationApplied = true; // Prevent infinite reload loop
+      window.location.reload();
+    }
   }
 }
 
 // Check if translation should be applied on page load (from cookie)
+// This should only run ONCE on initial load
+let cookieCheckDone = false;
+
 export function checkAndApplyTranslationFromCookie(): void {
+  // Only run once per page load
+  if (cookieCheckDone) {
+    return;
+  }
+  cookieCheckDone = true;
+  
+  // If page is already translated, don't re-apply
+  if (isPageAlreadyTranslated()) {
+    // Extract current language from select or cookie and mark as applied
+    const select = getGoogleTranslateSelect();
+    if (select && select.value) {
+      lastAppliedLang = select.value;
+      translationApplied = true;
+    }
+    return;
+  }
+
   const cookies = document.cookie.split(";");
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
@@ -111,14 +173,31 @@ export function checkAndApplyTranslationFromCookie(): void {
       // Cookie format: /en/targetLang
       const match = value.match(/\/en\/([a-z]{2})/);
       if (match && match[1] !== "en") {
+        const targetLang = match[1];
+        
+        // Mark as applying to prevent re-triggering
+        lastAppliedLang = targetLang;
+        
         // There's a translation cookie, ensure widget is triggered
         waitForTranslateWidget().then(ready => {
           if (ready) {
-            triggerTranslateSelect(match[1]);
+            const currentLang = getCurrentTranslatedLang();
+            // Only trigger if not already on this language
+            if (currentLang !== targetLang && !isPageAlreadyTranslated()) {
+              triggerTranslateSelect(targetLang);
+              translationApplied = true;
+            }
           }
         });
       }
       break;
     }
   }
+}
+
+// Reset the flags (useful for SPA navigation)
+export function resetTranslationState(): void {
+  translationApplied = false;
+  cookieCheckDone = false;
+  lastAppliedLang = null;
 }
