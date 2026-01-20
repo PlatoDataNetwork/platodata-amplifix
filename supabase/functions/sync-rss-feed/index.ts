@@ -17,6 +17,7 @@ interface RssFeed {
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
+  strip_images: boolean;
 }
 
 interface FeedItem {
@@ -458,8 +459,10 @@ Deno.serve(async (req) => {
         // Prepare article data
         const isExcerptMode = rssFeed.import_mode === "excerpt_with_link";
         const rawContent = isExcerptMode ? item.description : item.content;
-        // Strip all images from content
-        const articleContent = stripImagesFromContent(rawContent || "");
+        // Strip images from content if enabled (default is true)
+        const articleContent = rssFeed.strip_images !== false 
+          ? stripImagesFromContent(rawContent || "") 
+          : (rawContent || "");
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
         // Use default image from feed if set, otherwise null (ignore RSS images)
