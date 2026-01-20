@@ -1,47 +1,59 @@
 function setGoogTransCookie(value: string) {
-  // Both variants help across different hosting / subdomain setups
+  // Set cookie for both root and current domain
   document.cookie = `googtrans=${value}; path=/`;
   document.cookie = `googtrans=${value}; path=/; domain=${window.location.hostname}`;
 }
 
 function clearGoogTransCookie() {
-  // Clear the cookie by setting it to empty and expired
   document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }
 
-function triggerTranslateSelect(langCode: string) {
-  const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+function getGoogleTranslateSelect(): HTMLSelectElement | null {
+  return document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+}
+
+function triggerTranslateSelect(langCode: string): boolean {
+  const select = getGoogleTranslateSelect();
   if (!select) return false;
 
-  // Google Translate uses empty value to represent the original language
+  // Google Translate uses empty value to represent original language
   select.value = langCode === "en" ? "" : langCode;
-  select.dispatchEvent(new Event("change"));
+  
+  // Trigger multiple event types to ensure Google catches it
+  const events = ["change", "input"];
+  events.forEach(eventType => {
+    select.dispatchEvent(new Event(eventType, { bubbles: true }));
+  });
+  
   return true;
 }
 
-function waitForTranslateWidget(): Promise<boolean> {
+function waitForTranslateWidget(maxWait = 5000): Promise<boolean> {
   return new Promise((resolve) => {
-    let tries = 0;
-    const maxTries = 30;
+    const startTime = Date.now();
     
     const check = () => {
-      tries++;
-      const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
-      if (select) {
+      const select = getGoogleTranslateSelect();
+      if (select && select.options.length > 1) {
         resolve(true);
-      } else if (tries >= maxTries) {
-        resolve(false);
-      } else {
-        setTimeout(check, 100);
+        return;
       }
+      
+      if (Date.now() - startTime >= maxWait) {
+        resolve(false);
+        return;
+      }
+      
+      setTimeout(check, 100);
     };
     
-    check();
+    // Start checking after a small delay for script to load
+    setTimeout(check, 50);
   });
 }
 
-export async function applyGoogleTranslateLanguage(langCode: string) {
+export async function applyGoogleTranslateLanguage(langCode: string): Promise<void> {
   const target = langCode || "en";
 
   if (target === "en") {
@@ -53,29 +65,60 @@ export async function applyGoogleTranslateLanguage(langCode: string) {
     const widgetReady = await waitForTranslateWidget();
     if (widgetReady) {
       triggerTranslateSelect("en");
-      // Give it time to revert, if it doesn't work, the page will be clean on next load
-      setTimeout(() => {
-        // Check if translation is still active
-        const isTranslated = document.documentElement.classList.contains("translated-ltr") ||
-                            document.documentElement.classList.contains("translated-rtl");
-        if (isTranslated) {
-          // Force a clean reload if translation persists
-          window.location.reload();
-        }
-      }, 500);
+      
+      // Give it time to revert
+      await new Promise(r => setTimeout(r, 300));
+      
+      // If translation classes still present, we need a reload
+      const isStillTranslated = 
+        document.documentElement.classList.contains("translated-ltr") ||
+        document.documentElement.classList.contains("translated-rtl") ||
+        document.body.classList.contains("translated-ltr") ||
+        document.body.classList.contains("translated-rtl");
+        
+      if (isStillTranslated) {
+        // Remove the classes manually as a last resort
+        document.documentElement.classList.remove("translated-ltr", "translated-rtl");
+        document.body.classList.remove("translated-ltr", "translated-rtl");
+      }
     }
     return;
   }
 
-  // Setting the cookie makes Google Translate keep state across refreshes.
+  // Set the cookie for persistence across page loads
   setGoogTransCookie(`/en/${target}`);
 
-  // Also set document language for accessibility/SEO hints (content is still translated client-side).
+  // Set document language attribute for accessibility
   document.documentElement.setAttribute("lang", target);
 
   // Wait for widget to be ready, then trigger translation
   const widgetReady = await waitForTranslateWidget();
   if (widgetReady) {
     triggerTranslateSelect(target);
+  } else {
+    // Widget not ready - try reloading the page to apply translation from cookie
+    console.warn("Google Translate widget not ready, reloading to apply translation");
+    window.location.reload();
+  }
+}
+
+// Check if translation should be applied on page load (from cookie)
+export function checkAndApplyTranslationFromCookie(): void {
+  const cookies = document.cookie.split(";");
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split("=");
+    if (name === "googtrans" && value) {
+      // Cookie format: /en/targetLang
+      const match = value.match(/\/en\/([a-z]{2})/);
+      if (match && match[1] !== "en") {
+        // There's a translation cookie, ensure widget is triggered
+        waitForTranslateWidget().then(ready => {
+          if (ready) {
+            triggerTranslateSelect(match[1]);
+          }
+        });
+      }
+      break;
+    }
   }
 }
