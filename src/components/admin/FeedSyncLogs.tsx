@@ -33,6 +33,7 @@ interface FeedSyncLog {
   original_url: string | null;
   synced_at: string;
   feed_name?: string;
+  post_id?: number | null;
 }
 
 interface RssFeed {
@@ -145,7 +146,10 @@ const FeedSyncLogs = () => {
           article_id,
           original_guid,
           original_url,
-          synced_at
+          synced_at,
+          articles (
+            post_id
+          )
         `)
         .order("synced_at", { ascending: false })
         .range(from, to);
@@ -165,12 +169,14 @@ const FeedSyncLogs = () => {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Map feed names to logs
+      // Map feed names and post_id to logs
       const logsWithFeedNames = data?.map(log => {
         const feed = feeds?.find(f => f.id === log.feed_id);
+        const articleData = log.articles as { post_id: number | null } | null;
         return {
           ...log,
           feed_name: feed?.name || "Unknown Feed",
+          post_id: articleData?.post_id ?? null,
         };
       }) || [];
 
@@ -366,6 +372,7 @@ const FeedSyncLogs = () => {
                   <TableRow>
                     <TableHead>Feed</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Post ID</TableHead>
                     <TableHead>Original URL</TableHead>
                     <TableHead>Synced At</TableHead>
                   </TableRow>
@@ -390,6 +397,15 @@ const FeedSyncLogs = () => {
                             <XCircle className="w-3 h-3 mr-1" />
                             Skipped
                           </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {log.post_id ? (
+                          <Badge variant="outline" className="font-mono">
+                            #{log.post_id}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
                       <TableCell>
