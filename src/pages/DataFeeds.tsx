@@ -27,26 +27,27 @@ const DataFeeds = () => {
     },
   });
 
-  // Fetch article counts per vertical using a single aggregation query (only published articles)
+  // Fetch article counts per vertical by counting each vertical individually
   const { data: articleCounts } = useQuery({
     queryKey: ["feed-article-counts", verticals],
     enabled: !!verticals && verticals.length > 0,
     queryFn: async () => {
-      // Fetch only published articles (published_at <= now)
-      const { data, error } = await supabase
-        .from("articles")
-        .select("vertical_slug")
-        .lte("published_at", new Date().toISOString());
-      
-      if (error) throw error;
-      
-      // Count articles per vertical
       const counts: Record<string, number> = {};
-      data?.forEach((article) => {
-        const slug = article.vertical_slug;
-        counts[slug] = (counts[slug] || 0) + 1;
+      
+      // Fetch count for each vertical in parallel
+      const countPromises = verticals!.map(async (vertical) => {
+        const { count, error } = await supabase
+          .from("articles")
+          .select("*", { count: "exact", head: true })
+          .eq("vertical_slug", vertical)
+          .lte("published_at", new Date().toISOString());
+        
+        if (!error && count !== null) {
+          counts[vertical] = count;
+        }
       });
       
+      await Promise.all(countPromises);
       return counts;
     },
   });
