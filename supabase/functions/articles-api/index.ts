@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
       
       const { data: translations, error: translationsError } = await supabase
         .from('article_translations')
-        .select('article_id, language, title, description')
+        .select('article_id, language_code, translated_title, translated_excerpt, translated_content')
         .in('article_id', articleIds)
 
       if (translationsError) {

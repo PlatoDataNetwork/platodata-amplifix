@@ -261,7 +261,16 @@ for article in data["data"]:
       "external_url": "https://...",
       "metadata": {},
       "created_at": "2024-01-15T10:30:00Z",
-      "updated_at": "2024-01-15T10:30:00Z"
+      "updated_at": "2024-01-15T10:30:00Z",
+      "translations": [
+        {
+          "article_id": "uuid",
+          "language_code": "es",
+          "translated_title": "Título del artículo",
+          "translated_excerpt": "Breve descripción...",
+          "translated_content": "Contenido completo..."
+        }
+      ]
     }
   ],
   "pagination": {
