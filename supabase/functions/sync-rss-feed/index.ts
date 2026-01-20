@@ -235,6 +235,20 @@ function cleanHtml(text: string): string {
     .trim();
 }
 
+// Remove all image tags and figure elements from HTML content
+function stripImagesFromContent(html: string): string {
+  return html
+    // Remove <figure> elements (often wrap images)
+    .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "")
+    // Remove <img> tags (self-closing or not)
+    .replace(/<img[^>]*\/?>/gi, "")
+    // Remove <picture> elements
+    .replace(/<picture[^>]*>[\s\S]*?<\/picture>/gi, "")
+    // Remove empty paragraphs left behind
+    .replace(/<p[^>]*>\s*<\/p>/gi, "")
+    .trim();
+}
+
 function estimateReadTime(content: string): string {
   const wordCount = cleanHtml(content).split(/\s+/).length;
   const minutes = Math.max(1, Math.ceil(wordCount / 200));
@@ -443,7 +457,9 @@ Deno.serve(async (req) => {
         
         // Prepare article data
         const isExcerptMode = rssFeed.import_mode === "excerpt_with_link";
-        const articleContent = isExcerptMode ? item.description : item.content;
+        const rawContent = isExcerptMode ? item.description : item.content;
+        // Strip all images from content
+        const articleContent = stripImagesFromContent(rawContent || "");
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
         // Use default image from feed if set, otherwise null (ignore RSS images)
