@@ -193,6 +193,7 @@ export type Database = {
           import_mode: Database["public"]["Enums"]["feed_import_mode"]
           last_error: string | null
           last_synced_at: string | null
+          max_articles_per_sync: number
           name: string
           publish_status: Database["public"]["Enums"]["feed_publish_status"]
           status: Database["public"]["Enums"]["feed_status"]
@@ -211,6 +212,7 @@ export type Database = {
           import_mode?: Database["public"]["Enums"]["feed_import_mode"]
           last_error?: string | null
           last_synced_at?: string | null
+          max_articles_per_sync?: number
           name: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
           status?: Database["public"]["Enums"]["feed_status"]
@@ -229,6 +231,7 @@ export type Database = {
           import_mode?: Database["public"]["Enums"]["feed_import_mode"]
           last_error?: string | null
           last_synced_at?: string | null
+          max_articles_per_sync?: number
           name?: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
           status?: Database["public"]["Enums"]["feed_status"]

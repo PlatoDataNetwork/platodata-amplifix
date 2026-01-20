@@ -62,6 +62,7 @@ interface RssFeed {
   default_image_url: string | null;
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
+  max_articles_per_sync: number;
 }
 
 interface FeedFormData {
@@ -75,6 +76,7 @@ interface FeedFormData {
   default_image_url: string;
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
+  max_articles_per_sync: number;
 }
 
 const defaultFormData: FeedFormData = {
@@ -88,6 +90,7 @@ const defaultFormData: FeedFormData = {
   default_image_url: "",
   check_duplicate_title: false,
   check_duplicate_link: false,
+  max_articles_per_sync: 0,
 };
 
 interface FeedsSyndicatorProps {
@@ -153,6 +156,7 @@ const FeedsSyndicator = ({
         default_image_url: editingFeed.default_image_url || "",
         check_duplicate_title: editingFeed.check_duplicate_title || false,
         check_duplicate_link: editingFeed.check_duplicate_link || false,
+        max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
       });
     }
   }, [editingFeed]);
@@ -189,6 +193,7 @@ const FeedsSyndicator = ({
         default_image_url: data.default_image_url || null,
         check_duplicate_title: data.check_duplicate_title,
         check_duplicate_link: data.check_duplicate_link,
+        max_articles_per_sync: data.max_articles_per_sync,
       });
       if (error) throw error;
     },
@@ -519,6 +524,27 @@ const FeedsSyndicator = ({
                     {formData.auto_sync 
                       ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
                       : "Enable auto-sync to configure interval"}
+                  </p>
+                </div>
+
+                {/* Max Articles Per Sync */}
+                <div className="space-y-2">
+                  <Label htmlFor="max_articles">Articles Per Sync</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="max_articles"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.max_articles_per_sync}
+                      onChange={(e) => setFormData({ ...formData, max_articles_per_sync: parseInt(e.target.value) || 0 })}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">articles</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.max_articles_per_sync > 0 
+                      ? `Import up to ${formData.max_articles_per_sync} article${formData.max_articles_per_sync !== 1 ? 's' : ''} per sync`
+                      : "Unlimited - import all available articles"}
                   </p>
                 </div>
 

@@ -16,6 +16,7 @@ interface RssFeed {
   default_image_url: string | null;
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
+  max_articles_per_sync: number;
 }
 
 interface FeedItem {
@@ -407,10 +408,15 @@ Deno.serve(async (req) => {
     const newItems = feedItems.filter(item => !existingGuids.has(item.guid));
     console.log(`${newItems.length} new items to import (after GUID check)`);
     
+    // Apply max articles limit if configured
+    const maxArticles = rssFeed.max_articles_per_sync || 0;
+    const itemsToProcess = maxArticles > 0 ? newItems.slice(0, maxArticles) : newItems;
+    console.log(`Processing ${itemsToProcess.length} items (max limit: ${maxArticles > 0 ? maxArticles : 'unlimited'})`);
+    
     let articlesImported = 0;
     let duplicatesSkipped = 0;
     
-    for (const item of newItems) {
+    for (const item of itemsToProcess) {
       try {
         // Check for duplicates by title/link if enabled
         const isDup = await isDuplicate(
