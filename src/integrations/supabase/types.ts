@@ -197,6 +197,7 @@ export type Database = {
           name: string
           publish_status: Database["public"]["Enums"]["feed_publish_status"]
           status: Database["public"]["Enums"]["feed_status"]
+          strip_images: boolean
           sync_interval_hours: number
           updated_at: string
           vertical_slug: string
@@ -216,6 +217,7 @@ export type Database = {
           name: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
           status?: Database["public"]["Enums"]["feed_status"]
+          strip_images?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug: string
@@ -235,6 +237,7 @@ export type Database = {
           name?: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
           status?: Database["public"]["Enums"]["feed_status"]
+          strip_images?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug?: string

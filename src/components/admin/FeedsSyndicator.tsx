@@ -63,6 +63,7 @@ interface RssFeed {
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
+  strip_images: boolean;
 }
 
 interface FeedFormData {
@@ -77,6 +78,7 @@ interface FeedFormData {
   check_duplicate_title: boolean;
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
+  strip_images: boolean;
 }
 
 const defaultFormData: FeedFormData = {
@@ -91,6 +93,7 @@ const defaultFormData: FeedFormData = {
   check_duplicate_title: false,
   check_duplicate_link: false,
   max_articles_per_sync: 0,
+  strip_images: true,
 };
 
 interface FeedsSyndicatorProps {
@@ -157,6 +160,7 @@ const FeedsSyndicator = ({
         check_duplicate_title: editingFeed.check_duplicate_title || false,
         check_duplicate_link: editingFeed.check_duplicate_link || false,
         max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
+        strip_images: editingFeed.strip_images ?? true,
       });
     }
   }, [editingFeed]);
@@ -194,6 +198,7 @@ const FeedsSyndicator = ({
         check_duplicate_title: data.check_duplicate_title,
         check_duplicate_link: data.check_duplicate_link,
         max_articles_per_sync: data.max_articles_per_sync,
+        strip_images: data.strip_images,
       });
       if (error) throw error;
     },
@@ -582,6 +587,24 @@ const FeedsSyndicator = ({
                   <p className="text-xs text-muted-foreground">
                     Enable to prevent importing duplicate articles that already exist in the database
                   </p>
+                </div>
+
+                {/* Content Processing - Full Width */}
+                <div className="space-y-2 lg:col-span-2">
+                  <Label>Content Processing</Label>
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images from Content</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Remove all embedded images from imported article content
+                      </p>
+                    </div>
+                    <Switch
+                      id="strip_images"
+                      checked={formData.strip_images}
+                      onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
+                    />
+                  </div>
                 </div>
 
                 {/* Default Featured Image - Full Width */}
