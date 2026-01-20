@@ -20,49 +20,50 @@ function triggerTranslateSelect(langCode: string) {
   return true;
 }
 
-function restoreOriginalContent() {
-  // Try to click the "Show original" link if available
-  const showOriginalLink = document.querySelector(".goog-te-banner-frame");
-  if (showOriginalLink) {
-    try {
-      const iframe = showOriginalLink as HTMLIFrameElement;
-      const innerDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      const restoreBtn = innerDoc?.querySelector(".goog-te-button button");
-      if (restoreBtn) {
-        (restoreBtn as HTMLButtonElement).click();
-        return true;
+function waitForTranslateWidget(): Promise<boolean> {
+  return new Promise((resolve) => {
+    let tries = 0;
+    const maxTries = 30;
+    
+    const check = () => {
+      tries++;
+      const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+      if (select) {
+        resolve(true);
+      } else if (tries >= maxTries) {
+        resolve(false);
+      } else {
+        setTimeout(check, 100);
       }
-    } catch (e) {
-      // Cross-origin issues, fallback to cookie clear + reload
-    }
-  }
-  return false;
+    };
+    
+    check();
+  });
 }
 
-export function applyGoogleTranslateLanguage(langCode: string) {
+export async function applyGoogleTranslateLanguage(langCode: string) {
   const target = langCode || "en";
 
   if (target === "en") {
-    // Clear translation cookies and restore original content
+    // Clear translation cookies
     clearGoogTransCookie();
     document.documentElement.setAttribute("lang", "en");
     
-    // Try to restore original content without reload first
-    if (triggerTranslateSelect("en")) {
-      // Give it a moment to reset, then check if we need to reload
+    // Try to reset via the select dropdown
+    const widgetReady = await waitForTranslateWidget();
+    if (widgetReady) {
+      triggerTranslateSelect("en");
+      // Give it time to revert, if it doesn't work, the page will be clean on next load
       setTimeout(() => {
-        // If Google Translate banner is still visible, force reload
-        const banner = document.querySelector(".goog-te-banner-frame");
-        if (banner && !restoreOriginalContent()) {
-          // Force reload to clear all translations
+        // Check if translation is still active
+        const isTranslated = document.documentElement.classList.contains("translated-ltr") ||
+                            document.documentElement.classList.contains("translated-rtl");
+        if (isTranslated) {
+          // Force a clean reload if translation persists
           window.location.reload();
         }
-      }, 300);
-      return;
+      }, 500);
     }
-    
-    // Widget not loaded, just reload to get clean state
-    window.location.reload();
     return;
   }
 
@@ -72,14 +73,9 @@ export function applyGoogleTranslateLanguage(langCode: string) {
   // Also set document language for accessibility/SEO hints (content is still translated client-side).
   document.documentElement.setAttribute("lang", target);
 
-  // If the widget hasn't mounted yet, retry briefly without forcing a reload.
-  if (triggerTranslateSelect(target)) return;
-
-  let tries = 0;
-  const interval = window.setInterval(() => {
-    tries += 1;
-    if (triggerTranslateSelect(target) || tries > 25) {
-      window.clearInterval(interval);
-    }
-  }, 150);
+  // Wait for widget to be ready, then trigger translation
+  const widgetReady = await waitForTranslateWidget();
+  if (widgetReady) {
+    triggerTranslateSelect(target);
+  }
 }
