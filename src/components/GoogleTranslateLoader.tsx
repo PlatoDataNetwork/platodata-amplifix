@@ -131,11 +131,22 @@ const GoogleTranslateLoader = () => {
         width: 0 !important;
       }
       
-      /* Hide skip translate elements */
-      .skiptranslate { 
+      /* Hide skip translate elements but keep widget container functional */
+      .skiptranslate:not(#google_translate_element) { 
         display: none !important; 
         height: 0 !important; 
         visibility: hidden !important; 
+      }
+      
+      /* Keep the translate element container visible but off-screen */
+      #google_translate_element.skiptranslate {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute !important;
+        left: -9999px !important;
+        height: 1px !important;
+        width: 1px !important;
+        overflow: hidden !important;
       }
       
       /* But keep the hidden combo visible for our JS to interact with */
