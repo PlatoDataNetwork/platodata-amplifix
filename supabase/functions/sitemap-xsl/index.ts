@@ -18,6 +18,7 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
       <head>
         <title>XML Sitemap - PlatoData</title>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
         <style type="text/css">
           * {
             box-sizing: border-box;
@@ -25,183 +26,222 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
             padding: 0;
           }
           body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #ffffff;
-            color: #1a1a2e;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
             min-height: 100vh;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
           .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
           }
           .header {
-            text-align: center;
-            padding: 3rem 0;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 2rem;
             margin-bottom: 2rem;
+            border-bottom: 1px solid #e2e8f0;
           }
-          .logo {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-          }
-          .subtitle {
-            color: #52525b;
-            font-size: 1.1rem;
-          }
-          .info-box {
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px solid rgba(139, 92, 246, 0.4);
+          .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
           }
-          .info-box p {
-            margin-bottom: 0.5rem;
-            color: #3f3f46;
+          .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.025em;
           }
-          .info-box strong {
-            color: #a78bfa;
+          .header-text p {
+            color: #64748b;
+            font-size: 0.9rem;
           }
-          .info-box a {
-            color: #8b5cf6;
+          .info-banner {
+            background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+            border: 1px solid #c7d2fe;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+          .info-banner svg {
+            flex-shrink: 0;
+            color: #6366f1;
+          }
+          .info-banner p {
+            color: #4338ca;
+            font-size: 0.875rem;
+          }
+          .info-banner a {
+            color: #4f46e5;
+            font-weight: 500;
             text-decoration: none;
           }
-          .info-box a:hover {
+          .info-banner a:hover {
             text-decoration: underline;
           }
-          .stats {
+          .stats-row {
             display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
           }
           .stat-card {
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            flex: 1;
-            min-width: 200px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
           }
-          .stat-number {
-            font-size: 2rem;
+          .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+          }
+          .stat-content .stat-number {
+            font-size: 1.75rem;
             font-weight: 700;
-            color: #8b5cf6;
+            color: #0f172a;
+            line-height: 1;
           }
-          .stat-label {
-            color: #52525b;
-            font-size: 0.9rem;
+          .stat-content .stat-label {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+          }
+          .table-wrapper {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            background: #fafafa;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e4e4e7;
           }
           th {
-            background: rgba(139, 92, 246, 0.15);
-            color: #1a1a2e;
+            background: #f8fafc;
+            color: #475569;
             font-weight: 600;
             text-align: left;
-            padding: 1rem 1.5rem;
-            font-size: 0.85rem;
+            padding: 0.875rem 1.25rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            border-bottom: 1px solid #e2e8f0;
           }
           td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e4e4e7;
-            font-size: 0.95rem;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+            color: #334155;
           }
-          tr:hover {
-            background: rgba(139, 92, 246, 0.05);
+          tbody tr:hover {
+            background: #f8fafc;
           }
-          tr:last-child td {
+          tbody tr:last-child td {
             border-bottom: none;
           }
           td a {
-            color: #8b5cf6;
+            color: #4f46e5;
             text-decoration: none;
+            font-weight: 500;
             word-break: break-all;
+            transition: color 0.15s;
           }
           td a:hover {
-            color: #a78bfa;
+            color: #6366f1;
             text-decoration: underline;
           }
-          .priority {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
+          .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+          }
+          .badge-high {
+            background: #dcfce7;
+            color: #166534;
+          }
+          .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+          }
+          .badge-low {
+            background: #f1f5f9;
+            color: #475569;
+          }
+          .text-muted {
+            color: #64748b;
+          }
+          .text-sm {
+            font-size: 0.8125rem;
+          }
+          .row-num {
+            color: #94a3b8;
             font-weight: 500;
-          }
-          .priority-high {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-          }
-          .priority-medium {
-            background: rgba(234, 179, 8, 0.2);
-            color: #facc15;
-          }
-          .priority-low {
-            background: rgba(156, 163, 175, 0.2);
-            color: #9ca3af;
-          }
-          .lastmod {
-            color: #52525b;
-            font-size: 0.9rem;
-          }
-          .changefreq {
-            color: #52525b;
-            font-size: 0.85rem;
-            text-transform: capitalize;
-          }
-          .row-number {
-            color: #52525b;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.8125rem;
           }
           .footer {
             text-align: center;
-            padding: 3rem 0;
-            color: #52525b;
-            font-size: 0.9rem;
+            padding: 2.5rem 0 1rem;
+            color: #94a3b8;
+            font-size: 0.8125rem;
           }
           .footer a {
-            color: #8b5cf6;
+            color: #6366f1;
+            font-weight: 500;
             text-decoration: none;
+          }
+          .footer a:hover {
+            text-decoration: underline;
           }
           @media (max-width: 768px) {
             .container {
-              padding: 1rem;
+              padding: 1.5rem 1rem;
             }
             .header {
-              padding: 2rem 0;
-            }
-            .logo {
-              font-size: 1.8rem;
+              flex-direction: column;
+              text-align: center;
+              gap: 0.75rem;
             }
             th, td {
-              padding: 0.75rem;
-              font-size: 0.85rem;
-            }
-            .stats {
-              gap: 1rem;
+              padding: 0.75rem 0.875rem;
+              font-size: 0.8rem;
             }
             .stat-card {
-              min-width: 100%;
+              flex: 1;
+              min-width: 0;
+            }
+            .hide-mobile {
+              display: none;
             }
           }
         </style>
@@ -209,95 +249,112 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">🗺️ XML Sitemap</div>
-            <p class="subtitle">PlatoData - AI-Powered Intelligence Platform</p>
+            <div class="logo-icon">🗺️</div>
+            <div class="header-text">
+              <h1>XML Sitemap</h1>
+              <p>PlatoData</p>
+            </div>
           </div>
 
-          <div class="info-box">
-            <p>This XML sitemap is used by search engines like Google, Bing, and others to efficiently crawl and index this website.</p>
-            <p><strong>Learn more:</strong> <a href="https://www.sitemaps.org/" target="_blank" rel="noopener">sitemaps.org</a></p>
+          <div class="info-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <p>This sitemap helps search engines crawl and index this website. <a href="https://www.sitemaps.org/" target="_blank" rel="noopener">Learn more →</a></p>
           </div>
 
           <xsl:choose>
             <xsl:when test="sitemap:sitemapindex">
-              <div class="stats">
+              <div class="stats-row">
                 <div class="stat-card">
-                  <div class="stat-number"><xsl:value-of select="count(sitemap:sitemapindex/sitemap:sitemap)"/></div>
-                  <div class="stat-label">Sitemaps</div>
+                  <div class="stat-icon">📄</div>
+                  <div class="stat-content">
+                    <div class="stat-number"><xsl:value-of select="count(sitemap:sitemapindex/sitemap:sitemap)"/></div>
+                    <div class="stat-label">Sitemaps</div>
+                  </div>
                 </div>
               </div>
 
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width: 60px">#</th>
-                    <th>Sitemap URL</th>
-                    <th style="width: 150px">Last Modified</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <xsl:for-each select="sitemap:sitemapindex/sitemap:sitemap">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
                     <tr>
-                      <td class="row-number"><xsl:value-of select="position()"/></td>
-                      <td>
-                        <a href="{sitemap:loc}"><xsl:value-of select="sitemap:loc"/></a>
-                      </td>
-                      <td class="lastmod">
-                        <xsl:value-of select="sitemap:lastmod"/>
-                      </td>
+                      <th style="width: 50px">#</th>
+                      <th>Sitemap URL</th>
+                      <th style="width: 140px" class="hide-mobile">Last Modified</th>
                     </tr>
-                  </xsl:for-each>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <xsl:for-each select="sitemap:sitemapindex/sitemap:sitemap">
+                      <tr>
+                        <td class="row-num"><xsl:value-of select="position()"/></td>
+                        <td>
+                          <a href="{sitemap:loc}"><xsl:value-of select="sitemap:loc"/></a>
+                        </td>
+                        <td class="text-muted text-sm hide-mobile">
+                          <xsl:value-of select="sitemap:lastmod"/>
+                        </td>
+                      </tr>
+                    </xsl:for-each>
+                  </tbody>
+                </table>
+              </div>
             </xsl:when>
             <xsl:otherwise>
-              <div class="stats">
+              <div class="stats-row">
                 <div class="stat-card">
-                  <div class="stat-number"><xsl:value-of select="count(sitemap:urlset/sitemap:url)"/></div>
-                  <div class="stat-label">URLs</div>
+                  <div class="stat-icon">🔗</div>
+                  <div class="stat-content">
+                    <div class="stat-number"><xsl:value-of select="count(sitemap:urlset/sitemap:url)"/></div>
+                    <div class="stat-label">URLs</div>
+                  </div>
                 </div>
               </div>
 
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width: 60px">#</th>
-                    <th>URL</th>
-                    <th style="width: 100px">Priority</th>
-                    <th style="width: 110px">Change Freq</th>
-                    <th style="width: 130px">Last Modified</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <xsl:for-each select="sitemap:urlset/sitemap:url">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
                     <tr>
-                      <td class="row-number"><xsl:value-of select="position()"/></td>
-                      <td>
-                        <a href="{sitemap:loc}"><xsl:value-of select="sitemap:loc"/></a>
-                      </td>
-                      <td>
-                        <xsl:choose>
-                          <xsl:when test="sitemap:priority &gt;= 0.8">
-                            <span class="priority priority-high"><xsl:value-of select="sitemap:priority"/></span>
-                          </xsl:when>
-                          <xsl:when test="sitemap:priority &gt;= 0.5">
-                            <span class="priority priority-medium"><xsl:value-of select="sitemap:priority"/></span>
-                          </xsl:when>
-                          <xsl:otherwise>
-                            <span class="priority priority-low"><xsl:value-of select="sitemap:priority"/></span>
-                          </xsl:otherwise>
-                        </xsl:choose>
-                      </td>
-                      <td class="changefreq">
-                        <xsl:value-of select="sitemap:changefreq"/>
-                      </td>
-                      <td class="lastmod">
-                        <xsl:value-of select="sitemap:lastmod"/>
-                      </td>
+                      <th style="width: 50px">#</th>
+                      <th>URL</th>
+                      <th style="width: 80px">Priority</th>
+                      <th style="width: 100px" class="hide-mobile">Frequency</th>
+                      <th style="width: 120px" class="hide-mobile">Last Modified</th>
                     </tr>
-                  </xsl:for-each>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <xsl:for-each select="sitemap:urlset/sitemap:url">
+                      <tr>
+                        <td class="row-num"><xsl:value-of select="position()"/></td>
+                        <td>
+                          <a href="{sitemap:loc}"><xsl:value-of select="sitemap:loc"/></a>
+                        </td>
+                        <td>
+                          <xsl:choose>
+                            <xsl:when test="sitemap:priority &gt;= 0.8">
+                              <span class="badge badge-high"><xsl:value-of select="sitemap:priority"/></span>
+                            </xsl:when>
+                            <xsl:when test="sitemap:priority &gt;= 0.5">
+                              <span class="badge badge-medium"><xsl:value-of select="sitemap:priority"/></span>
+                            </xsl:when>
+                            <xsl:otherwise>
+                              <span class="badge badge-low"><xsl:value-of select="sitemap:priority"/></span>
+                            </xsl:otherwise>
+                          </xsl:choose>
+                        </td>
+                        <td class="text-muted text-sm hide-mobile" style="text-transform: capitalize;">
+                          <xsl:value-of select="sitemap:changefreq"/>
+                        </td>
+                        <td class="text-muted text-sm hide-mobile">
+                          <xsl:value-of select="sitemap:lastmod"/>
+                        </td>
+                      </tr>
+                    </xsl:for-each>
+                  </tbody>
+                </table>
+              </div>
             </xsl:otherwise>
           </xsl:choose>
 
