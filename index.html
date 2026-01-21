@@ -28,6 +28,29 @@
   </head>
 
   <body>
+    <!-- 
+      CRITICAL: Clear googtrans cookie BEFORE any scripts load.
+      This prevents Google Translate from auto-translating based on a stale cookie
+      when the URL is the root "/" (English).
+    -->
+    <script>
+      (function() {
+        // Check if URL has a language prefix
+        var path = window.location.pathname;
+        var seg = path.split('/').filter(Boolean)[0] || '';
+        // List of supported language codes (must match i18nLanguages.ts)
+        var supported = ['ar','bn','zh-CN','zh-TW','da','nl','et','fi','fr','de','el','iw','hi','hu','id','it','ja','km','ko','no','fa','pl','pt','pa','ro','ru','sl','es','sv','th','tr','uk','ur','vi'];
+        var isLangPrefix = supported.indexOf(seg) !== -1;
+        
+        // If no language prefix (i.e., English), clear the googtrans cookie
+        if (!isLangPrefix) {
+          document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'googtrans=; path=/; domain=' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'googtrans=; path=/; domain=.' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+      })();
+    </script>
+    
     <!-- Hidden Google Translate element - MUST be outside React root -->
     <div id="google_translate_element" style="display:none !important;"></div>
     <div id="root"></div>

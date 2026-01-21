@@ -2,22 +2,43 @@ import { useEffect } from "react";
 import { checkAndApplyTranslationFromCookie } from "@/lib/googleTranslate";
 import { isSupportedLanguage } from "@/lib/i18nLanguages";
 
+/**
+ * Clear the googtrans cookie (set by Google Translate to persist language choice).
+ * This must run BEFORE the Google Translate script loads to prevent auto-translation.
+ */
+function clearGoogTransCookies() {
+  document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  // Also try with leading dot for subdomains
+  document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
+
+/**
+ * Determine the language from the URL. URL is the single source of truth.
+ * Root "/" or any path without a valid language prefix → "en"
+ */
+function getLangFromUrl(): string {
+  const seg0 = window.location.pathname.split("/").filter(Boolean)[0];
+  return isSupportedLanguage(seg0) ? seg0 : "en";
+}
+
 const GoogleTranslateLoader = () => {
   useEffect(() => {
-    if (document.getElementById("google-translate-script")) return;
+    const langFromUrl = getLangFromUrl();
 
-    // URL is the source of truth. If there's no language prefix, ensure we don't
-    // auto-translate from a persisted googtrans cookie (prevents language flip-loops).
-    const seg0 = window.location.pathname.split("/").filter(Boolean)[0];
-    const langFromUrl = isSupportedLanguage(seg0) ? seg0 : "en";
+    // ──────────────────────────────────────────────────────────────────────────
+    // CRITICAL: If URL says English (no prefix), clear any stale googtrans cookie
+    // BEFORE loading Google Translate, so Google won't auto-translate.
+    // ──────────────────────────────────────────────────────────────────────────
     if (langFromUrl === "en") {
-      // Clear cookies for both root and current domain
-      document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-      document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      clearGoogTransCookies();
       document.documentElement.setAttribute("lang", "en");
       document.documentElement.classList.remove("translated-ltr", "translated-rtl");
       document.body.classList.remove("translated-ltr", "translated-rtl");
     }
+
+    // Avoid loading the script multiple times
+    if (document.getElementById("google-translate-script")) return;
 
     // Store original DOM methods to wrap them safely
     const originalRemoveChild = Node.prototype.removeChild;
