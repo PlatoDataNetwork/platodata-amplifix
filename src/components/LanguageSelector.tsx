@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Globe } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { LANGUAGES, type Language, isSupportedLanguage } from "@/lib/i18nLanguages";
-import { applyGoogleTranslateLanguage } from "@/lib/googleTranslate";
+
 
 const LanguageSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Keep selection in sync with the URL prefix (e.g. /nl/...).
   useEffect(() => {
@@ -56,17 +55,19 @@ const LanguageSelector = () => {
     const newPath = buildPathForLang(lang.code);
     
     if (lang.code === "en") {
-      // For English, clear cookies and do a hard navigation to reset Google Translate
+      // For English, clear cookies before navigation
       document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-      document.documentElement.setAttribute("lang", "en");
-      // Hard reload to ensure clean English content
-      window.location.href = newPath;
-      return;
+      document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    } else {
+      // Set translation cookie before navigation so Google Translate picks it up on reload
+      document.cookie = `googtrans=/en/${lang.code}; path=/`;
+      document.cookie = `googtrans=/en/${lang.code}; path=/; domain=${window.location.hostname}`;
     }
     
-    navigate(newPath, { replace: true });
-    applyGoogleTranslateLanguage(lang.code);
+    // Always use hard navigation for language changes - this ensures Google Translate
+    // properly initializes with the new language from the cookie on page load
+    window.location.href = newPath;
   };
 
   return (
