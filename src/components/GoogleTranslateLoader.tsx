@@ -1,9 +1,23 @@
 import { useEffect } from "react";
 import { checkAndApplyTranslationFromCookie } from "@/lib/googleTranslate";
+import { isSupportedLanguage } from "@/lib/i18nLanguages";
 
 const GoogleTranslateLoader = () => {
   useEffect(() => {
     if (document.getElementById("google-translate-script")) return;
+
+    // URL is the source of truth. If there's no language prefix, ensure we don't
+    // auto-translate from a persisted googtrans cookie (prevents language flip-loops).
+    const seg0 = window.location.pathname.split("/").filter(Boolean)[0];
+    const langFromUrl = isSupportedLanguage(seg0) ? seg0 : "en";
+    if (langFromUrl === "en") {
+      // Clear cookies for both root and current domain
+      document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.documentElement.setAttribute("lang", "en");
+      document.documentElement.classList.remove("translated-ltr", "translated-rtl");
+      document.body.classList.remove("translated-ltr", "translated-rtl");
+    }
 
     // Store original DOM methods to wrap them safely
     const originalRemoveChild = Node.prototype.removeChild;
@@ -64,7 +78,10 @@ const GoogleTranslateLoader = () => {
     script.onload = () => {
       // After script loads, check if we should apply translation from cookie
       setTimeout(() => {
-        checkAndApplyTranslationFromCookie();
+        // Only honor the cookie when the URL explicitly requests a language.
+        if (langFromUrl !== "en") {
+          checkAndApplyTranslationFromCookie();
+        }
       }, 500);
     };
     document.body.appendChild(script);

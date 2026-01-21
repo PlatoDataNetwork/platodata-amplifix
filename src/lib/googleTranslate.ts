@@ -2,6 +2,13 @@
 let translationApplied = false;
 let lastAppliedLang: string | null = null;
 
+// Retry control for when the Google Translate widget isn't ready yet.
+let retryTimer: number | null = null;
+let retryLang: string | null = null;
+let retryAttempt = 0;
+
+const RETRY_DELAYS_MS = [250, 500, 1000, 2000, 3500, 5000];
+
 function setGoogTransCookie(value: string) {
   // Set cookie for both root and current domain
   document.cookie = `googtrans=${value}; path=/`;
@@ -81,6 +88,38 @@ function waitForTranslateWidget(maxWait = 5000): Promise<boolean> {
   });
 }
 
+function scheduleTranslateRetry(langCode: string) {
+  if (retryLang !== langCode) {
+    retryLang = langCode;
+    retryAttempt = 0;
+  }
+
+  const delay = RETRY_DELAYS_MS[Math.min(retryAttempt, RETRY_DELAYS_MS.length - 1)];
+  retryAttempt += 1;
+
+  if (retryTimer) {
+    window.clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+
+  // Stop retrying after a bounded number of attempts.
+  if (retryAttempt > RETRY_DELAYS_MS.length + 2) {
+    console.warn("Google Translate widget still not ready; giving up to avoid reload loops");
+    retryLang = null;
+    retryAttempt = 0;
+    return;
+  }
+
+  retryTimer = window.setTimeout(() => {
+    // Only retry if we still want this language and we haven't already succeeded.
+    if (retryLang === langCode && !isPageAlreadyTranslated()) {
+      applyGoogleTranslateLanguage(langCode).catch(() => {
+        // no-op; retries are best-effort
+      });
+    }
+  }, delay);
+}
+
 export async function applyGoogleTranslateLanguage(langCode: string): Promise<void> {
   const target = langCode || "en";
 
@@ -123,7 +162,7 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
   document.documentElement.setAttribute("lang", target);
 
   // Wait for widget to be ready, then trigger translation
-  const widgetReady = await waitForTranslateWidget();
+  const widgetReady = await waitForTranslateWidget(15000);
   if (widgetReady) {
     const currentLang = getCurrentTranslatedLang();
     
@@ -135,12 +174,10 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
     lastAppliedLang = target;
     translationApplied = true;
   } else {
-    // Widget not ready - only reload if we haven't tried already
-    if (!translationApplied) {
-      console.warn("Google Translate widget not ready, reloading to apply translation");
-      translationApplied = true; // Prevent infinite reload loop
-      window.location.reload();
-    }
+    // Widget not ready — do NOT reload (causes infinite reload loops on cold starts).
+    console.warn("Google Translate widget not ready yet; retrying shortly");
+    translationApplied = true;
+    scheduleTranslateRetry(target);
   }
 }
 
