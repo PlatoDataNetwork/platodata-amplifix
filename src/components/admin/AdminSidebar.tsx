@@ -53,15 +53,15 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {/* Dashboard */}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => onViewChange("dashboard")}
                   isActive={currentView === "dashboard"}
-                  className="w-full text-base"
+                  className="w-full text-base py-3"
                 >
-                  <LayoutDashboard className="w-5 h-5" />
+                  <LayoutDashboard className="w-6 h-6" />
                   <span>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -71,23 +71,23 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      className="w-full text-base"
+                      className="w-full text-base py-3"
                       isActive={isArticlesSection}
                     >
-                      <FileText className="w-5 h-5" />
+                      <FileText className="w-6 h-6" />
                       <span>Articles</span>
-                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <ChevronDown className="ml-auto w-5 h-5 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="space-y-1 py-1">
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("articles")}
                           isActive={currentView === "articles"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <FileText className="w-4 h-4" />
+                          <FileText className="w-5 h-5" />
                           <span>All Articles</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -95,9 +95,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("new-article")}
                           isActive={currentView === "new-article"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-5 h-5" />
                           <span>New Article</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -105,9 +105,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("tags")}
                           isActive={currentView === "tags"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Tags className="w-4 h-4" />
+                          <Tags className="w-5 h-5" />
                           <span>Tags</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -115,9 +115,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("verticals")}
                           isActive={currentView === "verticals"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Layers className="w-4 h-4" />
+                          <Layers className="w-5 h-5" />
                           <span>Verticals</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -131,23 +131,23 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      className="w-full text-base"
+                      className="w-full text-base py-3"
                       isActive={isFeedsSection}
                     >
-                      <Rss className="w-5 h-5" />
+                      <Rss className="w-6 h-6" />
                       <span>Feed Syndicator</span>
-                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <ChevronDown className="ml-auto w-5 h-5 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="space-y-1 py-1">
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("feeds-syndicator")}
                           isActive={currentView === "feeds-syndicator"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Rss className="w-4 h-4" />
+                          <Rss className="w-5 h-5" />
                           <span>All Feeds</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -155,9 +155,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("new-feed")}
                           isActive={currentView === "new-feed"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-5 h-5" />
                           <span>Add Feed</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -165,9 +165,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("feeds-logs")}
                           isActive={currentView === "feeds-logs"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <ScrollText className="w-4 h-4" />
+                          <ScrollText className="w-5 h-5" />
                           <span>Logs</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -178,8 +178,8 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
 
               {/* Users - coming soon */}
               <SidebarMenuItem>
-                <SidebarMenuButton disabled className="w-full opacity-50 text-base">
-                  <Users className="w-5 h-5" />
+                <SidebarMenuButton disabled className="w-full opacity-50 text-base py-3">
+                  <Users className="w-6 h-6" />
                   <span>Users</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -189,23 +189,23 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      className="w-full text-base"
+                      className="w-full text-base py-3"
                       isActive={isSettingsSection}
                     >
-                      <Settings className="w-5 h-5" />
+                      <Settings className="w-6 h-6" />
                       <span>Settings</span>
-                      <ChevronDown className="ml-auto w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      <ChevronDown className="ml-auto w-5 h-5 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="space-y-1 py-1">
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("settings-general")}
                           isActive={currentView === "settings-general"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Globe className="w-4 h-4" />
+                          <Globe className="w-5 h-5" />
                           <span>General</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -213,9 +213,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("settings-analytics")}
                           isActive={currentView === "settings-analytics"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <BarChart3 className="w-4 h-4" />
+                          <BarChart3 className="w-5 h-5" />
                           <span>Analytics</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -223,9 +223,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("settings-sitemaps")}
                           isActive={currentView === "settings-sitemaps"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Map className="w-4 h-4" />
+                          <Map className="w-5 h-5" />
                           <span>Sitemaps</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -233,9 +233,9 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                         <SidebarMenuSubButton
                           onClick={() => onViewChange("settings-robots")}
                           isActive={currentView === "settings-robots"}
-                          className="text-sm"
+                          className="text-sm py-2"
                         >
-                          <Bot className="w-4 h-4" />
+                          <Bot className="w-5 h-5" />
                           <span>Robots.txt</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
