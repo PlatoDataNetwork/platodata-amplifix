@@ -26,8 +26,8 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
           }
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            color: #e4e4e7;
+            background: #ffffff;
+            color: #1a1a2e;
             min-height: 100vh;
             line-height: 1.6;
           }
@@ -39,7 +39,7 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
           .header {
             text-align: center;
             padding: 3rem 0;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.5);
             margin-bottom: 2rem;
           }
           .logo {
@@ -52,19 +52,19 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
             margin-bottom: 0.5rem;
           }
           .subtitle {
-            color: #a1a1aa;
+            color: #52525b;
             font-size: 1.1rem;
           }
           .info-box {
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.4);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 2rem;
           }
           .info-box p {
             margin-bottom: 0.5rem;
-            color: #d4d4d8;
+            color: #3f3f46;
           }
           .info-box strong {
             color: #a78bfa;
@@ -83,8 +83,8 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
             flex-wrap: wrap;
           }
           .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: 12px;
             padding: 1.5rem 2rem;
             flex: 1;
@@ -96,7 +96,7 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
             color: #8b5cf6;
           }
           .stat-label {
-            color: #a1a1aa;
+            color: #52525b;
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -104,14 +104,14 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
           table {
             width: 100%;
             border-collapse: collapse;
-            background: rgba(255, 255, 255, 0.02);
+            background: #fafafa;
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #e4e4e7;
           }
           th {
-            background: rgba(139, 92, 246, 0.2);
-            color: #e4e4e7;
+            background: rgba(139, 92, 246, 0.15);
+            color: #1a1a2e;
             font-weight: 600;
             text-align: left;
             padding: 1rem 1.5rem;
@@ -122,7 +122,7 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
           }
           td {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid #e4e4e7;
             font-size: 0.95rem;
           }
           tr:hover {
@@ -160,11 +160,11 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
             color: #9ca3af;
           }
           .lastmod {
-            color: #a1a1aa;
+            color: #52525b;
             font-size: 0.9rem;
           }
           .changefreq {
-            color: #71717a;
+            color: #52525b;
             font-size: 0.85rem;
             text-transform: capitalize;
           }
@@ -176,7 +176,7 @@ const xslStylesheet = `<?xml version="1.0" encoding="UTF-8"?>
           .footer {
             text-align: center;
             padding: 3rem 0;
-            color: #71717a;
+            color: #52525b;
             font-size: 0.9rem;
           }
           .footer a {
