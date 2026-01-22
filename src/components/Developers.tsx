@@ -2,23 +2,24 @@ import { Code2, GitBranch, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLangRouting } from "@/hooks/useLangRouting";
+import useTranslations from "@/hooks/useTranslations";
 
 const Developers = () => {
   const { withLang } = useLangRouting();
+  const { t } = useTranslations();
 
   return (
     <section className="py-32 relative">
       <div className="container mx-auto px-6">
         <div className="text-center space-y-8 mb-16">
-          <p className="text-primary text-sm font-medium tracking-wide uppercase">Developers</p>
+          <p className="text-primary text-sm font-medium tracking-wide uppercase">{t("developers.badge")}</p>
           <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
-            Built by developers,
+            {t("developers.titleLine1")}
             <br />
-            for developers
+            {t("developers.titleLine2")}
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Built for developers, by developers—engineered with precision, performance, and purpose. Every line of code is
-            crafted to empower innovation, streamline workflows, and accelerate your development journey.
+            {t("developers.description")}
           </p>
         </div>
 
@@ -27,9 +28,9 @@ const Developers = () => {
             <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
               <Code2 className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Clean APIs</h3>
+            <h3 className="text-xl font-semibold mb-4 text-foreground">{t("developers.items.cleanApis.title")}</h3>
             <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">
-              RESTful and GraphQL endpoints designed for seamless integration and developer productivity.
+              {t("developers.items.cleanApis.description")}
             </p>
             <Link to={withLang("/solutions")} className="w-full">
               <Button
@@ -37,7 +38,7 @@ const Developers = () => {
                 size="lg"
                 className="w-full bg-secondary hover:bg-secondary/80 text-foreground"
               >
-                Learn More
+                {t("developers.learnMore")}
               </Button>
             </Link>
           </div>
@@ -49,9 +50,9 @@ const Developers = () => {
             <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
               <GitBranch className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Version Control</h3>
+            <h3 className="text-xl font-semibold mb-4 text-foreground">{t("developers.items.versionControl.title")}</h3>
             <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">
-              Semantic versioning for stability, compatibility, and predictable updates across releases.
+              {t("developers.items.versionControl.description")}
             </p>
             <Link to={withLang("/solutions")} className="w-full">
               <Button
@@ -59,7 +60,7 @@ const Developers = () => {
                 size="lg"
                 className="w-full bg-secondary hover:bg-secondary/80 text-foreground"
               >
-                Learn More
+                {t("developers.learnMore")}
               </Button>
             </Link>
           </div>
@@ -71,9 +72,9 @@ const Developers = () => {
             <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
               <Terminal className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 text-foreground">CLI Tools</h3>
+            <h3 className="text-xl font-semibold mb-4 text-foreground">{t("developers.items.cliTools.title")}</h3>
             <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">
-              Powerful command-line utilities that streamline workflows and boost development efficiency.
+              {t("developers.items.cliTools.description")}
             </p>
             <Link to={withLang("/solutions")} className="w-full">
               <Button
@@ -81,7 +82,7 @@ const Developers = () => {
                 size="lg"
                 className="w-full bg-secondary hover:bg-secondary/80 text-foreground"
               >
-                Learn More
+                {t("developers.learnMore")}
               </Button>
             </Link>
           </div>

@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
 import { useLangRouting } from "@/hooks/useLangRouting";
+import useTranslations from "@/hooks/useTranslations";
 
 const Footer = () => {
   const { withLang } = useLangRouting();
+  const { t } = useTranslations();
 
   return (
     <footer className="py-20 border-t border-border">
@@ -20,69 +22,68 @@ const Footer = () => {
                 <span className="text-2xl font-bold tracking-tight text-foreground notranslate" translate="no">Platodata</span>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Plato Technologies Inc. A NYC based AI Web3 Venture Lab dedicated to building
-                vertically focused data intelligence products.
+                {t("footer.companyDescription")}
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Product</h4>
+              <h4 className="font-semibold mb-4">{t("footer.productTitle")}</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
                   <a href={withLang("/#solutions")} className="hover:text-foreground transition-colors">
-                    Solutions
+                    {t("navigation.solutions")}
                   </a>
                 </li>
                 <li>
                   <a href={withLang("/#protocol")} className="hover:text-foreground transition-colors">
-                    Protocol
+                    {t("navigation.protocol")}
                   </a>
                 </li>
                 <li>
                   <a href={withLang("/#security")} className="hover:text-foreground transition-colors">
-                    Security
+                    {t("navigation.security")}
                   </a>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
+              <h4 className="font-semibold mb-4">{t("footer.companyTitle")}</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
                   <a href={withLang("/#about")} className="hover:text-foreground transition-colors">
-                    About
+                    {t("navigation.about")}
                   </a>
                 </li>
                 <li>
                   <a href={withLang("/#resources")} className="hover:text-foreground transition-colors">
-                    Blog
+                    {t("footer.blog")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-foreground transition-colors">
-                    Careers
+                    {t("footer.careers")}
                   </a>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
+              <h4 className="font-semibold mb-4">{t("footer.connectTitle")}</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
                   <a href="#" className="hover:text-foreground transition-colors">
-                    Twitter
+                    {t("footer.twitter")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-foreground transition-colors">
-                    Discord
+                    {t("footer.discord")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-foreground transition-colors">
-                    GitHub
+                    {t("footer.github")}
                   </a>
                 </li>
               </ul>
@@ -90,13 +91,13 @@ const Footer = () => {
           </div>
 
           <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">© 2024 Plato Technologies Inc. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">{t("footer.copyright")}</p>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
-                Privacy Policy
+                {t("footer.privacyPolicy")}
               </a>
               <a href="#" className="hover:text-foreground transition-colors">
-                Terms of Service
+                {t("footer.termsOfService")}
               </a>
             </div>
           </div>

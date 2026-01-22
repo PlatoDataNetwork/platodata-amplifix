@@ -1,37 +1,37 @@
+import useTranslations from "@/hooks/useTranslations";
+
 const Mission = () => {
+  const { t } = useTranslations();
+
   return (
     <section className="py-32 relative" id="about">
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center space-y-6 mb-16">
             <p className="text-primary text-sm font-medium tracking-wide uppercase">
-              The Power of Generative AI Reimagined
+              {t("mission.badge")}
             </p>
             <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">
-              We are the intersection of Web3 and AI.
+              {t("mission.title")}
             </h2>
           </div>
           
           <div className="bg-card border border-border rounded-3xl p-12 md:p-16 space-y-8">
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Our mission is to use AI to revolutionize the way people discover and engage with 
-              vertical data intelligence. Our platform has created a new way to drive high value 
-              across both institutional and prosumer environments.
+              {t("mission.description")}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8">
               <div>
-                <h3 className="text-2xl font-semibold mb-4">Validated, Realtime Data</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t("mission.feature1Title")}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  AI-driven data compliance ensures accurate, real-time adherence to regulations 
-                  by automating audits, monitoring risks, and providing actionable insights.
+                  {t("mission.feature1Description")}
                 </p>
               </div>
               <div>
-                <h3 className="text-2xl font-semibold mb-4">AI-Driven Compliance</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t("mission.feature2Title")}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our streamlined compliance processes mitigate potential breaches while 
-                  enhancing organizational transparency and user security.
+                  {t("mission.feature2Description")}
                 </p>
               </div>
             </div>
