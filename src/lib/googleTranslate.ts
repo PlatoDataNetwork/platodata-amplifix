@@ -123,11 +123,6 @@ function scheduleTranslateRetry(langCode: string) {
 export async function applyGoogleTranslateLanguage(langCode: string): Promise<void> {
   const target = langCode || "en";
 
-  // If same language already applied, skip
-  if (lastAppliedLang === target && (target === "en" || isPageAlreadyTranslated())) {
-    return;
-  }
-
   if (target === "en") {
     // Clear translation cookies
     clearGoogTransCookie();
@@ -150,11 +145,6 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
     return;
   }
 
-  // Check if already translated to this language
-  if (isPageAlreadyTranslated() && lastAppliedLang === target) {
-    return;
-  }
-
   // Set the cookie for persistence across page loads
   setGoogTransCookie(`/en/${target}`);
 
@@ -166,10 +156,15 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
   if (widgetReady) {
     const currentLang = getCurrentTranslatedLang();
     
-    // Only trigger if not already on this language
-    if (currentLang !== target) {
-      triggerTranslateSelect(target);
+    // If switching between non-English languages, first reset to English then apply target
+    if (currentLang && currentLang !== "" && currentLang !== target) {
+      // Reset to English first
+      triggerTranslateSelect("en");
+      await new Promise(r => setTimeout(r, 200));
     }
+    
+    // Now apply the target language
+    triggerTranslateSelect(target);
     
     lastAppliedLang = target;
     translationApplied = true;

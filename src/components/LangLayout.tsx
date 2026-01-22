@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useParams } from "react-router-dom";
 import { isSupportedLanguage } from "@/lib/i18nLanguages";
-import { applyGoogleTranslateLanguage } from "@/lib/googleTranslate";
+import { applyGoogleTranslateLanguage, resetTranslationState } from "@/lib/googleTranslate";
 import NotFound from "@/pages/NotFound";
 
 const LangLayout = () => {
@@ -12,6 +12,8 @@ const LangLayout = () => {
   }
 
   useEffect(() => {
+    // Reset stale state before applying new language to prevent blocking
+    resetTranslationState();
     applyGoogleTranslateLanguage(lang);
   }, [lang]);
 
