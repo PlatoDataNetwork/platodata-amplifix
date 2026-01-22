@@ -9,15 +9,49 @@ let retryAttempt = 0;
 
 const RETRY_DELAYS_MS = [250, 500, 1000, 2000, 3500, 5000];
 
+function getCookieDomains(): string[] {
+  const host = window.location.hostname;
+  const base = host.startsWith("www.") ? host.slice(4) : host;
+  const domains = new Set<string>();
+  domains.add("");
+  domains.add(host);
+  domains.add(`.${host}`);
+  // IMPORTANT: include apex domain cookies (e.g. .platodata.io) when on www.
+  if (base && base !== host) {
+    domains.add(base);
+    domains.add(`.${base}`);
+  }
+  return Array.from(domains);
+}
+
 function setGoogTransCookie(value: string) {
-  // Set cookie for both root and current domain
-  document.cookie = `googtrans=${value}; path=/`;
-  document.cookie = `googtrans=${value}; path=/; domain=${window.location.hostname}`;
+  // Set cookie across host + apex domain variants to avoid stale cookies winning.
+  for (const domain of getCookieDomains()) {
+    let cookieStr = `googtrans=${value}; path=/`;
+    if (domain) cookieStr += `; domain=${domain}`;
+    document.cookie = cookieStr;
+  }
 }
 
 function clearGoogTransCookie() {
-  document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-  document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  for (const domain of getCookieDomains()) {
+    let cookieStr = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    if (domain) cookieStr += `; domain=${domain}`;
+    document.cookie = cookieStr;
+  }
+}
+
+function getGoogTransCookieValue(): string | null {
+  const cookies = document.cookie.split(";");
+  let value: string | null = null;
+  for (const cookie of cookies) {
+    const [name, raw] = cookie.trim().split("=");
+    if (name === "googtrans" && raw) {
+      // If multiple googtrans cookies exist, prefer the last one.
+      value = raw;
+    }
+  }
+  return value;
 }
 
 function getGoogleTranslateSelect(): HTMLSelectElement | null {
@@ -209,33 +243,27 @@ export function checkAndApplyTranslationFromCookie(): void {
     return;
   }
 
-  const cookies = document.cookie.split(";");
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split("=");
-    if (name === "googtrans" && value) {
-      // Cookie format: /en/targetLang (handles codes like zh-CN, zh-TW)
-      const match = value.match(/\/en\/([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/);
-      if (match && match[1] !== "en") {
-        const targetLang = match[1];
-        
-        // Mark as applying to prevent re-triggering
-        lastAppliedLang = targetLang;
-        
-        // There's a translation cookie, ensure widget is triggered
-        waitForTranslateWidget().then(ready => {
-          if (ready) {
-            const currentLang = getCurrentTranslatedLang();
-            // Only trigger if not already on this language
-            if (currentLang !== targetLang && !isPageAlreadyTranslated()) {
-              triggerTranslateSelect(targetLang);
-              translationApplied = true;
-            }
-          }
-        });
-      }
-      break;
+  const value = getGoogTransCookieValue();
+  if (!value) return;
+
+  // Cookie format: /en/targetLang (handles codes like zh-CN, zh-TW)
+  const match = value.match(/\/en\/([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/);
+  if (!match || match[1] === "en") return;
+
+  const targetLang = match[1];
+  // Mark as applying to prevent re-triggering
+  lastAppliedLang = targetLang;
+
+  // There's a translation cookie, ensure widget is triggered
+  waitForTranslateWidget().then((ready) => {
+    if (!ready) return;
+    const currentLang = getCurrentTranslatedLang();
+    // Only trigger if not already on this language
+    if (currentLang !== targetLang && !isPageAlreadyTranslated()) {
+      triggerTranslateSelect(targetLang);
+      translationApplied = true;
     }
-  }
+  });
 }
 
 // Reset the flags (useful for SPA navigation)

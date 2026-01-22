@@ -3,12 +3,31 @@ import { ChevronDown, Globe } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { LANGUAGES, type Language, isSupportedLanguage } from "@/lib/i18nLanguages";
 
+function getCookieDomains() {
+  const host = window.location.hostname;
+  const base = host.startsWith("www.") ? host.slice(4) : host;
+  const domains = new Set<string>(["", host, `.${host}`]);
+  // IMPORTANT: also include apex domain variants when on www.
+  if (base && base !== host) {
+    domains.add(base);
+    domains.add(`.${base}`);
+  }
+  return Array.from(domains);
+}
+
 // Helper to clear all googtrans cookies
 function clearAllGoogTransCookies() {
-  const domains = ['', window.location.hostname, '.' + window.location.hostname];
-  domains.forEach(domain => {
-    let cookieStr = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    if (domain) cookieStr += '; domain=' + domain;
+  getCookieDomains().forEach((domain) => {
+    let cookieStr = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    if (domain) cookieStr += "; domain=" + domain;
+    document.cookie = cookieStr;
+  });
+}
+
+function setGoogTransCookie(value: string) {
+  getCookieDomains().forEach((domain) => {
+    let cookieStr = `googtrans=${value}; path=/`;
+    if (domain) cookieStr += `; domain=${domain}`;
     document.cookie = cookieStr;
   });
 }
@@ -75,15 +94,20 @@ const LanguageSelector = () => {
     
     // STEP 4: If switching to a non-English language, set the correct cookie
     if (lang.code !== "en") {
-      document.cookie = `googtrans=/en/${lang.code}; path=/`;
-      document.cookie = `googtrans=/en/${lang.code}; path=/; domain=${window.location.hostname}`;
+      setGoogTransCookie(`/en/${lang.code}`);
     }
-    
-    // STEP 5: Force hard navigation with cache busting to ensure fresh page load
-    // Add a timestamp to prevent browser from using cached translated content
-    const separator = newPath.includes('?') ? '&' : '?';
-    const cacheBuster = `_gt=${Date.now()}`;
-    window.location.href = newPath + separator + cacheBuster;
+
+    // STEP 5: Hard navigation with a SINGLE cache-buster param (replace, don't append)
+    try {
+      const url = new URL(newPath, window.location.origin);
+      url.searchParams.delete("_gt");
+      url.searchParams.set("_gt", String(Date.now()));
+      const qs = url.searchParams.toString();
+      window.location.href = url.pathname + (qs ? `?${qs}` : "") + url.hash;
+    } catch (e) {
+      // Fallback
+      window.location.href = newPath;
+    }
   };
 
   return (
