@@ -137,11 +137,22 @@ export async function applyGoogleTranslateLanguage(langCode: string): Promise<vo
       
       // Give it time to revert
       await new Promise(r => setTimeout(r, 300));
-      
-      // Remove translation classes manually
-      document.documentElement.classList.remove("translated-ltr", "translated-rtl");
-      document.body.classList.remove("translated-ltr", "translated-rtl");
     }
+    
+    // ALWAYS aggressively remove translation classes regardless of widget status
+    document.documentElement.classList.remove("translated-ltr", "translated-rtl");
+    document.body.classList.remove("translated-ltr", "translated-rtl");
+    
+    // If page still shows translation after timeout, force reload (with loop prevention)
+    setTimeout(() => {
+      const stillTranslated = document.documentElement.classList.contains("translated-ltr") ||
+                              document.documentElement.classList.contains("translated-rtl");
+      if (stillTranslated && !sessionStorage.getItem('gtrans_reset')) {
+        sessionStorage.setItem('gtrans_reset', 'true');
+        window.location.reload();
+      }
+    }, 1000);
+    
     return;
   }
 
