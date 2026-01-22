@@ -49,33 +49,18 @@
         var supported = ['ar','bn','zh-CN','zh-TW','da','nl','et','fi','fr','de','el','iw','hi','hu','id','it','ja','km','ko','no','fa','pl','pt','pa','ro','ru','sl','es','sv','th','tr','uk','ur','vi'];
         var isLangPrefix = supported.indexOf(seg) !== -1;
 
-        // If no language prefix (i.e., English), clear the googtrans cookie
+        // ALWAYS clear the googtrans cookie on initial load if no language prefix
+        // This prevents auto-translation from previous visits
         if (!isLangPrefix) {
           document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'googtrans=; path=/; domain=' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'googtrans=; path=/; domain=.' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
-          // Check if page appears translated but URL says English - force reload
-          var resetFlag = sessionStorage.getItem('gtrans_reset');
-          var isTranslated = document.documentElement.classList.contains('translated-ltr') ||
-                             document.documentElement.classList.contains('translated-rtl');
-
-          if (!resetFlag && isTranslated) {
-            sessionStorage.setItem('gtrans_reset', 'true');
-            // Force cache-busting reload
-            window.location.reload(true);
-            return;
-          }
-
-          // Clear the reset flag after successful load
-          sessionStorage.removeItem('gtrans_reset');
-
           // Aggressively remove translation classes
           document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
-          document.body && document.body.classList.remove('translated-ltr', 'translated-rtl');
-        } else {
-          // Clear flag when visiting non-English pages
-          sessionStorage.removeItem('gtrans_reset');
+          if (document.body) {
+            document.body.classList.remove('translated-ltr', 'translated-rtl');
+          }
         }
       })();
     </script>
