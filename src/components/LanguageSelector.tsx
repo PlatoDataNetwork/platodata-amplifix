@@ -3,6 +3,15 @@ import { ChevronDown, Globe } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { LANGUAGES, type Language, isSupportedLanguage } from "@/lib/i18nLanguages";
 
+// Helper to clear all googtrans cookies
+function clearAllGoogTransCookies() {
+  const domains = ['', window.location.hostname, '.' + window.location.hostname];
+  domains.forEach(domain => {
+    let cookieStr = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    if (domain) cookieStr += '; domain=' + domain;
+    document.cookie = cookieStr;
+  });
+}
 
 const LanguageSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,22 +61,29 @@ const LanguageSelector = () => {
     setCurrentLang(lang);
     setIsOpen(false);
 
-    // ALWAYS clear existing cookies first (all variations) to prevent conflicts
-    document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-    document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-    document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    // STEP 1: Clear ALL existing cookies first
+    clearAllGoogTransCookies();
+    
+    // STEP 2: Clear localStorage items Google Translate might use
+    try {
+      localStorage.removeItem('googtrans');
+      localStorage.removeItem('google_translate_element');
+    } catch(e) { /* ignore */ }
 
+    // STEP 3: Build the new path
     const newPath = buildPathForLang(lang.code);
     
+    // STEP 4: If switching to a non-English language, set the correct cookie
     if (lang.code !== "en") {
-      // Set new translation cookie after clearing
       document.cookie = `googtrans=/en/${lang.code}; path=/`;
       document.cookie = `googtrans=/en/${lang.code}; path=/; domain=${window.location.hostname}`;
     }
     
-    // Always use hard navigation for language changes - this ensures Google Translate
-    // properly initializes with the new language from the cookie on page load
-    window.location.href = newPath;
+    // STEP 5: Force hard navigation with cache busting to ensure fresh page load
+    // Add a timestamp to prevent browser from using cached translated content
+    const separator = newPath.includes('?') ? '&' : '?';
+    const cacheBuster = `_gt=${Date.now()}`;
+    window.location.href = newPath + separator + cacheBuster;
   };
 
   return (

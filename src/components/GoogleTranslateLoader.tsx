@@ -3,14 +3,15 @@ import { checkAndApplyTranslationFromCookie } from "@/lib/googleTranslate";
 import { isSupportedLanguage } from "@/lib/i18nLanguages";
 
 /**
- * Clear the googtrans cookie (set by Google Translate to persist language choice).
- * This must run BEFORE the Google Translate script loads to prevent auto-translation.
+ * Clear all googtrans cookies (set by Google Translate to persist language choice).
  */
-function clearGoogTransCookies() {
-  document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-  document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-  // Also try with leading dot for subdomains
-  document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+function clearAllGoogTransCookies() {
+  const domains = ['', window.location.hostname, '.' + window.location.hostname];
+  domains.forEach(domain => {
+    let cookieStr = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    if (domain) cookieStr += '; domain=' + domain;
+    document.cookie = cookieStr;
+  });
 }
 
 /**
@@ -22,18 +23,26 @@ function getLangFromUrl(): string {
   return isSupportedLanguage(seg0) ? seg0 : "en";
 }
 
+/**
+ * Get the language from the googtrans cookie
+ */
+function getCookieLang(): string | null {
+  const match = document.cookie.match(/googtrans=\/en\/([a-zA-Z\-]+)/);
+  return match ? match[1] : null;
+}
+
 const GoogleTranslateLoader = () => {
   useEffect(() => {
     const langFromUrl = getLangFromUrl();
+    const cookieLang = getCookieLang();
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // CRITICAL: If URL says English (no prefix), clear any stale googtrans cookie
-    // BEFORE loading Google Translate, so Google won't auto-translate.
-    // ──────────────────────────────────────────────────────────────────────────
     let classObserver: MutationObserver | null = null;
     
+    // ──────────────────────────────────────────────────────────────────────────
+    // ENGLISH (no prefix): Clear cookies and prevent translation
+    // ──────────────────────────────────────────────────────────────────────────
     if (langFromUrl === "en") {
-      clearGoogTransCookies();
+      clearAllGoogTransCookies();
       document.documentElement.setAttribute("lang", "en");
       document.documentElement.classList.remove("translated-ltr", "translated-rtl");
       document.body.classList.remove("translated-ltr", "translated-rtl");
@@ -53,12 +62,29 @@ const GoogleTranslateLoader = () => {
       classObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
       classObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       
-      // Stop observing after 10 seconds to prevent memory leaks
+      // Stop observing after 10 seconds
       setTimeout(() => classObserver?.disconnect(), 10000);
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+    // NON-ENGLISH: Ensure cookie matches URL
+    // ──────────────────────────────────────────────────────────────────────────
+    else {
+      // If cookie doesn't match URL, fix it
+      if (cookieLang !== langFromUrl) {
+        clearAllGoogTransCookies();
+        document.cookie = `googtrans=/en/${langFromUrl}; path=/`;
+        document.cookie = `googtrans=/en/${langFromUrl}; path=/; domain=${window.location.hostname}`;
+      }
     }
 
     // Avoid loading the script multiple times
-    if (document.getElementById("google-translate-script")) return;
+    if (document.getElementById("google-translate-script")) {
+      // Script already loaded, just trigger translation if needed
+      if (langFromUrl !== "en") {
+        setTimeout(() => checkAndApplyTranslationFromCookie(), 500);
+      }
+      return;
+    }
 
     // Store original DOM methods to wrap them safely
     const originalRemoveChild = Node.prototype.removeChild;
@@ -69,20 +95,18 @@ const GoogleTranslateLoader = () => {
       if (child && child.parentNode === this) {
         return originalRemoveChild.call(this, child) as T;
       }
-      // If not a child, just return the node without error
       return child;
     };
 
     // Wrap insertBefore to handle edge cases
     Node.prototype.insertBefore = function <T extends Node>(newNode: T, referenceNode: Node | null): T {
       if (referenceNode && referenceNode.parentNode !== this) {
-        // Reference node is not a child, append instead
         return this.appendChild(newNode) as T;
       }
       return originalInsertBefore.call(this, newNode, referenceNode) as T;
     };
 
-    // Also suppress console errors as a backup
+    // Suppress console errors from Google Translate
     const originalError = console.error;
     console.error = (...args) => {
       const message = args[0]?.toString?.() || "";
@@ -117,9 +141,8 @@ const GoogleTranslateLoader = () => {
     script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     script.onload = () => {
-      // After script loads, check if we should apply translation from cookie
+      // After script loads, apply translation ONLY if URL has language prefix
       setTimeout(() => {
-        // Only honor the cookie when the URL explicitly requests a language.
         if (langFromUrl !== "en") {
           checkAndApplyTranslationFromCookie();
         }
@@ -169,7 +192,7 @@ const GoogleTranslateLoader = () => {
         overflow: hidden !important;
       }
       
-      /* But keep the hidden combo visible for our JS to interact with */
+      /* Keep the hidden combo visible for our JS to interact with */
       .goog-te-combo {
         visibility: visible !important;
         display: inline-block !important;
@@ -222,25 +245,18 @@ const GoogleTranslateLoader = () => {
     document.head.appendChild(style);
 
     return () => {
-      // Disconnect the class observer
       classObserver?.disconnect();
-      
-      // Restore original methods
       Node.prototype.removeChild = originalRemoveChild;
       Node.prototype.insertBefore = originalInsertBefore;
       console.error = originalError;
       
       const scriptEl = document.getElementById("google-translate-script");
       const styleEl = document.getElementById("google-translate-style");
-      if (scriptEl && scriptEl.parentNode) {
-        try {
-          scriptEl.parentNode.removeChild(scriptEl);
-        } catch (e) { /* ignore */ }
+      if (scriptEl?.parentNode) {
+        try { scriptEl.parentNode.removeChild(scriptEl); } catch (e) { /* ignore */ }
       }
-      if (styleEl && styleEl.parentNode) {
-        try {
-          styleEl.parentNode.removeChild(styleEl);
-        } catch (e) { /* ignore */ }
+      if (styleEl?.parentNode) {
+        try { styleEl.parentNode.removeChild(styleEl); } catch (e) { /* ignore */ }
       }
     };
   }, []);

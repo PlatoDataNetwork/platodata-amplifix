@@ -37,30 +37,59 @@
   </head>
 
   <body>
-    <!--  CRITICAL: Clear googtrans cookie BEFORE any scripts load.
-      This prevents Google Translate from auto-translating based on a stale cookie
-      when the URL is the root "/" (English). -->
+    <!--  CRITICAL: Handle Google Translate state BEFORE any scripts load -->
     <script>
       (function() {
-        // Check if URL has a language prefix
         var path = window.location.pathname;
         var seg = path.split('/').filter(Boolean)[0] || '';
-        // List of supported language codes (must match i18nLanguages.ts)
+        // Supported language codes (must match i18nLanguages.ts)
         var supported = ['ar','bn','zh-CN','zh-TW','da','nl','et','fi','fr','de','el','iw','hi','hu','id','it','ja','km','ko','no','fa','pl','pt','pa','ro','ru','sl','es','sv','th','tr','uk','ur','vi'];
         var isLangPrefix = supported.indexOf(seg) !== -1;
 
-        // ALWAYS clear the googtrans cookie on initial load if no language prefix
-        // This prevents auto-translation from previous visits
-        if (!isLangPrefix) {
-          document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-          document.cookie = 'googtrans=; path=/; domain=' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-          document.cookie = 'googtrans=; path=/; domain=.' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        // Helper to clear all googtrans cookies
+        function clearAllGoogTransCookies() {
+          var domains = ['', window.location.hostname, '.' + window.location.hostname];
+          domains.forEach(function(domain) {
+            var cookieStr = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            if (domain) cookieStr += '; domain=' + domain;
+            document.cookie = cookieStr;
+          });
+        }
 
-          // Aggressively remove translation classes
+        // Check what language the cookie says
+        function getCookieLang() {
+          var match = document.cookie.match(/googtrans=\/en\/([a-zA-Z\-]+)/);
+          return match ? match[1] : null;
+        }
+
+        var cookieLang = getCookieLang();
+        var urlLang = isLangPrefix ? seg : 'en';
+
+        // CASE 1: Root domain (English) - clear everything
+        if (!isLangPrefix) {
+          clearAllGoogTransCookies();
+          // Remove translation classes immediately
           document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
           if (document.body) {
             document.body.classList.remove('translated-ltr', 'translated-rtl');
           }
+          // Clear localStorage items Google Translate might use
+          try {
+            localStorage.removeItem('googtrans');
+            localStorage.removeItem('google_translate_element');
+          } catch(e) {}
+        }
+        // CASE 2: Language URL but cookie has different language - fix the mismatch
+        else if (cookieLang && cookieLang !== urlLang) {
+          clearAllGoogTransCookies();
+          // Set correct cookie for this URL's language
+          document.cookie = 'googtrans=/en/' + urlLang + '; path=/';
+          document.cookie = 'googtrans=/en/' + urlLang + '; path=/; domain=' + window.location.hostname;
+        }
+        // CASE 3: Language URL but no cookie - set it
+        else if (!cookieLang && isLangPrefix) {
+          document.cookie = 'googtrans=/en/' + urlLang + '; path=/';
+          document.cookie = 'googtrans=/en/' + urlLang + '; path=/; domain=' + window.location.hostname;
         }
       })();
     </script>
