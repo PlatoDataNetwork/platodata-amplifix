@@ -5,18 +5,27 @@
     <link rel="icon" href="/favicon.png" type="image/png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plato AI - Secure Network Protocol for the Next Web</title>
-    <meta name="description" content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency." />
+    <meta
+      name="description"
+      content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency."
+    />
     <meta name="author" content="Plato Technologies Inc" />
 
     <!-- Preconnect to Google Fonts for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+
     <!-- Inter font with multiple weights for consistency across browsers -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
     <meta property="og:title" content="Plato AI - Secure Network Protocol for the Next Web" />
-    <meta property="og:description" content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency." />
+    <meta
+      property="og:description"
+      content="Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.platodata.io" />
     <meta property="og:image" content="https://www.platodata.io/images/article-default-img.jpg" />
@@ -28,11 +37,9 @@
   </head>
 
   <body>
-    <!-- 
-      CRITICAL: Clear googtrans cookie BEFORE any scripts load.
+    <!--  CRITICAL: Clear googtrans cookie BEFORE any scripts load.
       This prevents Google Translate from auto-translating based on a stale cookie
-      when the URL is the root "/" (English).
-    -->
+      when the URL is the root "/" (English). -->
     <script>
       (function() {
         // Check if URL has a language prefix
@@ -41,28 +48,28 @@
         // List of supported language codes (must match i18nLanguages.ts)
         var supported = ['ar','bn','zh-CN','zh-TW','da','nl','et','fi','fr','de','el','iw','hi','hu','id','it','ja','km','ko','no','fa','pl','pt','pa','ro','ru','sl','es','sv','th','tr','uk','ur','vi'];
         var isLangPrefix = supported.indexOf(seg) !== -1;
-        
+
         // If no language prefix (i.e., English), clear the googtrans cookie
         if (!isLangPrefix) {
           document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'googtrans=; path=/; domain=' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'googtrans=; path=/; domain=.' + window.location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-          
+
           // Check if page appears translated but URL says English - force reload
           var resetFlag = sessionStorage.getItem('gtrans_reset');
-          var isTranslated = document.documentElement.classList.contains('translated-ltr') || 
+          var isTranslated = document.documentElement.classList.contains('translated-ltr') ||
                              document.documentElement.classList.contains('translated-rtl');
-          
+
           if (!resetFlag && isTranslated) {
             sessionStorage.setItem('gtrans_reset', 'true');
             // Force cache-busting reload
             window.location.reload(true);
             return;
           }
-          
+
           // Clear the reset flag after successful load
           sessionStorage.removeItem('gtrans_reset');
-          
+
           // Aggressively remove translation classes
           document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
           document.body && document.body.classList.remove('translated-ltr', 'translated-rtl');
@@ -72,7 +79,7 @@
         }
       })();
     </script>
-    
+
     <!-- Hidden Google Translate element - MUST be outside React root -->
     <div id="google_translate_element" style="display:none !important;"></div>
     <div id="root"></div>
