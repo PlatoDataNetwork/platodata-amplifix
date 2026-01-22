@@ -213,8 +213,8 @@ export function checkAndApplyTranslationFromCookie(): void {
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
     if (name === "googtrans" && value) {
-      // Cookie format: /en/targetLang
-      const match = value.match(/\/en\/([a-z]{2})/);
+      // Cookie format: /en/targetLang (handles codes like zh-CN, zh-TW)
+      const match = value.match(/\/en\/([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/);
       if (match && match[1] !== "en") {
         const targetLang = match[1];
         
