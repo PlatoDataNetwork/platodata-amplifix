@@ -1,0 +1,242 @@
+{
+  "navigation": {
+    "about": "About",
+    "solutions": "Solutions",
+    "protocol": "Protocol",
+    "security": "Security",
+    "resources": "Resources",
+    "intel": "Intel",
+    "dataFeeds": "Data Feeds",
+    "staking": "Staking",
+    "token": "Token"
+  },
+  "hero": {
+    "badge": "PLATO AI",
+    "titleLine1": "Secure network protocol",
+    "titleLine2": "for the next web",
+    "descriptionLine1": "Web3 AI code creation, automation, and vertical data Intelligence.",
+    "descriptionLine2": "A decentralized, consensus-driven AI network ensuring trust & transparency."
+  },
+  "mission": {
+    "badge": "The Power of Generative AI Reimagined",
+    "title": "We are the intersection of Web3 and AI.",
+    "description": "Our mission is to use AI to revolutionize the way people discover and engage with vertical data intelligence. Our platform has created a new way to drive high value across both institutional and prosumer environments.",
+    "feature1Title": "Validated, Realtime Data",
+    "feature1Description": "AI-driven data compliance ensures accurate, real-time adherence to regulations by automating audits, monitoring risks, and providing actionable insights.",
+    "feature2Title": "AI-Driven Compliance",
+    "feature2Description": "Our streamlined compliance processes mitigate potential breaches while enhancing organizational transparency and user security."
+  },
+  "features": {
+    "title": "Our Solutions",
+    "description": "Discover powerful tools and services designed to accelerate your digital transformation with cutting-edge technology and secure infrastructure.",
+    "learnMore": "Learn More",
+    "items": {
+      "aiDevelopment": {
+        "title": "AI Development",
+        "description": "Build intelligent solutions with cutting-edge machine learning and AI technologies."
+      },
+      "web3Development": {
+        "title": "Web3 Development",
+        "description": "Create decentralized applications with blockchain technology and Web3 infrastructure."
+      },
+      "softwareDevelopment": {
+        "title": "Software Development",
+        "description": "Develop robust, scalable software solutions tailored to your business needs."
+      },
+      "fastSeamless": {
+        "title": "Fast & Seamless",
+        "description": "Experience lightning-fast, frictionless interactions that keep you ahead of the curve."
+      },
+      "uniqueFunctionality": {
+        "title": "Unique Functionality",
+        "description": "Unlock unparalleled features designed to transform your digital experience."
+      },
+      "smartContracts": {
+        "title": "Smart Contracts",
+        "description": "Automate trust and execution with self-executing, tamper-proof agreements."
+      },
+      "communityIntegration": {
+        "title": "Community Integration",
+        "description": "Empower and engage a vibrant community through decentralized collaboration."
+      },
+      "secureTransparent": {
+        "title": "Secure & Transparent",
+        "description": "Trust in a platform built with cutting-edge security and full transparency."
+      },
+      "apiFunctionality": {
+        "title": "API Functionality",
+        "description": "Easily integrate powerful tools with flexible, scalable APIs for limitless possibilities."
+      }
+    }
+  },
+  "stats": {
+    "badge": "Content Syndication",
+    "titleLine1": "AI Powered Press Release",
+    "titleLine2": "and Content Syndication",
+    "trustedTitle": "Trusted by millions",
+    "trustedDescription": "Millions of users rely on our platform for secure, transparent, and reliable solutions. Our commitment to excellence has earned the trust of businesses and creators worldwide, empowering them to innovate with confidence.",
+    "items": {
+      "languages": "Languages",
+      "impressions": "Organic Impressions",
+      "engagements": "Engagements",
+      "enterprises": "Global Enterprises"
+    }
+  },
+  "security": {
+    "section1": {
+      "badge": "Multi Layered Security Protocol",
+      "title": "Safeguarding Your Data in an Ultra Secure Private Network",
+      "description": "Plato employs robust, multi-layered security protocols to protect your data and ensure the integrity of the platform, providing a secure environment for all your research activities.",
+      "feature1Title": "End-to-End Encryption",
+      "feature1Description": "Military-grade encryption protecting all data transfers",
+      "feature2Title": "Decentralized Architecture",
+      "feature2Description": "Distributed network ensuring no single point of failure",
+      "feature3Title": "Continuous Monitoring",
+      "feature3Description": "24/7 threat detection and automated response systems"
+    },
+    "section2": {
+      "badge": "Digital Watermarking",
+      "title": "Create, Embed and Validate Your Content Onchain",
+      "description": "Harness the power of blockchain to create, embed, and validate data with unmatched security and transparency. By embedding data directly onchain, we enable decentralized trust and real-time data integrity, transforming the way information is managed and shared."
+    }
+  },
+  "developers": {
+    "badge": "Developers",
+    "titleLine1": "Built by developers,",
+    "titleLine2": "for developers",
+    "description": "Built for developers, by developers—engineered with precision, performance, and purpose. Every line of code is crafted to empower innovation, streamline workflows, and accelerate your development journey.",
+    "learnMore": "Learn More",
+    "items": {
+      "cleanApis": {
+        "title": "Clean APIs",
+        "description": "RESTful and GraphQL endpoints designed for seamless integration and developer productivity."
+      },
+      "versionControl": {
+        "title": "Version Control",
+        "description": "Semantic versioning for stability, compatibility, and predictable updates across releases."
+      },
+      "cliTools": {
+        "title": "CLI Tools",
+        "description": "Powerful command-line utilities that streamline workflows and boost development efficiency."
+      }
+    }
+  },
+  "blog": {
+    "badge": "Blog",
+    "title": "Latest news on Plato",
+    "readMore": "Read more"
+  },
+  "footer": {
+    "companyDescription": "Plato Technologies Inc. A NYC based AI Web3 Venture Lab dedicated to building vertically focused data intelligence products.",
+    "productTitle": "Product",
+    "companyTitle": "Company",
+    "connectTitle": "Connect",
+    "blog": "Blog",
+    "careers": "Careers",
+    "twitter": "Twitter",
+    "discord": "Discord",
+    "github": "GitHub",
+    "copyright": "© 2024 Plato Technologies Inc. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "solutions": {
+    "pageTitle": "Our Solutions",
+    "pageDescription": "Empowering businesses with innovative technology solutions across AI, Web3, and custom software development.",
+    "getStarted": "Get Started",
+    "scheduleConsultation": "Schedule Consultation",
+    "keyBenefits": "Key Benefits",
+    "backToHome": "← Back to Home",
+    "aiDevelopment": {
+      "title": "AI Development",
+      "tagline": "Intelligent Solutions for Tomorrow's Challenges",
+      "description": "Transform your business with cutting-edge artificial intelligence and machine learning solutions. Our AI development services leverage state-of-the-art technologies to build intelligent systems that learn, adapt, and deliver exceptional results.",
+      "features": {
+        "mlModels": {
+          "title": "Machine Learning Models",
+          "description": "Custom ML models trained on your data to solve specific business problems, from predictive analytics to pattern recognition."
+        },
+        "nlp": {
+          "title": "Natural Language Processing",
+          "description": "Build conversational AI, sentiment analysis, and text processing systems that understand and generate human language."
+        },
+        "computerVision": {
+          "title": "Computer Vision",
+          "description": "Implement image recognition, object detection, and visual analysis systems for automated decision-making."
+        },
+        "aiIntegration": {
+          "title": "AI Integration",
+          "description": "Seamlessly integrate AI capabilities into your existing systems and workflows for enhanced automation."
+        }
+      },
+      "benefits": [
+        "Automate complex decision-making processes",
+        "Reduce operational costs by up to 40%",
+        "Gain actionable insights from data",
+        "Scale intelligence across your organization"
+      ]
+    },
+    "web3Development": {
+      "title": "Web3 Development",
+      "tagline": "Building the Decentralized Future",
+      "description": "Enter the next generation of the internet with our comprehensive Web3 development services. We create decentralized applications, smart contracts, and blockchain solutions that empower users and revolutionize digital interactions.",
+      "features": {
+        "smartContracts": {
+          "title": "Smart Contract Development",
+          "description": "Secure, audited smart contracts on Ethereum, Solana, and other leading blockchain platforms."
+        },
+        "defi": {
+          "title": "DeFi Solutions",
+          "description": "Build decentralized finance applications including DEXs, lending protocols, and yield farming platforms."
+        },
+        "nft": {
+          "title": "NFT Platforms",
+          "description": "Create NFT marketplaces, minting platforms, and digital collectible ecosystems with full Web3 integration."
+        },
+        "infrastructure": {
+          "title": "Blockchain Infrastructure",
+          "description": "Deploy and maintain blockchain nodes, validators, and decentralized storage solutions."
+        }
+      },
+      "benefits": [
+        "True ownership and data sovereignty",
+        "Transparent and immutable transactions",
+        "Reduced intermediary costs",
+        "Global accessibility without borders"
+      ]
+    },
+    "softwareDevelopment": {
+      "title": "Software Development",
+      "tagline": "Robust Solutions for Modern Business",
+      "description": "Build powerful, scalable software solutions tailored to your unique business needs. Our full-stack development expertise spans web applications, mobile apps, enterprise systems, and cloud-native architectures.",
+      "features": {
+        "fullStack": {
+          "title": "Full-Stack Development",
+          "description": "End-to-end application development using modern frameworks like React, Node.js, and cloud-native technologies."
+        },
+        "api": {
+          "title": "API Development",
+          "description": "Design and build robust RESTful and GraphQL APIs that power seamless integrations and data exchange."
+        },
+        "database": {
+          "title": "Database Architecture",
+          "description": "Optimize data storage with scalable database solutions including SQL, NoSQL, and distributed systems."
+        },
+        "securityCompliance": {
+          "title": "Security & Compliance",
+          "description": "Implement enterprise-grade security, encryption, and compliance measures to protect your data and users."
+        }
+      },
+      "benefits": [
+        "Accelerate time-to-market",
+        "Scale seamlessly with demand",
+        "Reduce technical debt",
+        "Enhance user experience"
+      ]
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}

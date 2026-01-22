@@ -2,55 +2,57 @@ import { Zap, Box, FileCode2, Users, Shield, Plug, Brain, Hexagon, Code } from "
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLangRouting } from "@/hooks/useLangRouting";
+import useTranslations from "@/hooks/useTranslations";
 
 const Features = () => {
   const { withLang } = useLangRouting();
+  const { t } = useTranslations();
 
   const features = [
     {
       icon: Brain,
-      title: "AI Development",
-      description: "Build intelligent solutions with cutting-edge machine learning and AI technologies.",
+      title: t("features.items.aiDevelopment.title"),
+      description: t("features.items.aiDevelopment.description"),
     },
     {
       icon: Hexagon,
-      title: "Web3 Development",
-      description: "Create decentralized applications with blockchain technology and Web3 infrastructure.",
+      title: t("features.items.web3Development.title"),
+      description: t("features.items.web3Development.description"),
     },
     {
       icon: Code,
-      title: "Software Development",
-      description: "Develop robust, scalable software solutions tailored to your business needs.",
+      title: t("features.items.softwareDevelopment.title"),
+      description: t("features.items.softwareDevelopment.description"),
     },
     {
       icon: Zap,
-      title: "Fast & Seamless",
-      description: "Experience lightning-fast, frictionless interactions that keep you ahead of the curve.",
+      title: t("features.items.fastSeamless.title"),
+      description: t("features.items.fastSeamless.description"),
     },
     {
       icon: Box,
-      title: "Unique Functionality",
-      description: "Unlock unparalleled features designed to transform your digital experience.",
+      title: t("features.items.uniqueFunctionality.title"),
+      description: t("features.items.uniqueFunctionality.description"),
     },
     {
       icon: FileCode2,
-      title: "Smart Contracts",
-      description: "Automate trust and execution with self-executing, tamper-proof agreements.",
+      title: t("features.items.smartContracts.title"),
+      description: t("features.items.smartContracts.description"),
     },
     {
       icon: Users,
-      title: "Community Integration",
-      description: "Empower and engage a vibrant community through decentralized collaboration.",
+      title: t("features.items.communityIntegration.title"),
+      description: t("features.items.communityIntegration.description"),
     },
     {
       icon: Shield,
-      title: "Secure & Transparent",
-      description: "Trust in a platform built with cutting-edge security and full transparency.",
+      title: t("features.items.secureTransparent.title"),
+      description: t("features.items.secureTransparent.description"),
     },
     {
       icon: Plug,
-      title: "API Functionality",
-      description: "Easily integrate powerful tools with flexible, scalable APIs for limitless possibilities.",
+      title: t("features.items.apiFunctionality.title"),
+      description: t("features.items.apiFunctionality.description"),
     },
   ];
 
@@ -58,10 +60,9 @@ const Features = () => {
     <section className="py-32 relative" id="solutions">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight mb-4">Our Solutions</h2>
+          <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight mb-4">{t("features.title")}</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover powerful tools and services designed to accelerate your digital transformation with cutting-edge
-            technology and secure infrastructure.
+            {t("features.description")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -85,7 +86,7 @@ const Features = () => {
                       size="lg"
                       className="w-full bg-secondary hover:bg-secondary/80 text-foreground"
                     >
-                      Learn More
+                      {t("features.learnMore")}
                     </Button>
                   </Link>
                 ) : null}
