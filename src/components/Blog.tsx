@@ -1,9 +1,6 @@
 import { ArrowRight } from "lucide-react";
-import useTranslations from "@/hooks/useTranslations";
 
 const Blog = () => {
-  const { t } = useTranslations();
-
   const posts = [
     {
       title: "Introducing enhanced search API functionality with Plato",
@@ -24,8 +21,8 @@ const Blog = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <p className="text-primary text-sm font-medium tracking-wide uppercase">{t("blog.badge")}</p>
-            <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">{t("blog.title")}</h2>
+            <p className="text-primary text-sm font-medium tracking-wide uppercase">Blog</p>
+            <h2 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight">Latest news on Plato</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -43,7 +40,7 @@ const Blog = () => {
                 </h3>
                 
                 <div className="flex items-center text-primary text-sm font-medium">
-                  {t("blog.readMore")}
+                  Read more
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>

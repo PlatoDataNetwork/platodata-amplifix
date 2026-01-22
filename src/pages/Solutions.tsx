@@ -6,108 +6,119 @@ import { Link } from "react-router-dom";
 import { useLangRouting } from "@/hooks/useLangRouting";
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import useTranslations from "@/hooks/useTranslations";
 
 const SITE_URL = "https://www.platodata.io";
 
 const Solutions = () => {
   const { siteName } = useSiteSettings();
   const { withLang } = useLangRouting();
-  const { t, getArray } = useTranslations();
-  
   const pageTitle = `Solutions | AI, Web3 & Software Development | ${siteName}`;
   const pageDescription = "Empowering businesses with innovative technology solutions across AI development, Web3 blockchain solutions, and custom software development.";
-  
   const solutions = [
     {
       id: "ai-development",
       icon: Brain,
-      title: t("solutions.aiDevelopment.title"),
-      tagline: t("solutions.aiDevelopment.tagline"),
-      description: t("solutions.aiDevelopment.description"),
+      title: "AI Development",
+      tagline: "Intelligent Solutions for Tomorrow's Challenges",
+      description: "Transform your business with cutting-edge artificial intelligence and machine learning solutions. Our AI development services leverage state-of-the-art technologies to build intelligent systems that learn, adapt, and deliver exceptional results.",
       features: [
         {
           icon: Cpu,
-          title: t("solutions.aiDevelopment.features.mlModels.title"),
-          description: t("solutions.aiDevelopment.features.mlModels.description")
+          title: "Machine Learning Models",
+          description: "Custom ML models trained on your data to solve specific business problems, from predictive analytics to pattern recognition."
         },
         {
           icon: Brain,
-          title: t("solutions.aiDevelopment.features.nlp.title"),
-          description: t("solutions.aiDevelopment.features.nlp.description")
+          title: "Natural Language Processing",
+          description: "Build conversational AI, sentiment analysis, and text processing systems that understand and generate human language."
         },
         {
           icon: Database,
-          title: t("solutions.aiDevelopment.features.computerVision.title"),
-          description: t("solutions.aiDevelopment.features.computerVision.description")
+          title: "Computer Vision",
+          description: "Implement image recognition, object detection, and visual analysis systems for automated decision-making."
         },
         {
           icon: Rocket,
-          title: t("solutions.aiDevelopment.features.aiIntegration.title"),
-          description: t("solutions.aiDevelopment.features.aiIntegration.description")
+          title: "AI Integration",
+          description: "Seamlessly integrate AI capabilities into your existing systems and workflows for enhanced automation."
         }
       ],
-      benefits: getArray("solutions.aiDevelopment.benefits")
+      benefits: [
+        "Automate complex decision-making processes",
+        "Reduce operational costs by up to 40%",
+        "Gain actionable insights from data",
+        "Scale intelligence across your organization"
+      ]
     },
     {
       id: "web3-development",
       icon: Hexagon,
-      title: t("solutions.web3Development.title"),
-      tagline: t("solutions.web3Development.tagline"),
-      description: t("solutions.web3Development.description"),
+      title: "Web3 Development",
+      tagline: "Building the Decentralized Future",
+      description: "Enter the next generation of the internet with our comprehensive Web3 development services. We create decentralized applications, smart contracts, and blockchain solutions that empower users and revolutionize digital interactions.",
       features: [
         {
           icon: Hexagon,
-          title: t("solutions.web3Development.features.smartContracts.title"),
-          description: t("solutions.web3Development.features.smartContracts.description")
+          title: "Smart Contract Development",
+          description: "Secure, audited smart contracts on Ethereum, Solana, and other leading blockchain platforms."
         },
         {
           icon: Shield,
-          title: t("solutions.web3Development.features.defi.title"),
-          description: t("solutions.web3Development.features.defi.description")
+          title: "DeFi Solutions",
+          description: "Build decentralized finance applications including DEXs, lending protocols, and yield farming platforms."
         },
         {
           icon: Globe,
-          title: t("solutions.web3Development.features.nft.title"),
-          description: t("solutions.web3Development.features.nft.description")
+          title: "NFT Platforms",
+          description: "Create NFT marketplaces, minting platforms, and digital collectible ecosystems with full Web3 integration."
         },
         {
           icon: Database,
-          title: t("solutions.web3Development.features.infrastructure.title"),
-          description: t("solutions.web3Development.features.infrastructure.description")
+          title: "Blockchain Infrastructure",
+          description: "Deploy and maintain blockchain nodes, validators, and decentralized storage solutions."
         }
       ],
-      benefits: getArray("solutions.web3Development.benefits")
+      benefits: [
+        "True ownership and data sovereignty",
+        "Transparent and immutable transactions",
+        "Reduced intermediary costs",
+        "Global accessibility without borders"
+      ]
     },
     {
       id: "software-development",
       icon: Code,
-      title: t("solutions.softwareDevelopment.title"),
-      tagline: t("solutions.softwareDevelopment.tagline"),
-      description: t("solutions.softwareDevelopment.description"),
+      title: "Software Development",
+      tagline: "Robust Solutions for Modern Business",
+      description: "Build powerful, scalable software solutions tailored to your unique business needs. Our full-stack development expertise spans web applications, mobile apps, enterprise systems, and cloud-native architectures.",
       features: [
         {
           icon: Code,
-          title: t("solutions.softwareDevelopment.features.fullStack.title"),
-          description: t("solutions.softwareDevelopment.features.fullStack.description")
+          title: "Full-Stack Development",
+          description: "End-to-end application development using modern frameworks like React, Node.js, and cloud-native technologies."
         },
         {
           icon: Zap,
-          title: t("solutions.softwareDevelopment.features.api.title"),
-          description: t("solutions.softwareDevelopment.features.api.description")
+          title: "API Development",
+          description: "Design and build robust RESTful and GraphQL APIs that power seamless integrations and data exchange."
         },
         {
           icon: Database,
-          title: t("solutions.softwareDevelopment.features.database.title"),
-          description: t("solutions.softwareDevelopment.features.database.description")
+          title: "Database Architecture",
+          description: "Optimize data storage with scalable database solutions including SQL, NoSQL, and distributed systems."
         },
         {
           icon: Shield,
-          title: t("solutions.softwareDevelopment.features.securityCompliance.title"),
-          description: t("solutions.softwareDevelopment.features.securityCompliance.description")
+          title: "Security & Compliance",
+          description: "Implement enterprise-grade security, encryption, and compliance measures to protect your data and users."
         }
       ],
-      benefits: getArray("solutions.softwareDevelopment.benefits")
+      benefits: [
+        "Accelerate time-to-market",
+        "Scale seamlessly with demand",
+        "Reduce technical debt",
+        "Enhance user experience"
+      ]
     }
   ];
 
@@ -144,10 +155,10 @@ const Solutions = () => {
         <div className="container mx-auto px-6">
           <div className="text-center mb-16 animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              {t("solutions.pageTitle")}
+              Our Solutions
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {t("solutions.pageDescription")}
+              Empowering businesses with innovative technology solutions across AI, Web3, and custom software development.
             </p>
           </div>
         </div>
@@ -208,7 +219,7 @@ const Solutions = () => {
 
                 {/* Benefits */}
                 <div className="p-8 rounded-xl bg-card border border-border animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                  <h3 className="text-xl font-semibold mb-4">{t("solutions.keyBenefits")}</h3>
+                  <h3 className="text-xl font-semibold mb-4">Key Benefits</h3>
                   <ul className="grid md:grid-cols-2 gap-3">
                     {solution.benefits.map((benefit, benefitIndex) => (
                       <li key={benefitIndex} className="flex items-center gap-2 text-muted-foreground">
@@ -222,10 +233,10 @@ const Solutions = () => {
                 {/* CTA */}
                 <div className="mt-8 flex gap-4 animate-fade-in" style={{ animationDelay: '0.7s' }}>
                   <Button size="lg" className="bg-primary hover:bg-primary/90">
-                    {t("solutions.getStarted")}
+                    Get Started
                   </Button>
                   <Button size="lg" variant="outline">
-                    {t("solutions.scheduleConsultation")}
+                    Schedule Consultation
                   </Button>
                 </div>
               </div>
@@ -239,7 +250,7 @@ const Solutions = () => {
         <div className="container mx-auto px-6 text-center">
           <Link to={withLang("/")}>
             <Button variant="ghost" size="lg">
-              {t("solutions.backToHome")}
+              ← Back to Home
             </Button>
           </Link>
         </div>

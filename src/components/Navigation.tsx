@@ -4,12 +4,10 @@ import { Link } from "react-router-dom";
 import platoIcon from "@/assets/plato-icon.png";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLangRouting } from "@/hooks/useLangRouting";
-import useTranslations from "@/hooks/useTranslations";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { withLang } = useLangRouting();
-  const { t } = useTranslations();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,13 +18,13 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { name: t("navigation.about"), href: "/#about" },
-    { name: t("navigation.solutions"), href: "/#solutions" },
-    { name: t("navigation.protocol"), href: "/#protocol" },
-    { name: t("navigation.security"), href: "/#security" },
-    { name: t("navigation.resources"), href: "/#resources" },
-    { name: t("navigation.intel"), href: "/intel", isRoute: true },
-    { name: t("navigation.dataFeeds"), href: "/data-feeds", isRoute: true },
+    { name: "About", href: "/#about" },
+    { name: "Solutions", href: "/#solutions" },
+    { name: "Protocol", href: "/#protocol" },
+    { name: "Security", href: "/#security" },
+    { name: "Resources", href: "/#resources" },
+    { name: "Intel", href: "/intel", isRoute: true },
+    { name: "Data Feeds", href: "/data-feeds", isRoute: true },
   ];
 
   return (
@@ -76,10 +74,10 @@ const Navigation = () => {
               <LanguageSelector />
             </div>
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">
-              {t("navigation.staking")}
+              Staking
             </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90">
-              {t("navigation.token")}
+              Token
             </Button>
           </div>
         </div>
