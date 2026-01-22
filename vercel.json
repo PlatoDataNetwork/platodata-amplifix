@@ -10,52 +10,54 @@
       ]
     }
   ],
-  "routes": [
+  "rewrites": [
     { 
-      "src": "/robots.txt", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/robots-txt"
+      "source": "/robots.txt", 
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/robots-txt"
     },
     {
-      "src": "/sitemap.xsl",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap-xsl"
-    },
-    { 
-      "src": "/sitemap.xml", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap.xml"
+      "source": "/sitemap.xsl",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap-xsl"
     },
     { 
-      "src": "/page-sitemap.xml", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=page-sitemap.xml"
+      "source": "/sitemap.xml", 
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=sitemap.xml"
     },
     { 
-      "src": "/vertical-sitemap.xml", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=vertical-sitemap.xml"
+      "source": "/page-sitemap.xml", 
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=page-sitemap.xml"
     },
     { 
-      "src": "/post-sitemap(\\d+).xml", 
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=post-sitemap$1.xml"
+      "source": "/vertical-sitemap.xml", 
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=vertical-sitemap.xml"
+    },
+    { 
+      "source": "/post-sitemap:num(\\d+).xml", 
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/sitemap?path=post-sitemap:num.xml"
     },
     {
-      "src": "/feed.xml",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed"
+      "source": "/feed.xml",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed"
     },
     {
-      "src": "/feed.json",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed"
+      "source": "/feed.json",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed"
     },
     {
-      "src": "/feed/([^/]+).xml",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed?vertical=$1"
+      "source": "/feed/:vertical.xml",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/rss-feed?vertical=:vertical"
     },
     {
-      "src": "/feed/([^/]+).json",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed?vertical=$1"
+      "source": "/feed/:vertical.json",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/json-feed?vertical=:vertical"
     },
     {
-      "src": "/share/article/(\\d+)",
-      "dest": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=$1"
+      "source": "/share/article/:postId",
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=:postId"
     },
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
   ]
 }
