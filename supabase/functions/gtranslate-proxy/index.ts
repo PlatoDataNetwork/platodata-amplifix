@@ -19,10 +19,6 @@ const supportedLangs = [
 // Get server based on hostname (same algorithm as PHP)
 function getServer(hostname: string): string {
   const cleanHost = hostname.replace(/^www\./, '');
-  let hash = 0;
-  for (let i = 0; i < Math.min(cleanHost.length, 5); i++) {
-    hash = hash * 16 + parseInt(cleanHost.charCodeAt(i).toString(16), 16);
-  }
   // Simple hash using MD5-like calculation
   const md5Like = Array.from(cleanHost).reduce((acc, char) => {
     return ((acc << 5) - acc + char.charCodeAt(0)) | 0;
@@ -30,30 +26,6 @@ function getServer(hostname: string): string {
   const serverId = Math.abs(md5Like) % servers.length;
   return servers[serverId];
 }
-
-// Get CA certificate for SSL verification
-const caCert = `-----BEGIN CERTIFICATE-----
-MIIDmzCCAoOgAwIBAgIJALjD5B2Tw5WVMA0GCSqGSIb3DQEBCwUAMGQxCzAJBgNV
-BAYTAlVTMQswCQYDVQQIDAJDQTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEXMBUG
-A1UECgwOR1RyYW5zbGF0ZSBJbmMxFzAVBgNVBAMMDmd0cmFuc2xhdGUuY29tMB4X
-DTE5MDIyMDE2NDcwN1oXDTI5MDIxNzE2NDcwN1owZDELMAkGA1UEBhMCVVMxCzAJ
-BgNVBAgMAkNBMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMRcwFQYDVQQKDA5HVHJh
-bnNsYXRlIEluYzEXMBUGA1UEAwwOZ3RyYW5zbGF0ZS5jb20wggEiMA0GCSqGSIb3
-DQEBAQUAA4IBDwAwggEKAoIBAQC3wWCPu05M9T9rpJR8rY/RYPEkyL5EmGUcirMe
-EJncOQnv0cKEU722xBuLBN2RPT/+pM2nVcMKbp/aFbJ5PX8BR6ZXKaGDQMPHdASV
-nM20yt1RJc+qNHDUL1vDvIlNfV+ux3by+k/dNNCXYj2BBzVbhqoJefHNtry3QnQ3
-AJ5hf09PHKtLAMS6PeaVmHn6XfCsKK2iQ5hD6qN85C8x7GiltEJD0Np0zM9nTim2
-ilQfpvF5JaDM0lf9vNJDseQ7JOlBM/WcQ3BtgbswFvq3kIMcIGTjqsw/dtNcUUpV
-PsGwz797bq31aFug0J0a9DMYMgbErPlC0r6JkazU3hdBvcF7AgMBAAGjUDBOMB0G
-A1UdDgQWBBTHGSln6Hs9Rk7iLECUbjMcB99b4jAfBgNVHSMEGDAWgBTHGSln6Hs9
-Rk7iLECUbjMcB99b4jAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBZ
-RWN7otrYojEehmjd3ybFrU95R9W4uLWV/LBUlW+sARAmunmQve0hARG8nOP0Tg4m
-5I0v1vxY1wVnYV6hi1+gba+ynBnNt7XkebqXC1Qq99WdQfi2M/a1clIbFZUJhWec
-Wv5WqXaafW102b/z7syZkRtrtZ6YhGSMtwd071C9KQbE025wqDVM2TioL6viSpZG
-YDYks7e7ogS4fUAorODAxT0FZ1GZM0HaZ/XQG33SpoG5saHHxflMqTh4dLcnh5KN
-W++ZZCwEYKrLi5slHjlyciZU7EWJNLWOnqNMZUxLX2yZ/hh9idzazEzm9IoQYrGP
-dAifs/vxi/FmcAllKc1Y
------END CERTIFICATE-----`;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -92,13 +64,17 @@ serve(async (req) => {
     // Pick server based on hostname
     const server = getServer(origin);
     
-    // Build the page URL
-    let pageUrl = '/' + gurl;
+    // Build the page URL - handle empty path for homepage
+    let pageUrl = gurl ? '/' + gurl : '/';
     
-    // URL encode path segments
-    const segments = pageUrl.split('/');
-    const encodedSegments = segments.map(segment => encodeURIComponent(decodeURIComponent(segment)));
-    pageUrl = encodedSegments.join('/');
+    // URL encode path segments (but not slashes)
+    if (gurl) {
+      const segments = pageUrl.split('/');
+      const encodedSegments = segments.map(segment => 
+        segment ? encodeURIComponent(decodeURIComponent(segment)) : ''
+      );
+      pageUrl = encodedSegments.join('/');
+    }
 
     // Get additional query params (exclude glang and gurl)
     const additionalParams = new URLSearchParams();
@@ -113,7 +89,9 @@ serve(async (req) => {
     }
 
     // Build the full proxy URL to GTranslate
-    const protocol = 'https';
+    // Use HTTP since Supabase Edge Functions cannot add custom CA certs
+    // GTranslate's custom CA certificate is not trusted by default
+    const protocol = 'http';
     const proxyUrl = `${protocol}://${server}.tdn.gtranslate.net${pageUrl}`;
 
     console.log(`Proxying to: ${proxyUrl}`);
