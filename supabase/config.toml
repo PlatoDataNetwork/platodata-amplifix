@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.og-meta]
 verify_jwt = false
+
+[functions.gtranslate-proxy]
+verify_jwt = false
