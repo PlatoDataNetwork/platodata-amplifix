@@ -52,15 +52,15 @@ const LanguageSelector = () => {
     setCurrentLang(lang);
     setIsOpen(false);
 
+    // ALWAYS clear existing cookies first (all variations) to prevent conflicts
+    document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+
     const newPath = buildPathForLang(lang.code);
     
-    if (lang.code === "en") {
-      // For English, clear cookies before navigation
-      document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-      document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-      document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-    } else {
-      // Set translation cookie before navigation so Google Translate picks it up on reload
+    if (lang.code !== "en") {
+      // Set new translation cookie after clearing
       document.cookie = `googtrans=/en/${lang.code}; path=/`;
       document.cookie = `googtrans=/en/${lang.code}; path=/; domain=${window.location.hostname}`;
     }
