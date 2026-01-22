@@ -40,17 +40,52 @@
     <!--  CRITICAL: Handle Google Translate state BEFORE any scripts load -->
     <script>
       (function() {
+        // Remove cache-buster param to avoid URLs growing on repeated language switches
+        // (keep other query params intact).
+        try {
+          var _url = new URL(window.location.href);
+          if (_url.searchParams.has('_gt')) {
+            _url.searchParams.delete('_gt');
+            var _q = _url.searchParams.toString();
+            history.replaceState(null, '', _url.pathname + (_q ? '?' + _q : '') + _url.hash);
+          }
+        } catch (e) {}
+
         var path = window.location.pathname;
         var seg = path.split('/').filter(Boolean)[0] || '';
         // Supported language codes (must match i18nLanguages.ts)
         var supported = ['ar','bn','zh-CN','zh-TW','da','nl','et','fi','fr','de','el','iw','hi','hu','id','it','ja','km','ko','no','fa','pl','pt','pa','ro','ru','sl','es','sv','th','tr','uk','ur','vi'];
         var isLangPrefix = supported.indexOf(seg) !== -1;
 
+        function getCookieDomains() {
+          var host = window.location.hostname;
+          var base = host.indexOf('www.') === 0 ? host.slice(4) : host;
+          var domains = ['', host, '.' + host];
+          // IMPORTANT: also clear/set apex domain cookies (e.g. .platodata.io)
+          if (base && base !== host) {
+            domains.push(base, '.' + base);
+          }
+          // de-dup
+          var seen = {};
+          return domains.filter(function(d) {
+            if (seen[d]) return false;
+            seen[d] = true;
+            return true;
+          });
+        }
+
         // Helper to clear all googtrans cookies
         function clearAllGoogTransCookies() {
-          var domains = ['', window.location.hostname, '.' + window.location.hostname];
-          domains.forEach(function(domain) {
+          getCookieDomains().forEach(function(domain) {
             var cookieStr = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            if (domain) cookieStr += '; domain=' + domain;
+            document.cookie = cookieStr;
+          });
+        }
+
+        function setGoogTransCookie(value) {
+          getCookieDomains().forEach(function(domain) {
+            var cookieStr = 'googtrans=' + value + '; path=/';
             if (domain) cookieStr += '; domain=' + domain;
             document.cookie = cookieStr;
           });
@@ -58,8 +93,19 @@
 
         // Check what language the cookie says
         function getCookieLang() {
-          var match = document.cookie.match(/googtrans=\/en\/([a-zA-Z\-]+)/);
-          return match ? match[1] : null;
+          var cookies = document.cookie.split(';');
+          var lang = null;
+          for (var i = 0; i < cookies.length; i++) {
+            var parts = cookies[i].trim().split('=');
+            if (parts[0] === 'googtrans' && parts[1]) {
+              var m = parts[1].match(/\/en\/([a-zA-Z\-]+)/);
+              if (m && m[1]) {
+                // If multiple googtrans cookies exist, prefer the last one.
+                lang = m[1];
+              }
+            }
+          }
+          return lang;
         }
 
         var cookieLang = getCookieLang();
@@ -83,13 +129,11 @@
         else if (cookieLang && cookieLang !== urlLang) {
           clearAllGoogTransCookies();
           // Set correct cookie for this URL's language
-          document.cookie = 'googtrans=/en/' + urlLang + '; path=/';
-          document.cookie = 'googtrans=/en/' + urlLang + '; path=/; domain=' + window.location.hostname;
+          setGoogTransCookie('/en/' + urlLang);
         }
         // CASE 3: Language URL but no cookie - set it
         else if (!cookieLang && isLangPrefix) {
-          document.cookie = 'googtrans=/en/' + urlLang + '; path=/';
-          document.cookie = 'googtrans=/en/' + urlLang + '; path=/; domain=' + window.location.hostname;
+          setGoogTransCookie('/en/' + urlLang);
         }
       })();
     </script>
