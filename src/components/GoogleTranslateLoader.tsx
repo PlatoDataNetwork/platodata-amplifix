@@ -30,11 +30,31 @@ const GoogleTranslateLoader = () => {
     // CRITICAL: If URL says English (no prefix), clear any stale googtrans cookie
     // BEFORE loading Google Translate, so Google won't auto-translate.
     // ──────────────────────────────────────────────────────────────────────────
+    let classObserver: MutationObserver | null = null;
+    
     if (langFromUrl === "en") {
       clearGoogTransCookies();
       document.documentElement.setAttribute("lang", "en");
       document.documentElement.classList.remove("translated-ltr", "translated-rtl");
       document.body.classList.remove("translated-ltr", "translated-rtl");
+      
+      // Set up observer to immediately remove translation classes if Google adds them
+      classObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const target = mutation.target as HTMLElement;
+            if (target.classList.contains('translated-ltr') || target.classList.contains('translated-rtl')) {
+              target.classList.remove('translated-ltr', 'translated-rtl');
+            }
+          }
+        });
+      });
+      
+      classObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      classObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      
+      // Stop observing after 10 seconds to prevent memory leaks
+      setTimeout(() => classObserver?.disconnect(), 10000);
     }
 
     // Avoid loading the script multiple times
@@ -202,6 +222,9 @@ const GoogleTranslateLoader = () => {
     document.head.appendChild(style);
 
     return () => {
+      // Disconnect the class observer
+      classObserver?.disconnect();
+      
       // Restore original methods
       Node.prototype.removeChild = originalRemoveChild;
       Node.prototype.insertBefore = originalInsertBefore;
