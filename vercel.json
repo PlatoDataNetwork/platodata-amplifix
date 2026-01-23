@@ -68,7 +68,7 @@
       "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=:postId"
     },
     {
-      "source": "/",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
