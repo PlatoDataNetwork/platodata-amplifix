@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import LangLayout from "@/components/LangLayout";
 import GTranslateBridge from "@/components/GTranslateBridge";
+import GoogleTranslateLoader from "@/components/GoogleTranslateLoader";
 
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
@@ -32,6 +33,8 @@ const App = () => (
           <Sonner />
 
           <BrowserRouter>
+            <GoogleTranslateLoader />
+            <div id="google_translate_element" style={{ display: "none" }} />
             <GTranslateBridge />
             <Routes>
               {/* Non-prefixed routes (default language) */}
