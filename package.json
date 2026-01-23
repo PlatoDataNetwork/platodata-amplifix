@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "react-snap"
+    "postbuild": "sh -c 'if [ \"$SNAPSHOT\" = \"1\" ]; then react-snap; else echo \"Skipping react-snap (SNAPSHOT!=1)\"; fi'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -95,7 +95,12 @@
       "/solutions",
       "/intel",
       "/data-feeds",
-      "/api-docs"
+      "/api-docs",
+      "/ar",
+      "/ar/solutions",
+      "/ar/intel",
+      "/ar/data-feeds",
+      "/ar/api-docs"
     ],
     "skipThirdPartyRequests": true,
     "puppeteerArgs": [
