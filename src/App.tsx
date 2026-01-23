@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import GoogleTranslateLoader from "@/components/GoogleTranslateLoader";
 import LangLayout from "@/components/LangLayout";
 
 import Index from "./pages/Index";
@@ -30,9 +29,6 @@ const App = () => (
           <GoogleAnalytics />
           <Toaster />
           <Sonner />
-
-          <GoogleTranslateLoader />
-          <div id="google_translate_element" style={{ display: "none" }} />
 
           <BrowserRouter>
             <Routes>
