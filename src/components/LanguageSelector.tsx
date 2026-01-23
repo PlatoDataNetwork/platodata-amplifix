@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Globe } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { LANGUAGES, type Language, isSupportedLanguage } from "@/lib/i18nLanguages";
+import { applyGoogleTranslateLanguage } from "@/lib/googleTranslate";
 
 function getCookieDomains() {
   const host = window.location.hostname;
@@ -37,6 +38,7 @@ const LanguageSelector = () => {
   const [currentLang, setCurrentLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Keep selection in sync with the URL prefix (e.g. /nl/...).
   useEffect(() => {
@@ -76,38 +78,18 @@ const LanguageSelector = () => {
     return "/" + segments.join("/") + location.search + location.hash;
   };
 
-  const handleLanguageSelect = (lang: Language) => {
+  const handleLanguageSelect = async (lang: Language) => {
     setCurrentLang(lang);
     setIsOpen(false);
 
-    // STEP 1: Clear ALL existing cookies first
-    clearAllGoogTransCookies();
-    
-    // STEP 2: Clear localStorage items Google Translate might use
-    try {
-      localStorage.removeItem('googtrans');
-      localStorage.removeItem('google_translate_element');
-    } catch(e) { /* ignore */ }
-
-    // STEP 3: Build the new path
+    // Build the new path (prefix aware)
     const newPath = buildPathForLang(lang.code);
-    
-    // STEP 4: If switching to a non-English language, set the correct cookie
-    if (lang.code !== "en") {
-      setGoogTransCookie(`/en/${lang.code}`);
-    }
 
-    // STEP 5: Hard navigation with a SINGLE cache-buster param (replace, don't append)
-    try {
-      const url = new URL(newPath, window.location.origin);
-      url.searchParams.delete("_gt");
-      url.searchParams.set("_gt", String(Date.now()));
-      const qs = url.searchParams.toString();
-      window.location.href = url.pathname + (qs ? `?${qs}` : "") + url.hash;
-    } catch (e) {
-      // Fallback
-      window.location.href = newPath;
-    }
+    // Apply translation via Google Translate widget (no full reload)
+    await applyGoogleTranslateLanguage(lang.code);
+
+    // Navigate using SPA routing to the language-prefixed path
+    navigate(newPath, { replace: false });
   };
 
   return (

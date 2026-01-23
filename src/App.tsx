@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import LangLayout from "@/components/LangLayout";
+import GTranslateBridge from "@/components/GTranslateBridge";
 
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
@@ -31,6 +32,7 @@ const App = () => (
           <Sonner />
 
           <BrowserRouter>
+            <GTranslateBridge />
             <Routes>
               {/* Non-prefixed routes (default language) */}
               <Route path="/" element={<Index />} />
