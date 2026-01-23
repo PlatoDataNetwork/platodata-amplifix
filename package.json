@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "sh -c 'if [ \"$SNAPSHOT\" = \"1\" ]; then react-snap; else echo \"Skipping react-snap (SNAPSHOT!=1)\"; fi'"
+    "postbuild": "sh -c 'if [ \"$SNAPSHOT\" = \"1\" ]; then react-snap && node scripts/replicate-lang-variants.mjs; else echo \"Skipping snapshot (SNAPSHOT!=1)\"; fi'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -96,11 +96,7 @@
       "/intel",
       "/data-feeds",
       "/api-docs",
-      "/ar",
-      "/ar/solutions",
-      "/ar/intel",
-      "/ar/data-feeds",
-      "/ar/api-docs"
+      "/404.html"
     ],
     "skipThirdPartyRequests": true,
     "puppeteerArgs": [
