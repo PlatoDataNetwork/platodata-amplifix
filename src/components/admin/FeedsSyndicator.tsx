@@ -570,22 +570,20 @@ const FeedsSyndicator = ({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Card 1: Basic Information */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Rss className="w-5 h-5 text-primary" />
-                {mode === "edit" ? "Feed Configuration" : "New Feed Configuration"}
+                Basic Information
               </CardTitle>
               <CardDescription>
-                {mode === "edit" 
-                  ? "Update the settings for this RSS feed"
-                  : "Configure all settings for your new RSS feed"}
+                Feed identity and target settings
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Row 1: Feed Name + RSS Feed URL */}
+              <div className="grid gap-4 sm:grid-cols-2">
                 {/* Feed Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Feed Name *</Label>
@@ -596,9 +594,6 @@ const FeedsSyndicator = ({
                     placeholder="e.g., TechCrunch AI"
                     required
                   />
-                  <p className="text-xs text-muted-foreground">
-                    A friendly name to identify this feed
-                  </p>
                 </div>
 
                 {/* RSS Feed URL */}
@@ -612,217 +607,34 @@ const FeedsSyndicator = ({
                     placeholder="https://example.com/feed.xml"
                     required
                   />
-                  <p className="text-xs text-muted-foreground">
-                    The full URL to the RSS or Atom feed
-                  </p>
                 </div>
 
-                {/* Row 2: Target Vertical + Import Mode + Article Status (3 columns) */}
-                <div className="lg:col-span-2 grid gap-6 lg:grid-cols-3">
-                  {/* Target Vertical */}
-                  <div className="space-y-2">
-                    <Label htmlFor="vertical_slug">Target Vertical *</Label>
-                    <Select
-                      value={formData.vertical_slug}
-                      onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a vertical" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {verticals?.map((vertical: string) => (
-                          <SelectItem key={vertical} value={vertical}>
-                            {vertical}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="__new__">+ Add custom...</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {formData.vertical_slug === "__new__" && (
-                      <Input
-                        placeholder="Enter custom vertical slug"
-                        onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
-                        className="mt-2"
-                      />
-                    )}
-                  </div>
-
-                  {/* Import Mode */}
-                  <div className="space-y-2">
-                    <Label htmlFor="import_mode">Import Mode</Label>
-                    <Select
-                      value={formData.import_mode}
-                      onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="full_content">Full Content</SelectItem>
-                        <SelectItem value="excerpt_with_link">Excerpt + External Link</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {formData.import_mode === "full_content" 
-                        ? "Import the complete article content"
-                        : "Import excerpt and link to original article"}
-                    </p>
-                  </div>
-
-                  {/* Article Status */}
-                  <div className="space-y-2">
-                    <Label htmlFor="publish_status">Article Status</Label>
-                    <Select
-                      value={formData.publish_status}
-                      onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Save as Draft</SelectItem>
-                        <SelectItem value="publish">Publish Immediately</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {formData.publish_status === "draft" 
-                        ? "Review articles before publishing"
-                        : "Articles go live immediately"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Auto-sync Toggle */}
+                {/* Target Vertical */}
                 <div className="space-y-2">
-                  <Label>Sync Settings</Label>
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="auto_sync" className="text-sm font-medium">Enable Auto-sync</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Automatically check for new articles
-                      </p>
-                    </div>
-                    <Switch
-                      id="auto_sync"
-                      checked={formData.auto_sync}
-                      onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
-                    />
-                  </div>
-                </div>
-
-                {/* Sync Interval */}
-                <div className="space-y-2">
-                  <Label htmlFor="sync_interval">Sync Interval</Label>
-                  <div className="flex items-center gap-2">
+                  <Label htmlFor="vertical_slug">Target Vertical *</Label>
+                  <Select
+                    value={formData.vertical_slug}
+                    onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a vertical" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {verticals?.map((vertical: string) => (
+                        <SelectItem key={vertical} value={vertical}>
+                          {vertical}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__new__">+ Add custom...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {formData.vertical_slug === "__new__" && (
                     <Input
-                      id="sync_interval"
-                      type="number"
-                      min="1"
-                      max="168"
-                      value={formData.sync_interval_hours}
-                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
-                      disabled={!formData.auto_sync}
+                      placeholder="Enter custom vertical slug"
+                      onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
+                      className="mt-2"
                     />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">hours</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {formData.auto_sync 
-                      ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
-                      : "Enable auto-sync to configure interval"}
-                  </p>
-                </div>
-
-                {/* Max Articles Per Sync */}
-                <div className="space-y-2">
-                  <Label htmlFor="max_articles">Articles Per Sync</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="max_articles"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.max_articles_per_sync}
-                      onChange={(e) => setFormData({ ...formData, max_articles_per_sync: parseInt(e.target.value) || 0 })}
-                    />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">articles</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {formData.max_articles_per_sync > 0 
-                      ? `Import up to ${formData.max_articles_per_sync} article${formData.max_articles_per_sync !== 1 ? 's' : ''} per sync`
-                      : "Unlimited - import all available articles"}
-                  </p>
-                </div>
-
-                {/* Duplicate Checking - Full Width */}
-                <div className="space-y-2 lg:col-span-2">
-                  <Label>Duplicate Checking</Label>
-                  <div className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg border">
-                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="check_duplicate_title" className="text-sm font-medium">Check by Title</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Skip articles with matching titles
-                        </p>
-                      </div>
-                      <Switch
-                        id="check_duplicate_title"
-                        checked={formData.check_duplicate_title}
-                        onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_title: checked })}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="check_duplicate_link" className="text-sm font-medium">Check by Link</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Skip articles with matching URLs
-                        </p>
-                      </div>
-                      <Switch
-                        id="check_duplicate_link"
-                        checked={formData.check_duplicate_link}
-                        onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_link: checked })}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enable to prevent importing duplicate articles that already exist in the database
-                  </p>
-                </div>
-
-                {/* Content Processing - Full Width */}
-                <div className="space-y-2 lg:col-span-2">
-                  <Label>Content Processing</Label>
-                  <div className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg border">
-                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Remove embedded images from content
-                        </p>
-                      </div>
-                      <Switch
-                        id="strip_images"
-                        checked={formData.strip_images}
-                        onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="strip_inline_styles" className="text-sm font-medium">Strip Inline Styles</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Remove inline CSS for theme compatibility
-                        </p>
-                      </div>
-                      <Switch
-                        id="strip_inline_styles"
-                        checked={formData.strip_inline_styles}
-                        onCheckedChange={(checked) => setFormData({ ...formData, strip_inline_styles: checked })}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    These options clean imported content for better display
-                  </p>
+                  )}
                 </div>
 
                 {/* Default Author */}
@@ -854,7 +666,6 @@ const FeedsSyndicator = ({
                       className="mt-2"
                     />
                   )}
-                  {/* Show input if custom value is entered that's not in the list */}
                   {formData.default_author && !existingAuthors?.includes(formData.default_author) && (
                     <Input
                       value={formData.default_author}
@@ -863,116 +674,304 @@ const FeedsSyndicator = ({
                       className="mt-2"
                     />
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Author name to assign to all articles from this feed
-                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Import Settings */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" />
+                Import Settings
+              </CardTitle>
+              <CardDescription>
+                How content is imported and published
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {/* Import Mode */}
+                <div className="space-y-2">
+                  <Label htmlFor="import_mode">Import Mode</Label>
+                  <Select
+                    value={formData.import_mode}
+                    onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full_content">Full Content</SelectItem>
+                      <SelectItem value="excerpt_with_link">Excerpt + Link</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Source Attribution Link Switch */}
+                {/* Article Status */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="add_source_link">Add Source Attribution</Label>
+                  <Label htmlFor="publish_status">Article Status</Label>
+                  <Select
+                    value={formData.publish_status}
+                    onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Save as Draft</SelectItem>
+                      <SelectItem value="publish">Publish Immediately</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Max Articles Per Sync */}
+                <div className="space-y-2">
+                  <Label htmlFor="max_articles">Max Per Sync</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="max_articles"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.max_articles_per_sync}
+                      onChange={(e) => setFormData({ ...formData, max_articles_per_sync: parseInt(e.target.value) || 0 })}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">articles</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Duplicate Checking */}
+              <div className="space-y-2">
+                <Label>Duplicate Checking</Label>
+                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
+                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="check_duplicate_title" className="text-sm font-medium">Check by Title</Label>
+                      <p className="text-xs text-muted-foreground">Skip matching titles</p>
+                    </div>
                     <Switch
-                      id="add_source_link"
-                      checked={formData.add_source_link}
-                      onCheckedChange={(checked) => setFormData({ ...formData, add_source_link: checked })}
+                      id="check_duplicate_title"
+                      checked={formData.check_duplicate_title}
+                      onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_title: checked })}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    When enabled, adds source attribution at the end of each article
-                  </p>
-                  {formData.add_source_link && (
-                    <div className="p-3 bg-muted/30 rounded-lg border mt-2 space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="source_label" className="text-xs">Label Text</Label>
-                        <Input
-                          id="source_label"
-                          value={formData.source_label}
-                          onChange={(e) => setFormData({ ...formData, source_label: e.target.value })}
-                          placeholder="Source"
-                          className="text-sm"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-2">Preview:</p>
-                        <div className="p-2 bg-background rounded border text-sm">
-                          <span className="font-semibold">{formData.source_label || "Source"} : </span>
-                          <a 
-                            href="#" 
-                            className="text-primary underline"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            https://example.com/article-url
-                          </a>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="check_duplicate_link" className="text-sm font-medium">Check by Link</Label>
+                      <p className="text-xs text-muted-foreground">Skip matching URLs</p>
                     </div>
-                  )}
+                    <Switch
+                      id="check_duplicate_link"
+                      checked={formData.check_duplicate_link}
+                      onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_link: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Sync Schedule */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" />
+                Sync Schedule
+              </CardTitle>
+              <CardDescription>
+                Automation settings for this feed
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Auto-sync Toggle */}
+                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="auto_sync" className="text-sm font-medium">Enable Auto-sync</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Automatically check for new articles
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto_sync"
+                    checked={formData.auto_sync}
+                    onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
+                  />
                 </div>
 
-                {/* Default Featured Image - Full Width */}
-                <div className="space-y-2 lg:col-span-2">
-                  <Label>Default Featured Image</Label>
-                  <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border">
-                    {formData.default_image_url ? (
-                      <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
-                        <img 
-                          src={formData.default_image_url} 
-                          alt="Default featured" 
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 h-5 w-5 shadow-lg"
-                          onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                {/* Sync Interval */}
+                <div className="space-y-2">
+                  <Label htmlFor="sync_interval">Sync Interval</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="sync_interval"
+                      type="number"
+                      min="1"
+                      max="168"
+                      value={formData.sync_interval_hours}
+                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
+                      disabled={!formData.auto_sync}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">hours</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.auto_sync 
+                      ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
+                      : "Enable auto-sync to configure"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Content & Media */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-primary" />
+                Content & Media
+              </CardTitle>
+              <CardDescription>
+                Processing options and media settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Content Processing */}
+              <div className="space-y-2">
+                <Label>Content Processing</Label>
+                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
+                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images</Label>
+                      <p className="text-xs text-muted-foreground">Remove embedded images</p>
+                    </div>
+                    <Switch
+                      id="strip_images"
+                      checked={formData.strip_images}
+                      onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="strip_inline_styles" className="text-sm font-medium">Strip Inline Styles</Label>
+                      <p className="text-xs text-muted-foreground">For theme compatibility</p>
+                    </div>
+                    <Switch
+                      id="strip_inline_styles"
+                      checked={formData.strip_inline_styles}
+                      onCheckedChange={(checked) => setFormData({ ...formData, strip_inline_styles: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Source Attribution */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="add_source_link">Source Attribution</Label>
+                  <Switch
+                    id="add_source_link"
+                    checked={formData.add_source_link}
+                    onCheckedChange={(checked) => setFormData({ ...formData, add_source_link: checked })}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add source link at the end of each article
+                </p>
+                {formData.add_source_link && (
+                  <div className="p-3 bg-muted/30 rounded-lg border space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="source_label" className="text-xs">Label Text</Label>
+                      <Input
+                        id="source_label"
+                        value={formData.source_label}
+                        onChange={(e) => setFormData({ ...formData, source_label: e.target.value })}
+                        placeholder="Source"
+                        className="text-sm"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                      <div className="p-2 bg-background rounded border text-sm">
+                        <span className="font-semibold">{formData.source_label || "Source"} : </span>
+                        <a 
+                          href="#" 
+                          className="text-primary underline"
+                          onClick={(e) => e.preventDefault()}
                         >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                          https://example.com/article-url
+                        </a>
                       </div>
-                    ) : (
-                      <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-background flex-shrink-0">
-                        <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
-                      </div>
-                    )}
-                    <div className="flex-1 space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
-                        <Input
-                          id="default_image_url"
-                          type="url"
-                          value={formData.default_image_url}
-                          onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
-                          placeholder="https://example.com/image.jpg"
-                          className="text-sm"
-                        />
-                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Default Featured Image */}
+              <div className="space-y-2">
+                <Label>Default Featured Image</Label>
+                <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border">
+                  {formData.default_image_url ? (
+                    <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                      <img 
+                        src={formData.default_image_url} 
+                        alt="Default featured" 
+                        className="w-full h-full object-cover"
+                      />
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isUploadingImage}
-                        onClick={() => document.getElementById("image_upload")?.click()}
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-5 w-5 shadow-lg"
+                        onClick={() => setFormData({ ...formData, default_image_url: "" })}
                       >
-                        {isUploadingImage ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Upload className="w-4 h-4 mr-2" />
-                        )}
-                        Upload
+                        <Trash2 className="w-3 h-3" />
                       </Button>
-                      <input
-                        id="image_upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Used for all articles from this feed that don't have an image
-                      </p>
                     </div>
+                  ) : (
+                    <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-background flex-shrink-0">
+                      <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
+                      <Input
+                        id="default_image_url"
+                        type="url"
+                        value={formData.default_image_url}
+                        onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="text-sm"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isUploadingImage}
+                      onClick={() => document.getElementById("image_upload")?.click()}
+                    >
+                      {isUploadingImage ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4 mr-2" />
+                      )}
+                      Upload
+                    </Button>
+                    <input
+                      id="image_upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Used when feed articles don't have an image
+                    </p>
                   </div>
                 </div>
               </div>
