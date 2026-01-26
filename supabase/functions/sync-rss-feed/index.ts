@@ -468,8 +468,9 @@ Deno.serve(async (req) => {
           : (rawContent || "");
         
         // Append source link at the end of content if configured (use the item's original link)
-        if (rssFeed.source_link_text && rssFeed.source_link_url && item.link) {
-          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>Source :</strong> <a target="_blank" href="${item.link}">${item.link}</a></p>`;
+        if (rssFeed.source_link_url && item.link) {
+          const sourceLabel = rssFeed.source_link_text || "Source";
+          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>${sourceLabel} :</strong> <a target="_blank" href="${item.link}">${item.link}</a></p>`;
           articleContent = articleContent + sourceLink;
         }
         
