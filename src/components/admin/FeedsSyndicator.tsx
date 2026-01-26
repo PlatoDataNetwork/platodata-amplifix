@@ -64,6 +64,9 @@ interface RssFeed {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  default_author: string | null;
+  source_link_text: string | null;
+  source_link_url: string | null;
 }
 
 interface FeedFormData {
@@ -79,6 +82,9 @@ interface FeedFormData {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  default_author: string;
+  source_link_text: string;
+  source_link_url: string;
 }
 
 const defaultFormData: FeedFormData = {
@@ -94,6 +100,9 @@ const defaultFormData: FeedFormData = {
   check_duplicate_link: false,
   max_articles_per_sync: 0,
   strip_images: true,
+  default_author: "",
+  source_link_text: "",
+  source_link_url: "",
 };
 
 interface FeedsSyndicatorProps {
@@ -161,6 +170,9 @@ const FeedsSyndicator = ({
         check_duplicate_link: editingFeed.check_duplicate_link || false,
         max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
         strip_images: editingFeed.strip_images ?? true,
+        default_author: editingFeed.default_author || "",
+        source_link_text: editingFeed.source_link_text || "",
+        source_link_url: editingFeed.source_link_url || "",
       });
     }
   }, [editingFeed]);
@@ -199,6 +211,9 @@ const FeedsSyndicator = ({
         check_duplicate_link: data.check_duplicate_link,
         max_articles_per_sync: data.max_articles_per_sync,
         strip_images: data.strip_images,
+        default_author: data.default_author || null,
+        source_link_text: data.source_link_text || null,
+        source_link_url: data.source_link_url || null,
       });
       if (error) throw error;
     },
@@ -218,6 +233,9 @@ const FeedsSyndicator = ({
       const { error } = await supabase.from("rss_feeds").update({
         ...data,
         default_image_url: data.default_image_url || null,
+        default_author: data.default_author || null,
+        source_link_text: data.source_link_text || null,
+        source_link_url: data.source_link_url || null,
       }).eq("id", id);
       if (error) throw error;
     },
@@ -604,6 +622,51 @@ const FeedsSyndicator = ({
                       checked={formData.strip_images}
                       onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
                     />
+                  </div>
+                </div>
+
+                {/* Default Author */}
+                <div className="space-y-2">
+                  <Label htmlFor="default_author">Default Author</Label>
+                  <Input
+                    id="default_author"
+                    value={formData.default_author}
+                    onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
+                    placeholder="e.g., John Doe"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Author name to assign to all articles from this feed
+                  </p>
+                </div>
+
+                {/* Source Link Section */}
+                <div className="space-y-2">
+                  <Label>Source Attribution Link</Label>
+                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+                    <div className="space-y-2">
+                      <Label htmlFor="source_link_text" className="text-xs">Link Text</Label>
+                      <Input
+                        id="source_link_text"
+                        value={formData.source_link_text}
+                        onChange={(e) => setFormData({ ...formData, source_link_text: e.target.value })}
+                        placeholder="e.g., Read the original article"
+                        className="text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="source_link_url" className="text-xs">Link URL</Label>
+                      <Input
+                        id="source_link_url"
+                        type="url"
+                        value={formData.source_link_url}
+                        onChange={(e) => setFormData({ ...formData, source_link_url: e.target.value })}
+                        placeholder="https://source-website.com"
+                        className="text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      This link will be appended at the end of each article content
+                    </p>
                   </div>
                 </div>
 
