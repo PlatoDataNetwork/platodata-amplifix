@@ -84,6 +84,7 @@ interface FeedFormData {
   strip_images: boolean;
   default_author: string;
   add_source_link: boolean;
+  source_label: string;
 }
 
 const defaultFormData: FeedFormData = {
@@ -101,6 +102,7 @@ const defaultFormData: FeedFormData = {
   strip_images: true,
   default_author: "",
   add_source_link: false,
+  source_label: "Source",
 };
 
 interface FeedsSyndicatorProps {
@@ -169,7 +171,8 @@ const FeedsSyndicator = ({
         max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
         strip_images: editingFeed.strip_images ?? true,
         default_author: editingFeed.default_author || "",
-        add_source_link: !!(editingFeed.source_link_text && editingFeed.source_link_url),
+        add_source_link: !!(editingFeed.source_link_url),
+        source_label: editingFeed.source_link_text || "Source",
       });
     }
   }, [editingFeed]);
@@ -225,7 +228,7 @@ const FeedsSyndicator = ({
         max_articles_per_sync: data.max_articles_per_sync,
         strip_images: data.strip_images,
         default_author: data.default_author || null,
-        source_link_text: data.add_source_link ? "enabled" : null,
+        source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
       });
       if (error) throw error;
@@ -247,7 +250,7 @@ const FeedsSyndicator = ({
         ...data,
         default_image_url: data.default_image_url || null,
         default_author: data.default_author || null,
-        source_link_text: data.add_source_link ? "enabled" : null,
+        source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
       }).eq("id", id);
       if (error) throw error;
@@ -695,17 +698,29 @@ const FeedsSyndicator = ({
                     When enabled, adds source attribution at the end of each article
                   </p>
                   {formData.add_source_link && (
-                    <div className="p-3 bg-muted/30 rounded-lg border mt-2">
-                      <p className="text-xs text-muted-foreground mb-2">Preview:</p>
-                      <div className="p-2 bg-background rounded border text-sm">
-                        <span className="font-semibold">Source : </span>
-                        <a 
-                          href="#" 
-                          className="text-primary underline"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          https://example.com/article-url
-                        </a>
+                    <div className="p-3 bg-muted/30 rounded-lg border mt-2 space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="source_label" className="text-xs">Label Text</Label>
+                        <Input
+                          id="source_label"
+                          value={formData.source_label}
+                          onChange={(e) => setFormData({ ...formData, source_label: e.target.value })}
+                          placeholder="Source"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                        <div className="p-2 bg-background rounded border text-sm">
+                          <span className="font-semibold">{formData.source_label || "Source"} : </span>
+                          <a 
+                            href="#" 
+                            className="text-primary underline"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            https://example.com/article-url
+                          </a>
+                        </div>
                       </div>
                     </div>
                   )}
