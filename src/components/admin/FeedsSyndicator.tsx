@@ -113,6 +113,7 @@ interface FeedsSyndicatorProps {
   editFeedId?: string;
   onAddFeed?: () => void;
   onEditFeed?: (feedId: string) => void;
+  onViewArticles?: (feedId: string) => void;
   onBack?: () => void;
 }
 
@@ -121,6 +122,7 @@ const FeedsSyndicator = ({
   editFeedId, 
   onAddFeed, 
   onEditFeed,
+  onViewArticles,
   onBack 
 }: FeedsSyndicatorProps) => {
   const queryClient = useQueryClient();
@@ -923,9 +925,16 @@ const FeedsSyndicator = ({
                       <Badge variant="outline">{feed.vertical_slug}</Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium text-foreground">
-                        {feedArticleCounts?.[feed.id] || 0}
-                      </span>
+                      {(feedArticleCounts?.[feed.id] || 0) > 0 ? (
+                        <button
+                          onClick={() => onViewArticles?.(feed.id)}
+                          className="font-medium text-primary hover:underline cursor-pointer"
+                        >
+                          {feedArticleCounts?.[feed.id] || 0}
+                        </button>
+                      ) : (
+                        <span className="font-medium text-muted-foreground">0</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
