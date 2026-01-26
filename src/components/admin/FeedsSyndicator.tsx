@@ -147,6 +147,7 @@ const FeedsSyndicator = ({
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FeedFormData>(defaultFormData);
   const [syncingFeedId, setSyncingFeedId] = useState<string | null>(null);
+  const [isBulkSyncing, setIsBulkSyncing] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [deletingArticlesFeed, setDeletingArticlesFeed] = useState<RssFeed | null>(null);
   const [isDeletingArticles, setIsDeletingArticles] = useState(false);
@@ -356,6 +357,52 @@ const FeedsSyndicator = ({
       setSyncingFeedId(null);
     },
   });
+
+  // Bulk sync all active feeds
+  const handleBulkSync = async () => {
+    const activeFeeds = feeds?.filter(feed => feed.status === "active") || [];
+    if (activeFeeds.length === 0) {
+      toast.info("No active feeds to sync");
+      return;
+    }
+
+    setIsBulkSyncing(true);
+    let successCount = 0;
+    let totalImported = 0;
+
+    try {
+      // Sync feeds sequentially to avoid overwhelming the server
+      for (const feed of activeFeeds) {
+        try {
+          const { data, error } = await supabase.functions.invoke("sync-rss-feed", {
+            body: { feedId: feed.id },
+          });
+          if (error) {
+            console.error(`Failed to sync ${feed.name}:`, error);
+          } else {
+            successCount++;
+            totalImported += data?.articlesImported || 0;
+          }
+        } catch (err) {
+          console.error(`Failed to sync ${feed.name}:`, err);
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["rss-feeds"] });
+      queryClient.invalidateQueries({ queryKey: ["feed-article-counts"] });
+
+      if (totalImported > 0) {
+        toast.success(`Synced ${successCount}/${activeFeeds.length} feeds. Imported ${totalImported} new articles.`);
+      } else {
+        toast.info(`Synced ${successCount}/${activeFeeds.length} feeds. No new articles found.`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`Bulk sync failed: ${errorMessage}`);
+    } finally {
+      setIsBulkSyncing(false);
+    }
+  };
 
   // Toggle feed status
   const toggleFeedStatus = (feed: RssFeed) => {
@@ -940,6 +987,8 @@ const FeedsSyndicator = ({
   }
 
   // Render the list view
+  const activeFeedsCount = feeds?.filter(f => f.status === "active").length || 0;
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -949,10 +998,26 @@ const FeedsSyndicator = ({
             Import and republish articles from RSS feeds
           </p>
         </div>
-        <Button onClick={onAddFeed}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Feed
-        </Button>
+        <div className="flex items-center gap-2">
+          {activeFeedsCount > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleBulkSync}
+              disabled={isBulkSyncing || syncingFeedId !== null}
+            >
+              {isBulkSyncing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              Sync All ({activeFeedsCount})
+            </Button>
+          )}
+          <Button onClick={onAddFeed}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Feed
+          </Button>
+        </div>
       </div>
 
       {feedsLoading ? (
