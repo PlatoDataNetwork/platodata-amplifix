@@ -18,6 +18,7 @@ interface RssFeed {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  strip_inline_styles: boolean;
   default_author: string | null;
   source_link_text: string | null;
   source_link_url: string | null;
@@ -253,6 +254,28 @@ function stripImagesFromContent(html: string): string {
     .trim();
 }
 
+// Remove inline styles from HTML content for theme compatibility
+function stripInlineStylesFromContent(html: string): string {
+  return html
+    // Remove style attributes from all tags
+    .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
+    // Remove bgcolor attributes
+    .replace(/\s+bgcolor\s*=\s*["'][^"']*["']/gi, "")
+    // Remove color attributes
+    .replace(/\s+color\s*=\s*["'][^"']*["']/gi, "")
+    // Remove width/height attributes (except on img tags which we want to preserve aspect ratio)
+    .replace(/(<(?!img)[^>]*)\s+(?:width|height)\s*=\s*["'][^"']*["']/gi, "$1")
+    // Remove align attributes
+    .replace(/\s+align\s*=\s*["'][^"']*["']/gi, "")
+    // Remove valign attributes
+    .replace(/\s+valign\s*=\s*["'][^"']*["']/gi, "")
+    // Remove border attributes
+    .replace(/\s+border\s*=\s*["'][^"']*["']/gi, "")
+    // Remove cellpadding/cellspacing attributes
+    .replace(/\s+cell(?:padding|spacing)\s*=\s*["'][^"']*["']/gi, "")
+    .trim();
+}
+
 function estimateReadTime(content: string): string {
   const wordCount = cleanHtml(content).split(/\s+/).length;
   const minutes = Math.max(1, Math.ceil(wordCount / 200));
@@ -466,6 +489,11 @@ Deno.serve(async (req) => {
         let articleContent = rssFeed.strip_images !== false 
           ? stripImagesFromContent(rawContent || "") 
           : (rawContent || "");
+        
+        // Strip inline styles from content if enabled (default is true)
+        if (rssFeed.strip_inline_styles !== false) {
+          articleContent = stripInlineStylesFromContent(articleContent);
+        }
         
         // Append source link at the end of content if configured (use the item's original link)
         if (rssFeed.source_link_url && item.link) {

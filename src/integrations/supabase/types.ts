@@ -219,6 +219,7 @@ export type Database = {
           source_link_url: string | null
           status: Database["public"]["Enums"]["feed_status"]
           strip_images: boolean
+          strip_inline_styles: boolean
           sync_interval_hours: number
           updated_at: string
           vertical_slug: string
@@ -242,6 +243,7 @@ export type Database = {
           source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
+          strip_inline_styles?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug: string
@@ -265,6 +267,7 @@ export type Database = {
           source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
+          strip_inline_styles?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug?: string
