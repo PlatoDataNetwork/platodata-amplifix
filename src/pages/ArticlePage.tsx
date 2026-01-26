@@ -272,7 +272,7 @@ const ArticlePage = () => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               {article.author && (
-                <span>Republished By {article.author}</span>
+                <span>{article.author}</span>
               )}
               <span>{formatLongDate(article.published_at)}</span>
               {article.post_id && (
