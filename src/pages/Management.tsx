@@ -28,11 +28,13 @@ const Management = () => {
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [initialVerticalFilter, setInitialVerticalFilter] = useState<string | undefined>();
+  const [initialFeedIdFilter, setInitialFeedIdFilter] = useState<string | undefined>();
   const [editingFeedId, setEditingFeedId] = useState<string | undefined>();
 
   const handleViewChange = (view: View, verticalSlug?: string) => {
     setCurrentView(view);
     setInitialVerticalFilter(verticalSlug);
+    setInitialFeedIdFilter(undefined);
     if (view !== "edit-feed") {
       setEditingFeedId(undefined);
     }
@@ -41,6 +43,12 @@ const Management = () => {
   const handleEditFeed = (feedId: string) => {
     setEditingFeedId(feedId);
     setCurrentView("edit-feed");
+  };
+
+  const handleViewArticlesByFeed = (feedId: string) => {
+    setInitialFeedIdFilter(feedId);
+    setInitialVerticalFilter(undefined);
+    setCurrentView("articles");
   };
 
   // Fetch article count
@@ -208,6 +216,7 @@ const Management = () => {
           <ArticleManagement 
             onBack={() => setCurrentView("dashboard")} 
             initialVertical={initialVerticalFilter}
+            initialFeedId={initialFeedIdFilter}
           />
         );
       case "new-article":
@@ -225,6 +234,7 @@ const Management = () => {
           <FeedsSyndicator 
             onAddFeed={() => setCurrentView("new-feed")} 
             onEditFeed={handleEditFeed}
+            onViewArticles={handleViewArticlesByFeed}
           />
         );
       case "new-feed":

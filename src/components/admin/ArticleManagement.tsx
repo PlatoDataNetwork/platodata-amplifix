@@ -50,17 +50,19 @@ type Article = Tables<"articles">;
 interface ArticleManagementProps {
   onBack: () => void;
   initialVertical?: string;
+  initialFeedId?: string;
 }
 
 type View = "list" | "create" | "edit";
 
 const ITEMS_PER_PAGE = 10;
 
-const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) => {
+const ArticleManagement = ({ onBack, initialVertical, initialFeedId }: ArticleManagementProps) => {
   const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<View>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVertical, setSelectedVertical] = useState<string>(initialVertical || "all");
+  const [selectedFeedId, setSelectedFeedId] = useState<string | undefined>(initialFeedId);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [deletingArticle, setDeletingArticle] = useState<Article | null>(null);
@@ -69,9 +71,19 @@ const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) 
   useEffect(() => {
     if (initialVertical) {
       setSelectedVertical(initialVertical);
+      setSelectedFeedId(undefined);
       setCurrentPage(1);
     }
   }, [initialVertical]);
+
+  // Update filter when initialFeedId changes
+  useEffect(() => {
+    if (initialFeedId) {
+      setSelectedFeedId(initialFeedId);
+      setSelectedVertical("all");
+      setCurrentPage(1);
+    }
+  }, [initialFeedId]);
 
   // Fetch verticals for filter
   const { data: verticals } = useQuery({
@@ -83,16 +95,56 @@ const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) 
     },
   });
 
+  // Fetch feed name when filtering by feed
+  const { data: feedInfo } = useQuery({
+    queryKey: ["feed-info", selectedFeedId],
+    queryFn: async () => {
+      if (!selectedFeedId) return null;
+      const { data, error } = await supabase
+        .from("rss_feeds")
+        .select("id, name")
+        .eq("id", selectedFeedId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedFeedId,
+  });
+
+  // Fetch article IDs from feed_sync_logs when filtering by feed
+  const { data: feedArticleIds } = useQuery({
+    queryKey: ["feed-article-ids", selectedFeedId],
+    queryFn: async () => {
+      if (!selectedFeedId) return null;
+      const { data, error } = await supabase
+        .from("feed_sync_logs")
+        .select("article_id")
+        .eq("feed_id", selectedFeedId)
+        .not("article_id", "is", null);
+      if (error) throw error;
+      return data?.map(log => log.article_id).filter(Boolean) as string[];
+    },
+    enabled: !!selectedFeedId,
+  });
+
   // Fetch articles with pagination and filters
   const { data: articlesData, isLoading } = useQuery({
-    queryKey: ["admin-articles", searchQuery, selectedVertical, currentPage],
+    queryKey: ["admin-articles", searchQuery, selectedVertical, selectedFeedId, feedArticleIds, currentPage],
     queryFn: async () => {
       let query = supabase
         .from("articles")
         .select("*", { count: "exact" })
         .order("published_at", { ascending: false });
 
-      if (selectedVertical && selectedVertical !== "all") {
+      // Filter by feed (using article IDs from sync logs)
+      if (selectedFeedId && feedArticleIds && feedArticleIds.length > 0) {
+        query = query.in("id", feedArticleIds);
+      } else if (selectedFeedId && (!feedArticleIds || feedArticleIds.length === 0)) {
+        // No articles for this feed, return empty
+        return { articles: [], totalCount: 0 };
+      }
+
+      if (selectedVertical && selectedVertical !== "all" && !selectedFeedId) {
         query = query.eq("vertical_slug", selectedVertical);
       }
 
@@ -108,6 +160,7 @@ const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) 
       if (error) throw error;
       return { articles: data, totalCount: count || 0 };
     },
+    enabled: !selectedFeedId || (selectedFeedId && feedArticleIds !== undefined),
   });
 
   // Delete article mutation
@@ -176,6 +229,24 @@ const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) 
         </Button>
       </div>
 
+      {/* Feed Filter Badge */}
+      {selectedFeedId && feedInfo && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-2 py-1.5 px-3">
+            <span>Feed: {feedInfo.name}</span>
+            <button
+              onClick={() => {
+                setSelectedFeedId(undefined);
+                setCurrentPage(1);
+              }}
+              className="ml-1 hover:text-destructive"
+            >
+              ×
+            </button>
+          </Badge>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -194,8 +265,10 @@ const ArticleManagement = ({ onBack, initialVertical }: ArticleManagementProps) 
           value={selectedVertical}
           onValueChange={(value) => {
             setSelectedVertical(value);
+            setSelectedFeedId(undefined);
             setCurrentPage(1);
           }}
+          disabled={!!selectedFeedId}
         >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Verticals" />
