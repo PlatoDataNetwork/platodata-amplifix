@@ -19,6 +19,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,7 +54,9 @@ import {
   ImageIcon,
   Upload,
   ArrowLeft,
-  Settings
+  Settings,
+  MoreHorizontal,
+  FileX
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -129,6 +148,8 @@ const FeedsSyndicator = ({
   const [formData, setFormData] = useState<FeedFormData>(defaultFormData);
   const [syncingFeedId, setSyncingFeedId] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [deletingArticlesFeed, setDeletingArticlesFeed] = useState<RssFeed | null>(null);
+  const [isDeletingArticles, setIsDeletingArticles] = useState(false);
 
   // Fetch all feeds
   const { data: feeds, isLoading: feedsLoading } = useQuery({
@@ -343,6 +364,60 @@ const FeedsSyndicator = ({
       id: feed.id,
       data: { status: newStatus } as Partial<FeedFormData>,
     });
+  };
+
+  // Delete all articles from a feed
+  const handleDeleteFeedArticles = async () => {
+    if (!deletingArticlesFeed) return;
+    
+    setIsDeletingArticles(true);
+    try {
+      // Get all article IDs from feed_sync_logs for this feed
+      const { data: syncLogs, error: logsError } = await supabase
+        .from("feed_sync_logs")
+        .select("article_id")
+        .eq("feed_id", deletingArticlesFeed.id)
+        .not("article_id", "is", null);
+      
+      if (logsError) throw logsError;
+      
+      const articleIds = syncLogs?.map(log => log.article_id).filter(Boolean) as string[];
+      
+      if (articleIds.length === 0) {
+        toast.info("No articles to delete for this feed");
+        setDeletingArticlesFeed(null);
+        setIsDeletingArticles(false);
+        return;
+      }
+      
+      // Delete articles
+      const { error: deleteError } = await supabase
+        .from("articles")
+        .delete()
+        .in("id", articleIds);
+      
+      if (deleteError) throw deleteError;
+      
+      // Delete sync logs for this feed
+      const { error: logsDeleteError } = await supabase
+        .from("feed_sync_logs")
+        .delete()
+        .eq("feed_id", deletingArticlesFeed.id);
+      
+      if (logsDeleteError) throw logsDeleteError;
+      
+      queryClient.invalidateQueries({ queryKey: ["feed-article-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-article-count"] });
+      
+      toast.success(`Deleted ${articleIds.length} articles from "${deletingArticlesFeed.name}"`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to delete articles: ${errorMessage}`);
+    } finally {
+      setDeletingArticlesFeed(null);
+      setIsDeletingArticles(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1006,29 +1081,41 @@ const FeedsSyndicator = ({
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm("Are you sure you want to delete this feed?")) {
-                              deleteFeedMutation.mutate(feed.id);
-                            }
-                          }}
-                          title="Delete"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                          title="Open feed URL"
-                        >
-                          <a href={feed.feed_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" title="More actions">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <a href={feed.feed_url} target="_blank" rel="noopener noreferrer" className="flex items-center cursor-pointer">
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                Open Feed URL
+                              </a>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => setDeletingArticlesFeed(feed)}
+                              disabled={(feedArticleCounts?.[feed.id] || 0) === 0}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <FileX className="w-4 h-4 mr-2" />
+                              Delete All Articles ({feedArticleCounts?.[feed.id] || 0})
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (confirm("Are you sure you want to delete this feed?")) {
+                                  deleteFeedMutation.mutate(feed.id);
+                                }
+                              }}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete Feed
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -1056,6 +1143,41 @@ const FeedsSyndicator = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Articles Confirmation Dialog */}
+      <AlertDialog open={!!deletingArticlesFeed} onOpenChange={(open) => !open && setDeletingArticlesFeed(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Articles from Feed</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete all <strong>{feedArticleCounts?.[deletingArticlesFeed?.id || ""] || 0}</strong> articles 
+                imported from <strong>"{deletingArticlesFeed?.name}"</strong>?
+              </p>
+              <p className="text-destructive">
+                This action cannot be undone. All articles and their sync logs will be permanently removed.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingArticles}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteFeedArticles}
+              disabled={isDeletingArticles}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingArticles ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete All Articles"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
