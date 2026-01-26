@@ -194,6 +194,22 @@ const FeedsSyndicator = ({
     },
   });
 
+  // Fetch existing authors for dropdown
+  const { data: existingAuthors } = useQuery({
+    queryKey: ["existing-authors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("author")
+        .not("author", "is", null)
+        .not("author", "eq", "");
+      if (error) throw error;
+      // Get unique authors
+      const uniqueAuthors = [...new Set(data?.map(a => a.author).filter(Boolean))];
+      return uniqueAuthors.sort() as string[];
+    },
+  });
+
   // Create feed mutation
   const createFeedMutation = useMutation({
     mutationFn: async (data: FeedFormData) => {
@@ -628,12 +644,41 @@ const FeedsSyndicator = ({
                 {/* Default Author */}
                 <div className="space-y-2">
                   <Label htmlFor="default_author">Default Author</Label>
-                  <Input
-                    id="default_author"
-                    value={formData.default_author}
-                    onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
-                    placeholder="e.g., John Doe"
-                  />
+                  <Select
+                    value={formData.default_author || "__none__"}
+                    onValueChange={(value) => setFormData({ ...formData, default_author: value === "__none__" ? "" : value === "__custom__" ? "" : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an author" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No default author</SelectItem>
+                      {existingAuthors?.map((author) => (
+                        <SelectItem key={author} value={author}>
+                          {author}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">+ Add custom...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {formData.default_author === "" && (
+                    <Input
+                      id="default_author_custom"
+                      value=""
+                      onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
+                      placeholder="Enter custom author name"
+                      className="mt-2"
+                    />
+                  )}
+                  {/* Show input if custom value is entered that's not in the list */}
+                  {formData.default_author && !existingAuthors?.includes(formData.default_author) && (
+                    <Input
+                      value={formData.default_author}
+                      onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
+                      placeholder="Enter custom author name"
+                      className="mt-2"
+                    />
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Author name to assign to all articles from this feed
                   </p>
