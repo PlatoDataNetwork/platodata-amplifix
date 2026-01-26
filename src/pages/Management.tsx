@@ -21,8 +21,9 @@ import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
 import FeedSyncLogs from "@/components/admin/FeedSyncLogs";
 import DefaultFeaturedImages from "@/components/admin/DefaultFeaturedImages";
 import OGImageGenerator from "@/components/admin/OGImageGenerator";
+import SocialPreviewDebugger from "@/components/admin/SocialPreviewDebugger";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -259,6 +260,8 @@ const Management = () => {
         return <DefaultFeaturedImages />;
       case "og-generator":
         return <OGImageGenerator />;
+      case "social-preview":
+        return <SocialPreviewDebugger />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":
