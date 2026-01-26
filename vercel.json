@@ -68,6 +68,17 @@
       "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=:postId"
     },
     {
+      "source": "/w3ai/:postId/:vertical/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Twitterbot|Slackbot|LinkedInBot|Discordbot|TelegramBot|Googlebot|bingbot|Applebot).*"
+        }
+      ],
+      "destination": "https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta?postId=:postId"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
