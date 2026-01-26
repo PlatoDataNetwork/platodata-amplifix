@@ -13,7 +13,8 @@ import {
   Bot,
   Rss,
   ScrollText,
-  Images
+  Images,
+  Sparkles
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +35,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -186,6 +187,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 >
                   <Images className="w-6 h-6" />
                   <span>Default Images</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* AI OG Image Generator */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("og-generator")}
+                  isActive={currentView === "og-generator"}
+                  className="w-full text-base py-3"
+                >
+                  <Sparkles className="w-6 h-6" />
+                  <span>OG Image Generator</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
