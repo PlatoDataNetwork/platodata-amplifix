@@ -187,6 +187,7 @@ export type Database = {
           check_duplicate_link: boolean
           check_duplicate_title: boolean
           created_at: string
+          default_author: string | null
           default_image_url: string | null
           feed_url: string
           id: string
@@ -196,6 +197,8 @@ export type Database = {
           max_articles_per_sync: number
           name: string
           publish_status: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text: string | null
+          source_link_url: string | null
           status: Database["public"]["Enums"]["feed_status"]
           strip_images: boolean
           sync_interval_hours: number
@@ -207,6 +210,7 @@ export type Database = {
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string
+          default_author?: string | null
           default_image_url?: string | null
           feed_url: string
           id?: string
@@ -216,6 +220,8 @@ export type Database = {
           max_articles_per_sync?: number
           name: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text?: string | null
+          source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
           sync_interval_hours?: number
@@ -227,6 +233,7 @@ export type Database = {
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string
+          default_author?: string | null
           default_image_url?: string | null
           feed_url?: string
           id?: string
@@ -236,6 +243,8 @@ export type Database = {
           max_articles_per_sync?: number
           name?: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text?: string | null
+          source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
           sync_interval_hours?: number

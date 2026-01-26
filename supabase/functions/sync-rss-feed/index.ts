@@ -18,6 +18,9 @@ interface RssFeed {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  default_author: string | null;
+  source_link_text: string | null;
+  source_link_url: string | null;
 }
 
 interface FeedItem {
@@ -460,13 +463,23 @@ Deno.serve(async (req) => {
         const isExcerptMode = rssFeed.import_mode === "excerpt_with_link";
         const rawContent = isExcerptMode ? item.description : item.content;
         // Strip images from content if enabled (default is true)
-        const articleContent = rssFeed.strip_images !== false 
+        let articleContent = rssFeed.strip_images !== false 
           ? stripImagesFromContent(rawContent || "") 
           : (rawContent || "");
+        
+        // Append source link at the end of content if configured
+        if (rssFeed.source_link_text && rssFeed.source_link_url) {
+          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>Source:</strong> <a href="${rssFeed.source_link_url}" target="_blank" rel="noopener noreferrer">${rssFeed.source_link_text}</a></p>`;
+          articleContent = articleContent + sourceLink;
+        }
+        
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
         // Use default image from feed if set, otherwise null (ignore RSS images)
         const imageUrl = rssFeed.default_image_url || null;
+        
+        // Use default author from feed if set, otherwise use RSS author
+        const articleAuthor = rssFeed.default_author || item.author || null;
         
         // Create article
         const { data: article, error: articleError } = await supabase
@@ -475,7 +488,7 @@ Deno.serve(async (req) => {
             title: item.title || "Untitled",
             content: articleContent,
             excerpt: item.description?.substring(0, 300) || null,
-            author: item.author || null,
+            author: articleAuthor,
             published_at: publishDate,
             vertical_slug: rssFeed.vertical_slug,
             image_url: imageUrl,
