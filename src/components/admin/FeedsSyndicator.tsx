@@ -36,6 +36,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,7 +61,8 @@ import {
   ArrowLeft,
   Settings,
   MoreHorizontal,
-  FileX
+  FileX,
+  ChevronDown
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -570,413 +576,457 @@ const FeedsSyndicator = ({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Card 1: Basic Information */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Rss className="w-5 h-5 text-primary" />
-                Basic Information
-              </CardTitle>
-              <CardDescription>
-                Feed identity and target settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* Feed Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name">Feed Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., TechCrunch AI"
-                    required
-                  />
-                </div>
-
-                {/* RSS Feed URL */}
-                <div className="space-y-2">
-                  <Label htmlFor="feed_url">RSS Feed URL *</Label>
-                  <Input
-                    id="feed_url"
-                    type="url"
-                    value={formData.feed_url}
-                    onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
-                    placeholder="https://example.com/feed.xml"
-                    required
-                  />
-                </div>
-
-                {/* Target Vertical */}
-                <div className="space-y-2">
-                  <Label htmlFor="vertical_slug">Target Vertical *</Label>
-                  <Select
-                    value={formData.vertical_slug}
-                    onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a vertical" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {verticals?.map((vertical: string) => (
-                        <SelectItem key={vertical} value={vertical}>
-                          {vertical}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__new__">+ Add custom...</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formData.vertical_slug === "__new__" && (
-                    <Input
-                      placeholder="Enter custom vertical slug"
-                      onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-
-                {/* Default Author */}
-                <div className="space-y-2">
-                  <Label htmlFor="default_author">Default Author</Label>
-                  <Select
-                    value={formData.default_author || "__none__"}
-                    onValueChange={(value) => setFormData({ ...formData, default_author: value === "__none__" ? "" : value === "__custom__" ? "" : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an author" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">No default author</SelectItem>
-                      {existingAuthors?.map((author) => (
-                        <SelectItem key={author} value={author}>
-                          {author}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__custom__">+ Add custom...</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formData.default_author === "" && (
-                    <Input
-                      id="default_author_custom"
-                      value=""
-                      onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
-                      placeholder="Enter custom author name"
-                      className="mt-2"
-                    />
-                  )}
-                  {formData.default_author && !existingAuthors?.includes(formData.default_author) && (
-                    <Input
-                      value={formData.default_author}
-                      onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
-                      placeholder="Enter custom author name"
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Card 2: Import Settings */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Settings className="w-5 h-5 text-primary" />
-                Import Settings
-              </CardTitle>
-              <CardDescription>
-                How content is imported and published
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-3">
-                {/* Import Mode */}
-                <div className="space-y-2">
-                  <Label htmlFor="import_mode">Import Mode</Label>
-                  <Select
-                    value={formData.import_mode}
-                    onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full_content">Full Content</SelectItem>
-                      <SelectItem value="excerpt_with_link">Excerpt + Link</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Article Status */}
-                <div className="space-y-2">
-                  <Label htmlFor="publish_status">Article Status</Label>
-                  <Select
-                    value={formData.publish_status}
-                    onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Save as Draft</SelectItem>
-                      <SelectItem value="publish">Publish Immediately</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Max Articles Per Sync */}
-                <div className="space-y-2">
-                  <Label htmlFor="max_articles">Max Per Sync</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="max_articles"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.max_articles_per_sync}
-                      onChange={(e) => setFormData({ ...formData, max_articles_per_sync: parseInt(e.target.value) || 0 })}
-                    />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">articles</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Duplicate Checking */}
-              <div className="space-y-2">
-                <Label>Duplicate Checking</Label>
-                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
-                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="check_duplicate_title" className="text-sm font-medium">Check by Title</Label>
-                      <p className="text-xs text-muted-foreground">Skip matching titles</p>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Card 1: Basic Information - Always open */}
+          <Collapsible defaultOpen>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Rss className="w-5 h-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Basic Information</CardTitle>
+                        <CardDescription className="mt-1">
+                          Feed identity and target settings
+                        </CardDescription>
+                      </div>
                     </div>
-                    <Switch
-                      id="check_duplicate_title"
-                      checked={formData.check_duplicate_title}
-                      onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_title: checked })}
-                    />
+                    <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </div>
-                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="check_duplicate_link" className="text-sm font-medium">Check by Link</Label>
-                      <p className="text-xs text-muted-foreground">Skip matching URLs</p>
-                    </div>
-                    <Switch
-                      id="check_duplicate_link"
-                      checked={formData.check_duplicate_link}
-                      onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_link: checked })}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Card 3: Sync Schedule */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-primary" />
-                Sync Schedule
-              </CardTitle>
-              <CardDescription>
-                Automation settings for this feed
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* Auto-sync Toggle */}
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto_sync" className="text-sm font-medium">Enable Auto-sync</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Automatically check for new articles
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto_sync"
-                    checked={formData.auto_sync}
-                    onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
-                  />
-                </div>
-
-                {/* Sync Interval */}
-                <div className="space-y-2">
-                  <Label htmlFor="sync_interval">Sync Interval</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="sync_interval"
-                      type="number"
-                      min="1"
-                      max="168"
-                      value={formData.sync_interval_hours}
-                      onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
-                      disabled={!formData.auto_sync}
-                    />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">hours</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {formData.auto_sync 
-                      ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
-                      : "Enable auto-sync to configure"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Card 4: Content & Media */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-primary" />
-                Content & Media
-              </CardTitle>
-              <CardDescription>
-                Processing options and media settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Content Processing */}
-              <div className="space-y-2">
-                <Label>Content Processing</Label>
-                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
-                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images</Label>
-                      <p className="text-xs text-muted-foreground">Remove embedded images</p>
-                    </div>
-                    <Switch
-                      id="strip_images"
-                      checked={formData.strip_images}
-                      onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="strip_inline_styles" className="text-sm font-medium">Strip Inline Styles</Label>
-                      <p className="text-xs text-muted-foreground">For theme compatibility</p>
-                    </div>
-                    <Switch
-                      id="strip_inline_styles"
-                      checked={formData.strip_inline_styles}
-                      onCheckedChange={(checked) => setFormData({ ...formData, strip_inline_styles: checked })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Source Attribution */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="add_source_link">Source Attribution</Label>
-                  <Switch
-                    id="add_source_link"
-                    checked={formData.add_source_link}
-                    onCheckedChange={(checked) => setFormData({ ...formData, add_source_link: checked })}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Add source link at the end of each article
-                </p>
-                {formData.add_source_link && (
-                  <div className="p-3 bg-muted/30 rounded-lg border space-y-3">
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Feed Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="source_label" className="text-xs">Label Text</Label>
+                      <Label htmlFor="name">Feed Name *</Label>
                       <Input
-                        id="source_label"
-                        value={formData.source_label}
-                        onChange={(e) => setFormData({ ...formData, source_label: e.target.value })}
-                        placeholder="Source"
-                        className="text-sm"
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g., TechCrunch AI"
+                        required
                       />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Preview:</p>
-                      <div className="p-2 bg-background rounded border text-sm">
-                        <span className="font-semibold">{formData.source_label || "Source"} : </span>
-                        <a 
-                          href="#" 
-                          className="text-primary underline"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          https://example.com/article-url
-                        </a>
+
+                    {/* RSS Feed URL */}
+                    <div className="space-y-2">
+                      <Label htmlFor="feed_url">RSS Feed URL *</Label>
+                      <Input
+                        id="feed_url"
+                        type="url"
+                        value={formData.feed_url}
+                        onChange={(e) => setFormData({ ...formData, feed_url: e.target.value })}
+                        placeholder="https://example.com/feed.xml"
+                        required
+                      />
+                    </div>
+
+                    {/* Target Vertical */}
+                    <div className="space-y-2">
+                      <Label htmlFor="vertical_slug">Target Vertical *</Label>
+                      <Select
+                        value={formData.vertical_slug}
+                        onValueChange={(value) => setFormData({ ...formData, vertical_slug: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a vertical" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {verticals?.map((vertical: string) => (
+                            <SelectItem key={vertical} value={vertical}>
+                              {vertical}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="__new__">+ Add custom...</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {formData.vertical_slug === "__new__" && (
+                        <Input
+                          placeholder="Enter custom vertical slug"
+                          onChange={(e) => setFormData({ ...formData, vertical_slug: e.target.value })}
+                          className="mt-2"
+                        />
+                      )}
+                    </div>
+
+                    {/* Default Author */}
+                    <div className="space-y-2">
+                      <Label htmlFor="default_author">Default Author</Label>
+                      <Select
+                        value={formData.default_author || "__none__"}
+                        onValueChange={(value) => setFormData({ ...formData, default_author: value === "__none__" ? "" : value === "__custom__" ? "" : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an author" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">No default author</SelectItem>
+                          {existingAuthors?.map((author) => (
+                            <SelectItem key={author} value={author}>
+                              {author}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="__custom__">+ Add custom...</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {formData.default_author === "" && (
+                        <Input
+                          id="default_author_custom"
+                          value=""
+                          onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
+                          placeholder="Enter custom author name"
+                          className="mt-2"
+                        />
+                      )}
+                      {formData.default_author && !existingAuthors?.includes(formData.default_author) && (
+                        <Input
+                          value={formData.default_author}
+                          onChange={(e) => setFormData({ ...formData, default_author: e.target.value })}
+                          placeholder="Enter custom author name"
+                          className="mt-2"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Card 2: Import Settings */}
+          <Collapsible defaultOpen>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Import Settings</CardTitle>
+                        <CardDescription className="mt-1">
+                          How content is imported and published
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {/* Import Mode */}
+                    <div className="space-y-2">
+                      <Label htmlFor="import_mode">Import Mode</Label>
+                      <Select
+                        value={formData.import_mode}
+                        onValueChange={(value: ImportMode) => setFormData({ ...formData, import_mode: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full_content">Full Content</SelectItem>
+                          <SelectItem value="excerpt_with_link">Excerpt + Link</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Article Status */}
+                    <div className="space-y-2">
+                      <Label htmlFor="publish_status">Article Status</Label>
+                      <Select
+                        value={formData.publish_status}
+                        onValueChange={(value: PublishStatus) => setFormData({ ...formData, publish_status: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Save as Draft</SelectItem>
+                          <SelectItem value="publish">Publish Immediately</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Max Articles Per Sync */}
+                    <div className="space-y-2">
+                      <Label htmlFor="max_articles">Max Per Sync</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="max_articles"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.max_articles_per_sync}
+                          onChange={(e) => setFormData({ ...formData, max_articles_per_sync: parseInt(e.target.value) || 0 })}
+                        />
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">articles</span>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Default Featured Image */}
-              <div className="space-y-2">
-                <Label>Default Featured Image</Label>
-                <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border">
-                  {formData.default_image_url ? (
-                    <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
-                      <img 
-                        src={formData.default_image_url} 
-                        alt="Default featured" 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-1 right-1 h-5 w-5 shadow-lg"
-                        onClick={() => setFormData({ ...formData, default_image_url: "" })}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                  {/* Duplicate Checking */}
+                  <div className="space-y-2">
+                    <Label>Duplicate Checking</Label>
+                    <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
+                      <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="check_duplicate_title" className="text-sm font-medium">Check by Title</Label>
+                          <p className="text-xs text-muted-foreground">Skip matching titles</p>
+                        </div>
+                        <Switch
+                          id="check_duplicate_title"
+                          checked={formData.check_duplicate_title}
+                          onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_title: checked })}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="check_duplicate_link" className="text-sm font-medium">Check by Link</Label>
+                          <p className="text-xs text-muted-foreground">Skip matching URLs</p>
+                        </div>
+                        <Switch
+                          id="check_duplicate_link"
+                          checked={formData.check_duplicate_link}
+                          onCheckedChange={(checked) => setFormData({ ...formData, check_duplicate_link: checked })}
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-background flex-shrink-0">
-                      <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
-                    </div>
-                  )}
-                  <div className="flex-1 space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
-                      <Input
-                        id="default_image_url"
-                        type="url"
-                        value={formData.default_image_url}
-                        onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
-                        placeholder="https://example.com/image.jpg"
-                        className="text-sm"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isUploadingImage}
-                      onClick={() => document.getElementById("image_upload")?.click()}
-                    >
-                      {isUploadingImage ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4 mr-2" />
-                      )}
-                      Upload
-                    </Button>
-                    <input
-                      id="image_upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Used when feed articles don't have an image
-                    </p>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Card 3: Sync Schedule */}
+          <Collapsible defaultOpen={false}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-5 h-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Sync Schedule</CardTitle>
+                        <CardDescription className="mt-1">
+                          Automation settings for this feed
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Auto-sync Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="auto_sync" className="text-sm font-medium">Enable Auto-sync</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Automatically check for new articles
+                        </p>
+                      </div>
+                      <Switch
+                        id="auto_sync"
+                        checked={formData.auto_sync}
+                        onCheckedChange={(checked) => setFormData({ ...formData, auto_sync: checked })}
+                      />
+                    </div>
+
+                    {/* Sync Interval */}
+                    <div className="space-y-2">
+                      <Label htmlFor="sync_interval">Sync Interval</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="sync_interval"
+                          type="number"
+                          min="1"
+                          max="168"
+                          value={formData.sync_interval_hours}
+                          onChange={(e) => setFormData({ ...formData, sync_interval_hours: parseInt(e.target.value) || 24 })}
+                          disabled={!formData.auto_sync}
+                        />
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">hours</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {formData.auto_sync 
+                          ? `Check every ${formData.sync_interval_hours} hour${formData.sync_interval_hours !== 1 ? 's' : ''}`
+                          : "Enable auto-sync to configure"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Card 4: Content & Media */}
+          <Collapsible defaultOpen={false}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Content & Media</CardTitle>
+                        <CardDescription className="mt-1">
+                          Processing options and media settings
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="space-y-4">
+                  {/* Content Processing */}
+                  <div className="space-y-2">
+                    <Label>Content Processing</Label>
+                    <div className="flex flex-col sm:flex-row gap-3 p-3 bg-muted/30 rounded-lg border">
+                      <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images</Label>
+                          <p className="text-xs text-muted-foreground">Remove embedded images</p>
+                        </div>
+                        <Switch
+                          id="strip_images"
+                          checked={formData.strip_images}
+                          onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="strip_inline_styles" className="text-sm font-medium">Strip Inline Styles</Label>
+                          <p className="text-xs text-muted-foreground">For theme compatibility</p>
+                        </div>
+                        <Switch
+                          id="strip_inline_styles"
+                          checked={formData.strip_inline_styles}
+                          onCheckedChange={(checked) => setFormData({ ...formData, strip_inline_styles: checked })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Source Attribution */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="add_source_link">Source Attribution</Label>
+                      <Switch
+                        id="add_source_link"
+                        checked={formData.add_source_link}
+                        onCheckedChange={(checked) => setFormData({ ...formData, add_source_link: checked })}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Add source link at the end of each article
+                    </p>
+                    {formData.add_source_link && (
+                      <div className="p-3 bg-muted/30 rounded-lg border space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="source_label" className="text-xs">Label Text</Label>
+                          <Input
+                            id="source_label"
+                            value={formData.source_label}
+                            onChange={(e) => setFormData({ ...formData, source_label: e.target.value })}
+                            placeholder="Source"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                          <div className="p-2 bg-background rounded border text-sm">
+                            <span className="font-semibold">{formData.source_label || "Source"} : </span>
+                            <a 
+                              href="#" 
+                              className="text-primary underline"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              https://example.com/article-url
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Default Featured Image */}
+                  <div className="space-y-2">
+                    <Label>Default Featured Image</Label>
+                    <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border">
+                      {formData.default_image_url ? (
+                        <div className="relative w-28 h-20 rounded-lg border border-border overflow-hidden flex-shrink-0 shadow-sm">
+                          <img 
+                            src={formData.default_image_url} 
+                            alt="Default featured" 
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-5 w-5 shadow-lg"
+                            onClick={() => setFormData({ ...formData, default_image_url: "" })}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="w-28 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center bg-background flex-shrink-0">
+                          <ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="default_image_url" className="text-xs">Image URL</Label>
+                          <Input
+                            id="default_image_url"
+                            type="url"
+                            value={formData.default_image_url}
+                            onChange={(e) => setFormData({ ...formData, default_image_url: e.target.value })}
+                            placeholder="https://example.com/image.jpg"
+                            className="text-sm"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isUploadingImage}
+                          onClick={() => document.getElementById("image_upload")?.click()}
+                        >
+                          {isUploadingImage ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          Upload
+                        </Button>
+                        <input
+                          id="image_upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Used when feed articles don't have an image
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
