@@ -33,7 +33,6 @@ interface FeedItem {
   guid: string;
   author: string;
   imageUrl: string | null;
-  postId: number | null;
 }
 
 // Parse RSS/Atom feed XML
@@ -60,8 +59,6 @@ function parseFeed(xmlText: string): FeedItem[] {
       const author = extractAtomAuthor(entry) || "";
       const imageUrl = extractImageFromContent(content) || extractMediaContent(entry);
       
-      const postId = extractPostId(entry, guid, link);
-      
       items.push({
         title: cleanHtml(title),
         link,
@@ -71,7 +68,6 @@ function parseFeed(xmlText: string): FeedItem[] {
         guid,
         author: cleanHtml(author),
         imageUrl,
-        postId,
       });
     }
   } else {
@@ -91,8 +87,6 @@ function parseFeed(xmlText: string): FeedItem[] {
       const author = extractTagContent(item, "dc:creator") || extractTagContent(item, "author") || "";
       const imageUrl = extractMediaContent(item) || extractEnclosure(item) || extractImageFromContent(content);
       
-      const postId = extractPostId(item, guid, link);
-      
       items.push({
         title: cleanHtml(title),
         link,
@@ -102,7 +96,6 @@ function parseFeed(xmlText: string): FeedItem[] {
         guid,
         author: cleanHtml(author),
         imageUrl,
-        postId,
       });
     }
   }
@@ -179,53 +172,24 @@ function extractImageFromContent(content: string): string | null {
   return match ? match[1] : null;
 }
 
-// Extract post_id from various RSS feed formats
-function extractPostId(itemXml: string, guid: string, link: string): number | null {
-  // 1. WordPress <wp:post_id> tag
-  const wpPostIdMatch = itemXml.match(/<wp:post_id[^>]*>(\d+)<\/wp:post_id>/i);
-  if (wpPostIdMatch) {
-    return parseInt(wpPostIdMatch[1], 10);
+// Get the next available post_id by finding the max in the database and incrementing
+// deno-lint-ignore no-explicit-any
+async function getNextPostId(supabase: any): Promise<number> {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("post_id")
+    .not("post_id", "is", null)
+    .order("post_id", { ascending: false })
+    .limit(1);
+  
+  if (error) {
+    console.error("Error fetching max post_id:", error);
+    // Fallback to a reasonable starting number
+    return 1;
   }
   
-  // 2. Generic <post_id> or <postId> tag
-  const genericPostIdMatch = itemXml.match(/<post[_-]?id[^>]*>(\d+)<\/post[_-]?id>/i);
-  if (genericPostIdMatch) {
-    return parseInt(genericPostIdMatch[1], 10);
-  }
-  
-  // 3. <id> tag with numeric content (common in some feeds)
-  const idTagMatch = itemXml.match(/<id[^>]*>(\d+)<\/id>/i);
-  if (idTagMatch) {
-    return parseInt(idTagMatch[1], 10);
-  }
-  
-  // 4. Extract from GUID if it contains ?p=123 pattern (WordPress)
-  const guidParamMatch = guid.match(/[?&]p=(\d+)/);
-  if (guidParamMatch) {
-    return parseInt(guidParamMatch[1], 10);
-  }
-  
-  // 5. Extract from GUID if it's just a number
-  if (/^\d+$/.test(guid)) {
-    return parseInt(guid, 10);
-  }
-  
-  // 6. Extract from link URL patterns like /post/123 or /article/123 or ?p=123
-  const linkPatterns = [
-    /[?&]p=(\d+)/,                    // WordPress ?p=123
-    /\/(?:post|article|news|blog|p)\/(\d+)/i,  // /post/123, /article/123
-    /\/(\d+)\/?(?:\?|#|$)/,           // /123/ or /123
-    /-(\d+)\/?(?:\?|#|$)/,            // slug-123
-  ];
-  
-  for (const pattern of linkPatterns) {
-    const match = link.match(pattern);
-    if (match) {
-      return parseInt(match[1], 10);
-    }
-  }
-  
-  return null;
+  const maxPostId = data && data.length > 0 && data[0].post_id ? data[0].post_id : 0;
+  return maxPostId + 1;
 }
 
 function cleanHtml(text: string): string {
@@ -454,6 +418,10 @@ Deno.serve(async (req) => {
     const itemsToProcess = maxArticles > 0 ? newItems.slice(0, maxArticles) : newItems;
     console.log(`Processing ${itemsToProcess.length} items (max limit: ${maxArticles > 0 ? maxArticles : 'unlimited'})`);
     
+    // Get the starting post_id for new articles
+    let nextPostId = await getNextPostId(supabase);
+    console.log(`Starting post_id: ${nextPostId}`);
+    
     let articlesImported = 0;
     let duplicatesSkipped = 0;
     
@@ -523,6 +491,10 @@ Deno.serve(async (req) => {
         // Use default author from feed if set, otherwise use RSS author
         const articleAuthor = rssFeed.default_author || item.author || null;
         
+        // Assign the next post_id
+        const articlePostId = nextPostId;
+        nextPostId++; // Increment for the next article
+        
         // Create article
         const { data: article, error: articleError } = await supabase
           .from("articles")
@@ -536,13 +508,12 @@ Deno.serve(async (req) => {
             image_url: imageUrl,
             external_url: isExcerptMode ? item.link : null,
             read_time: estimateReadTime(articleContent || ""),
-            post_id: item.postId,
+            post_id: articlePostId,
             metadata: {
               source_feed: rssFeed.name,
               original_url: item.link,
               imported_at: new Date().toISOString(),
               is_draft: rssFeed.publish_status === "draft",
-              original_post_id: item.postId,
             },
           })
           .select("id")
