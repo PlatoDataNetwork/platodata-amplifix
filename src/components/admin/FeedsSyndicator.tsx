@@ -83,8 +83,7 @@ interface FeedFormData {
   max_articles_per_sync: number;
   strip_images: boolean;
   default_author: string;
-  source_link_text: string;
-  source_link_url: string;
+  add_source_link: boolean;
 }
 
 const defaultFormData: FeedFormData = {
@@ -101,8 +100,7 @@ const defaultFormData: FeedFormData = {
   max_articles_per_sync: 0,
   strip_images: true,
   default_author: "",
-  source_link_text: "",
-  source_link_url: "",
+  add_source_link: false,
 };
 
 interface FeedsSyndicatorProps {
@@ -171,8 +169,7 @@ const FeedsSyndicator = ({
         max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
         strip_images: editingFeed.strip_images ?? true,
         default_author: editingFeed.default_author || "",
-        source_link_text: editingFeed.source_link_text || "",
-        source_link_url: editingFeed.source_link_url || "",
+        add_source_link: !!(editingFeed.source_link_text && editingFeed.source_link_url),
       });
     }
   }, [editingFeed]);
@@ -228,8 +225,8 @@ const FeedsSyndicator = ({
         max_articles_per_sync: data.max_articles_per_sync,
         strip_images: data.strip_images,
         default_author: data.default_author || null,
-        source_link_text: data.source_link_text || null,
-        source_link_url: data.source_link_url || null,
+        source_link_text: data.add_source_link ? "enabled" : null,
+        source_link_url: data.add_source_link ? "enabled" : null,
       });
       if (error) throw error;
     },
@@ -250,8 +247,8 @@ const FeedsSyndicator = ({
         ...data,
         default_image_url: data.default_image_url || null,
         default_author: data.default_author || null,
-        source_link_text: data.source_link_text || null,
-        source_link_url: data.source_link_url || null,
+        source_link_text: data.add_source_link ? "enabled" : null,
+        source_link_url: data.add_source_link ? "enabled" : null,
       }).eq("id", id);
       if (error) throw error;
     },
@@ -684,35 +681,19 @@ const FeedsSyndicator = ({
                   </p>
                 </div>
 
-                {/* Source Link Section */}
+                {/* Source Attribution Link Switch */}
                 <div className="space-y-2">
-                  <Label>Source Attribution Link</Label>
-                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
-                    <div className="space-y-2">
-                      <Label htmlFor="source_link_text" className="text-xs">Link Text</Label>
-                      <Input
-                        id="source_link_text"
-                        value={formData.source_link_text}
-                        onChange={(e) => setFormData({ ...formData, source_link_text: e.target.value })}
-                        placeholder="e.g., Read the original article"
-                        className="text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="source_link_url" className="text-xs">Link URL</Label>
-                      <Input
-                        id="source_link_url"
-                        type="url"
-                        value={formData.source_link_url}
-                        onChange={(e) => setFormData({ ...formData, source_link_url: e.target.value })}
-                        placeholder="https://source-website.com"
-                        className="text-sm"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      This link will be appended at the end of each article content
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="add_source_link">Add Source Attribution</Label>
+                    <Switch
+                      id="add_source_link"
+                      checked={formData.add_source_link}
+                      onCheckedChange={(checked) => setFormData({ ...formData, add_source_link: checked })}
+                    />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    When enabled, adds "Source: [original URL]" at the end of each article
+                  </p>
                 </div>
 
                 {/* Default Featured Image - Full Width */}

@@ -467,9 +467,9 @@ Deno.serve(async (req) => {
           ? stripImagesFromContent(rawContent || "") 
           : (rawContent || "");
         
-        // Append source link at the end of content if configured
-        if (rssFeed.source_link_text && rssFeed.source_link_url) {
-          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>Source:</strong> <a href="${rssFeed.source_link_url}" target="_blank" rel="noopener noreferrer">${rssFeed.source_link_text}</a></p>`;
+        // Append source link at the end of content if configured (use the item's original link)
+        if (rssFeed.source_link_text && rssFeed.source_link_url && item.link) {
+          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>Source :</strong> <a target="_blank" href="${item.link}">${item.link}</a></p>`;
           articleContent = articleContent + sourceLink;
         }
         
