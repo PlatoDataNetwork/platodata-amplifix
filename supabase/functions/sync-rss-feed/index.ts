@@ -476,8 +476,21 @@ Deno.serve(async (req) => {
         
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
-        // Use default image from feed if set, otherwise null (ignore RSS images)
-        const imageUrl = rssFeed.default_image_url || null;
+        // Determine image URL: feed default > random from pool > null
+        let imageUrl = rssFeed.default_image_url || null;
+        
+        // If no feed default image, try to get a random one from the pool
+        if (!imageUrl) {
+          const { data: randomImages } = await supabase
+            .from("default_featured_images")
+            .select("image_url")
+            .limit(100);
+          
+          if (randomImages && randomImages.length > 0) {
+            const randomIndex = Math.floor(Math.random() * randomImages.length);
+            imageUrl = randomImages[randomIndex].image_url;
+          }
+        }
         
         // Use default author from feed if set, otherwise use RSS author
         const articleAuthor = rssFeed.default_author || item.author || null;

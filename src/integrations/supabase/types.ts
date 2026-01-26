@@ -139,6 +139,24 @@ export type Database = {
         }
         Relationships: []
       }
+      default_featured_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
       feed_sync_logs: {
         Row: {
           article_id: string | null

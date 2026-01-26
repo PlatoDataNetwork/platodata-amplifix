@@ -19,8 +19,9 @@ import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 import RobotsSettings from "@/components/admin/settings/RobotsSettings";
 import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
 import FeedSyncLogs from "@/components/admin/FeedSyncLogs";
+import DefaultFeaturedImages from "@/components/admin/DefaultFeaturedImages";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -243,6 +244,8 @@ const Management = () => {
         );
       case "feeds-logs":
         return <FeedSyncLogs />;
+      case "default-images":
+        return <DefaultFeaturedImages />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":

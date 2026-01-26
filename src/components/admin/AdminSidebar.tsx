@@ -12,7 +12,8 @@ import {
   Map,
   Bot,
   Rss,
-  ScrollText
+  ScrollText,
+  Images
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,7 +34,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -175,6 +176,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
+              {/* Default Featured Images */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("default-images")}
+                  isActive={currentView === "default-images"}
+                  className="w-full text-base py-3"
+                >
+                  <Images className="w-6 h-6" />
+                  <span>Default Images</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               {/* Users - coming soon */}
               <SidebarMenuItem>
