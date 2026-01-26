@@ -141,6 +141,29 @@ const FeedsSyndicator = ({
     },
   });
 
+  // Fetch article counts per feed from feed_sync_logs
+  const { data: feedArticleCounts } = useQuery({
+    queryKey: ["feed-article-counts"],
+    queryFn: async () => {
+      // Get counts of successfully imported articles (where article_id is not null)
+      const { data, error } = await supabase
+        .from("feed_sync_logs")
+        .select("feed_id, article_id")
+        .not("article_id", "is", null);
+      
+      if (error) throw error;
+      
+      // Group by feed_id and count
+      const counts: Record<string, number> = {};
+      data?.forEach((log) => {
+        counts[log.feed_id] = (counts[log.feed_id] || 0) + 1;
+      });
+      
+      return counts;
+    },
+    enabled: mode === "list",
+  });
+
   // Fetch single feed for editing
   const { data: editingFeed, isLoading: editFeedLoading } = useQuery({
     queryKey: ["rss-feed", editFeedId],
@@ -867,6 +890,7 @@ const FeedsSyndicator = ({
                 <TableRow>
                   <TableHead>Feed</TableHead>
                   <TableHead>Vertical</TableHead>
+                  <TableHead>Articles</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Import Mode</TableHead>
                   <TableHead>Last Synced</TableHead>
@@ -897,6 +921,11 @@ const FeedsSyndicator = ({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{feed.vertical_slug}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-medium text-foreground">
+                        {feedArticleCounts?.[feed.id] || 0}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
