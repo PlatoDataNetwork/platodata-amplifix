@@ -692,8 +692,23 @@ const FeedsSyndicator = ({
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    When enabled, adds "Source: [original URL]" at the end of each article
+                    When enabled, adds source attribution at the end of each article
                   </p>
+                  {formData.add_source_link && (
+                    <div className="p-3 bg-muted/30 rounded-lg border mt-2">
+                      <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                      <div className="p-2 bg-background rounded border text-sm">
+                        <span className="font-semibold">Source : </span>
+                        <a 
+                          href="#" 
+                          className="text-primary underline"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          https://example.com/article-url
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Default Featured Image - Full Width */}
