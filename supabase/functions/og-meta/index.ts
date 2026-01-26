@@ -18,7 +18,15 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const postId = url.searchParams.get("postId");
+    let postId = url.searchParams.get("postId");
+    
+    // Also extract postId from path if present (e.g., /w3ai/123456/vertical/slug)
+    if (!postId) {
+      const pathMatch = url.pathname.match(/\/w3ai\/(\d+)/);
+      if (pathMatch) {
+        postId = pathMatch[1];
+      }
+    }
 
     // If no postId, return default meta tags
     if (!postId) {
