@@ -148,6 +148,11 @@ const FeedsSyndicator = ({
   const [formData, setFormData] = useState<FeedFormData>(defaultFormData);
   const [syncingFeedId, setSyncingFeedId] = useState<string | null>(null);
   const [isBulkSyncing, setIsBulkSyncing] = useState(false);
+  const [bulkSyncProgress, setBulkSyncProgress] = useState<{
+    current: number;
+    total: number;
+    currentFeedName: string;
+  } | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [deletingArticlesFeed, setDeletingArticlesFeed] = useState<RssFeed | null>(null);
   const [isDeletingArticles, setIsDeletingArticles] = useState(false);
@@ -367,12 +372,20 @@ const FeedsSyndicator = ({
     }
 
     setIsBulkSyncing(true);
+    setBulkSyncProgress({ current: 0, total: activeFeeds.length, currentFeedName: "" });
     let successCount = 0;
     let totalImported = 0;
 
     try {
       // Sync feeds sequentially to avoid overwhelming the server
-      for (const feed of activeFeeds) {
+      for (let i = 0; i < activeFeeds.length; i++) {
+        const feed = activeFeeds[i];
+        setBulkSyncProgress({ 
+          current: i + 1, 
+          total: activeFeeds.length, 
+          currentFeedName: feed.name 
+        });
+        
         try {
           const { data, error } = await supabase.functions.invoke("sync-rss-feed", {
             body: { feedId: feed.id },
@@ -401,6 +414,7 @@ const FeedsSyndicator = ({
       toast.error(`Bulk sync failed: ${errorMessage}`);
     } finally {
       setIsBulkSyncing(false);
+      setBulkSyncProgress(null);
     }
   };
 
@@ -1019,6 +1033,35 @@ const FeedsSyndicator = ({
           </Button>
         </div>
       </div>
+
+      {/* Bulk sync progress indicator */}
+      {bulkSyncProgress && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-4">
+              <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-foreground truncate">
+                    Syncing: {bulkSyncProgress.currentFeedName}
+                  </span>
+                  <span className="text-sm text-muted-foreground flex-shrink-0 ml-2">
+                    {bulkSyncProgress.current} of {bulkSyncProgress.total}
+                  </span>
+                </div>
+                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-300 ease-out"
+                    style={{ 
+                      width: `${(bulkSyncProgress.current / bulkSyncProgress.total) * 100}%` 
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {feedsLoading ? (
         <div className="flex items-center justify-center py-12">
