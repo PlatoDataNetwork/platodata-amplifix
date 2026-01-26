@@ -3,6 +3,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Upload, Trash2, Loader2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +27,7 @@ const DefaultFeaturedImages = () => {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [deleteImageId, setDeleteImageId] = useState<string | null>(null);
 
   // Fetch all default featured images
   const { data: images, isLoading } = useQuery({
@@ -43,11 +54,23 @@ const DefaultFeaturedImages = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["default-featured-images"] });
       toast.success("Image deleted");
+      setDeleteImageId(null);
     },
     onError: (error) => {
       toast.error(`Failed to delete: ${error.message}`);
+      setDeleteImageId(null);
     },
   });
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteImageId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteImageId) {
+      deleteMutation.mutate(deleteImageId);
+    }
+  };
 
   // Process files for upload
   const processFiles = async (files: FileList | File[]) => {
@@ -243,14 +266,9 @@ const DefaultFeaturedImages = () => {
                       variant="destructive"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => deleteMutation.mutate(image.id)}
-                      disabled={deleteMutation.isPending}
+                      onClick={() => handleDeleteClick(image.id)}
                     >
-                      {deleteMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -269,6 +287,31 @@ const DefaultFeaturedImages = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteImageId} onOpenChange={(open) => !open && setDeleteImageId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this image from the pool? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
