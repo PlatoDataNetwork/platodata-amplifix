@@ -64,6 +64,7 @@ interface RssFeed {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  strip_inline_styles: boolean;
   default_author: string | null;
   source_link_text: string | null;
   source_link_url: string | null;
@@ -82,6 +83,7 @@ interface FeedFormData {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  strip_inline_styles: boolean;
   default_author: string;
   add_source_link: boolean;
   source_label: string;
@@ -100,6 +102,7 @@ const defaultFormData: FeedFormData = {
   check_duplicate_link: false,
   max_articles_per_sync: 0,
   strip_images: true,
+  strip_inline_styles: true,
   default_author: "",
   add_source_link: false,
   source_label: "Source",
@@ -170,6 +173,7 @@ const FeedsSyndicator = ({
         check_duplicate_link: editingFeed.check_duplicate_link || false,
         max_articles_per_sync: editingFeed.max_articles_per_sync || 0,
         strip_images: editingFeed.strip_images ?? true,
+        strip_inline_styles: editingFeed.strip_inline_styles ?? true,
         default_author: editingFeed.default_author || "",
         add_source_link: !!(editingFeed.source_link_url),
         source_label: editingFeed.source_link_text || "Source",
@@ -227,6 +231,7 @@ const FeedsSyndicator = ({
         check_duplicate_link: data.check_duplicate_link,
         max_articles_per_sync: data.max_articles_per_sync,
         strip_images: data.strip_images,
+        strip_inline_styles: data.strip_inline_styles,
         default_author: data.default_author || null,
         source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
@@ -626,19 +631,37 @@ const FeedsSyndicator = ({
                 {/* Content Processing - Full Width */}
                 <div className="space-y-2 lg:col-span-2">
                   <Label>Content Processing</Label>
-                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images from Content</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Remove all embedded images from imported article content
-                      </p>
+                  <div className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg border">
+                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="strip_images" className="text-sm font-medium">Strip Images</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Remove embedded images from content
+                        </p>
+                      </div>
+                      <Switch
+                        id="strip_images"
+                        checked={formData.strip_images}
+                        onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
+                      />
                     </div>
-                    <Switch
-                      id="strip_images"
-                      checked={formData.strip_images}
-                      onCheckedChange={(checked) => setFormData({ ...formData, strip_images: checked })}
-                    />
+                    <div className="flex items-center justify-between flex-1 p-3 bg-background rounded-md border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="strip_inline_styles" className="text-sm font-medium">Strip Inline Styles</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Remove inline CSS for theme compatibility
+                        </p>
+                      </div>
+                      <Switch
+                        id="strip_inline_styles"
+                        checked={formData.strip_inline_styles}
+                        onCheckedChange={(checked) => setFormData({ ...formData, strip_inline_styles: checked })}
+                      />
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    These options clean imported content for better display
+                  </p>
                 </div>
 
                 {/* Default Author */}
