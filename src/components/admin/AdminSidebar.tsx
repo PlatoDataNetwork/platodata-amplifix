@@ -35,7 +35,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -199,6 +199,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 >
                   <Sparkles className="w-6 h-6" />
                   <span>OG Image Generator</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Social Preview Debugger */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("social-preview")}
+                  isActive={currentView === "social-preview"}
+                  className="w-full text-base py-3"
+                >
+                  <Globe className="w-6 h-6" />
+                  <span>Social Preview</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
