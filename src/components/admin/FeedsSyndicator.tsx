@@ -310,8 +310,19 @@ const FeedsSyndicator = ({
   const updateFeedMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<FeedFormData> }) => {
       const { error } = await supabase.from("rss_feeds").update({
-        ...data,
+        name: data.name,
+        feed_url: data.feed_url,
+        vertical_slug: data.vertical_slug,
+        import_mode: data.import_mode,
+        publish_status: data.publish_status,
+        auto_sync: data.auto_sync,
+        sync_interval_hours: data.sync_interval_hours,
         default_image_url: data.default_image_url || null,
+        check_duplicate_title: data.check_duplicate_title,
+        check_duplicate_link: data.check_duplicate_link,
+        max_articles_per_sync: data.max_articles_per_sync,
+        strip_images: data.strip_images,
+        strip_inline_styles: data.strip_inline_styles,
         default_author: data.default_author || null,
         source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
