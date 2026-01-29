@@ -320,6 +320,22 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
             <div className="bg-card border border-border rounded-lg p-4 space-y-4">
               <h3 className="font-semibold text-foreground">Article Details</h3>
 
+              {/* Post ID - shown when editing an existing article */}
+              {isEditing && article?.post_id && (
+                <div className="space-y-2">
+                  <Label>Post ID</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={article.post_id.toString()}
+                      readOnly
+                      disabled
+                      className="bg-muted text-muted-foreground font-mono"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Auto-assigned unique identifier</p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="vertical">Vertical *</Label>
                 <Select
