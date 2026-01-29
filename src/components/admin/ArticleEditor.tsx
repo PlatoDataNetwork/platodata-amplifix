@@ -152,8 +152,15 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
 
   // Update article mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<Article> & { id: string }) => {
-      const { id, ...updates } = data;
+    mutationFn: async (data: Partial<Article> & { id: string; currentPostId?: number | null }) => {
+      const { id, currentPostId, ...updates } = data;
+      
+      // If article doesn't have a post_id, assign one
+      if (!currentPostId) {
+        const nextPostId = await getNextPostId();
+        (updates as Partial<Article>).post_id = nextPostId;
+      }
+      
       const { error } = await supabase.from("articles").update(updates).eq("id", id);
       if (error) throw error;
       return id;
@@ -223,7 +230,7 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     };
 
     if (isEditing && article) {
-      updateMutation.mutate({ id: article.id, ...articleData });
+      updateMutation.mutate({ id: article.id, currentPostId: article.post_id, ...articleData });
     } else {
       createMutation.mutate(articleData);
     }
