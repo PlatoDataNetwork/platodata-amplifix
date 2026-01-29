@@ -90,12 +90,36 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     }
   }, [existingArticleTags]);
 
+  // Helper to get next sequential post_id
+  const getNextPostId = async (): Promise<number> => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("post_id")
+      .not("post_id", "is", null)
+      .order("post_id", { ascending: false })
+      .limit(1);
+    
+    if (error) {
+      console.error("Error fetching max post_id:", error);
+      return 1;
+    }
+    
+    if (data && data.length > 0 && data[0].post_id) {
+      return data[0].post_id + 1;
+    }
+    
+    return 1;
+  };
+
   // Create article mutation
   const createMutation = useMutation({
     mutationFn: async (data: Omit<Article, "id" | "created_at" | "updated_at" | "post_id" | "metadata">) => {
+      // Get the next sequential post_id
+      const nextPostId = await getNextPostId();
+      
       const { data: newArticle, error } = await supabase
         .from("articles")
-        .insert(data)
+        .insert({ ...data, post_id: nextPostId })
         .select("id")
         .single();
       if (error) throw error;
