@@ -56,24 +56,22 @@ Deno.serve(async (req) => {
     const vertical = url.searchParams.get('vertical')
     const category = url.searchParams.get('category')
     const limitParam = url.searchParams.get('limit')
-    const limit = limitParam !== null ? parseInt(limitParam) : 100
-    const includeTranslations = url.searchParams.get('include_translations') === 'true'
-    
-    // Cursor-based pagination parameters
-    const cursorPublishedAt = url.searchParams.get('cursor_published_at')
-    const cursorId = url.searchParams.get('cursor_id')
-    
-    // Legacy offset parameter (for backward compatibility)
+    const limit = limitParam !== null ? parseInt(limitParam) : 50
     const offset = parseInt(url.searchParams.get('offset') || '0')
+    const includeTranslations = url.searchParams.get('include_translations') === 'true'
 
-    console.log(`Fetching articles - vertical: ${vertical}, category: ${category}, limit: ${limit}, cursor_published_at: ${cursorPublishedAt}, cursor_id: ${cursorId}, includeTranslations: ${includeTranslations}`)
+    console.log(`Fetching articles - vertical: ${vertical}, category: ${category}, limit: ${limit}, offset: ${offset}, includeTranslations: ${includeTranslations}`)
 
     // Build the query
     let query = supabase
       .from('articles')
       .select('id, post_id, title, excerpt, content, author, published_at, read_time, category, vertical_slug, image_url, external_url, metadata, created_at, updated_at', { count: 'exact' })
       .order('published_at', { ascending: false })
-      .order('id', { ascending: false })
+
+    // Apply range only if limit > 0 (limit=0 means fetch all)
+    if (limit > 0) {
+      query = query.range(offset, offset + limit - 1)
+    }
 
     // Apply vertical filter if provided
     if (vertical) {
@@ -83,20 +81,6 @@ Deno.serve(async (req) => {
     // Apply category filter if provided
     if (category) {
       query = query.eq('category', category)
-    }
-
-    // Cursor-based pagination (preferred - fast at any depth)
-    if (cursorPublishedAt && cursorId) {
-      // Get articles older than cursor OR same timestamp with smaller ID
-      query = query.or(`published_at.lt.${cursorPublishedAt},and(published_at.eq.${cursorPublishedAt},id.lt.${cursorId})`)
-    } else if (offset > 0) {
-      // Legacy offset-based pagination (slow for large offsets, kept for backward compatibility)
-      query = query.range(offset, offset + limit - 1)
-    }
-
-    // Apply limit
-    if (limit > 0) {
-      query = query.limit(limit)
     }
 
     const { data: articles, error: articlesError, count } = await query
@@ -131,16 +115,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Build next_cursor from last article
-    let nextCursor = null
-    if (articles && articles.length > 0 && articles.length === limit) {
-      const lastArticle = articles[articles.length - 1]
-      nextCursor = {
-        published_at: lastArticle.published_at,
-        id: lastArticle.id
-      }
-    }
-
     console.log(`Successfully fetched ${articles?.length || 0} articles out of ${count} total`)
 
     return new Response(
@@ -149,9 +123,8 @@ Deno.serve(async (req) => {
         data: responseData,
         pagination: {
           limit,
-          offset: cursorPublishedAt ? undefined : offset,
-          total: count || 0,
-          next_cursor: nextCursor
+          offset,
+          total: count || 0
         }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

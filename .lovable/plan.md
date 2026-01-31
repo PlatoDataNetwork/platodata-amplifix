@@ -1,11 +1,20 @@
 
-# Fix Articles API Pagination Performance
 
-## Problem
-The current `articles-api` uses OFFSET-based pagination which becomes extremely slow with large datasets. At offset 23,800+, PostgreSQL times out because it must scan through all previous rows.
+# Update CORS Settings for articles-api Edge Function
 
-## Solution
-Implement cursor-based pagination using `published_at` and `id` as cursor values. This allows the database to use indexes efficiently regardless of how deep into the dataset you're paginating.
+## Summary
+Update the `articles-api` edge function to allow cross-origin requests from `ai.platodata.io` in addition to the existing `dashboard.platodata.io`.
+
+---
+
+## Important Note About Your Current Error
+
+The 401 "Invalid or missing API key" error in your screenshot is **not a CORS issue**. Since you're running the sync from a Laravel CLI command (server-side), CORS doesn't apply - it only affects browser-based requests.
+
+**To fix the 401 error, verify:**
+1. Your Laravel `.env` has the correct `PLATO_API_KEY` value
+2. Run `php artisan config:clear` after updating `.env`
+3. The API key matches what's stored in Supabase Edge Function secrets
 
 ---
 
@@ -13,122 +22,48 @@ Implement cursor-based pagination using `published_at` and `id` as cursor values
 
 ### File: `supabase/functions/articles-api/index.ts`
 
-**Current Approach (Slow):**
+**Current Configuration (Line 3-6):**
 ```typescript
-query = query.range(offset, offset + limit - 1)
-```
-
-**New Approach (Fast - Cursor-based):**
-```typescript
-// Use cursor parameters instead of offset
-const cursor_published_at = url.searchParams.get('cursor_published_at')
-const cursor_id = url.searchParams.get('cursor_id')
-
-// Filter using WHERE instead of OFFSET
-if (cursor_published_at && cursor_id) {
-  query = query
-    .or(`published_at.lt.${cursor_published_at},and(published_at.eq.${cursor_published_at},id.lt.${cursor_id})`)
-}
-
-query = query.limit(limit)
-```
-
-### API Changes
-
-**New Query Parameters:**
-| Parameter | Description |
-|-----------|-------------|
-| `cursor_published_at` | ISO timestamp from the last article's `published_at` |
-| `cursor_id` | UUID from the last article's `id` |
-| `limit` | Number of articles per page (default: 100) |
-
-**Backward Compatibility:**
-- Keep supporting `offset` for existing integrations
-- Add `cursor_published_at` and `cursor_id` for new cursor-based approach
-- Return `next_cursor` in the response for easy iteration
-
-**Response Format Update:**
-```json
-{
-  "success": true,
-  "data": [...],
-  "pagination": {
-    "limit": 100,
-    "total": 597659,
-    "next_cursor": {
-      "published_at": "2025-01-30T10:00:00Z",
-      "id": "abc-123-def"
-    }
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://dashboard.platodata.io',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
 }
 ```
+
+**New Configuration:**
+```typescript
+// Helper to check allowed origins
+const allowedOrigins = [
+  'https://dashboard.platodata.io',
+  'https://ai.platodata.io'
+];
+
+const getCorsHeaders = (origin: string | null) => {
+  const allowedOrigin = origin && allowedOrigins.includes(origin) 
+    ? origin 
+    : allowedOrigins[0];
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
+  };
+};
+```
+
+**Updated Request Handler:**
+- Modify the `Deno.serve` function to extract the `Origin` header from incoming requests
+- Use `getCorsHeaders(origin)` instead of static `corsHeaders` throughout the function
+- This allows dynamic CORS based on the requesting origin
 
 ---
 
-## Laravel Command Updates
+## Implementation Details
 
-Your `SyncPlatoArticles` command will need a small update to use cursor-based pagination:
+1. **Dynamic Origin Handling**: The function will check if the request's `Origin` header matches one of the allowed origins and respond with that specific origin in the CORS header
 
-```php
-private function fetchArticles(?string $vertical, int $limit): array
-{
-    $allArticles = [];
-    $cursorPublishedAt = null;
-    $cursorId = null;
-    $batchSize = 100;
+2. **Fallback Behavior**: If the origin isn't recognized or isn't present (like server-side requests), it falls back to the first allowed origin
 
-    $this->info('Fetching articles from API...');
-
-    do {
-        $params = [
-            'limit' => ($limit > 0 && $limit < $batchSize) ? $limit : $batchSize,
-        ];
-
-        // Use cursor-based pagination instead of offset
-        if ($cursorPublishedAt && $cursorId) {
-            $params['cursor_published_at'] = $cursorPublishedAt;
-            $params['cursor_id'] = $cursorId;
-        }
-
-        if ($vertical) {
-            $params['vertical'] = $vertical;
-        }
-
-        $this->line("Fetching batch with cursor: published_at={$cursorPublishedAt}");
-
-        $response = Http::withHeaders([
-            'X-API-Key' => $this->apiKey,
-        ])->timeout(120)->get($this->apiUrl, $params);
-
-        // ... rest of error handling ...
-
-        $articles = $data['data'] ?? [];
-        $this->totalArticles = $data['pagination']['total'] ?? 0;
-
-        $allArticles = array_merge($allArticles, $articles);
-
-        // Get cursor from last article for next batch
-        if (!empty($articles)) {
-            $lastArticle = end($articles);
-            $cursorPublishedAt = $lastArticle['published_at'];
-            $cursorId = $lastArticle['id'];
-        }
-
-        // Stop conditions
-        if ($limit > 0 && count($allArticles) >= $limit) {
-            $allArticles = array_slice($allArticles, 0, $limit);
-            break;
-        }
-
-        if (count($articles) < $batchSize) {
-            break;
-        }
-
-    } while (true);
-
-    return $allArticles;
-}
-```
+3. **All Response Types Updated**: Both success and error responses will use the dynamic CORS headers
 
 ---
 
@@ -136,23 +71,13 @@ private function fetchArticles(?string $vertical, int $limit): array
 
 | File | Change |
 |------|--------|
-| `supabase/functions/articles-api/index.ts` | Add cursor-based pagination support |
-
----
-
-## Performance Comparison
-
-| Pagination Type | Offset 0 | Offset 10,000 | Offset 100,000 |
-|-----------------|----------|---------------|----------------|
-| OFFSET-based | ~100ms | ~2s | Timeout |
-| Cursor-based | ~100ms | ~100ms | ~100ms |
-
-Cursor-based pagination maintains consistent performance regardless of how deep you paginate.
+| `supabase/functions/articles-api/index.ts` | Update CORS to support multiple origins dynamically |
 
 ---
 
 ## After Implementation
 
-1. Redeploy the edge function
-2. Update your Laravel command to use cursor parameters
-3. Re-run the sync - it should complete without timeouts
+The edge function will be automatically redeployed. You can verify the CORS change by:
+1. Making a request from `ai.platodata.io` in the browser
+2. Checking the response headers include `Access-Control-Allow-Origin: https://ai.platodata.io`
+
