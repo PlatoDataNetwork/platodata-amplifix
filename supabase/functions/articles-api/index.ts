@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
   // Validate API key
   const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key')
-  const validApiKey = Deno.env.get('ARTICLES_API_KEY')
+  const validApiKey = Deno.env.get('PLATOAI_KEY')
 
   if (!apiKey || apiKey !== validApiKey) {
     console.error('Unauthorized: Invalid or missing API key')
