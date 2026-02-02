@@ -246,56 +246,56 @@ const ArticlePage = () => {
       <Navigation />
       
       {/* Article Header */}
-      <section className="pt-32 pb-8 px-6">
+      <section className="pt-24 md:pt-32 pb-6 md:pb-8 px-4 md:px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-4 md:mb-6">
             <Link 
               to={withLang("/intel")} 
-              className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+              className="text-muted-foreground hover:text-foreground transition-colors text-xs md:text-sm"
             >
-              <ArrowLeft className="w-4 h-4 inline mr-1" />
+              <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
               Back to Intelligence
             </Link>
             <Link 
               to={withLang(`/w3ai/vertical/${article.vertical_slug}`)}
-              className="text-primary hover:underline text-sm"
+              className="text-primary hover:underline text-xs md:text-sm"
             >
               {formatVerticalName(article.vertical_slug)}
             </Link>
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6" style={{ lineHeight: '1.2' }}>
+          <h1 className="text-2xl md:text-5xl font-bold text-foreground mb-4 md:mb-6" style={{ lineHeight: '1.2' }}>
             {decodeHtmlEntities(article.title)}
           </h1>
           
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 md:mb-8">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-muted-foreground">
               {article.author && (
                 <span className="font-bold flex items-center gap-1">
-                  <User className="w-4 h-4" />
+                  <User className="w-3 h-3 md:w-4 md:h-4" />
                   {article.author}
                 </span>
               )}
               <span className="font-bold flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                 {formatLongDate(article.published_at)}
               </span>
               {article.post_id && (
                 <span className="font-bold flex items-center gap-1">
-                  <Hash className="w-4 h-4" />
+                  <Hash className="w-3 h-3 md:w-4 md:h-4" />
                   {article.post_id}
                 </span>
               )}
               {article.read_time && (
                 <span className="font-bold flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3 h-3 md:w-4 md:h-4" />
                   {article.read_time}
                 </span>
               )}
             </div>
             
             {/* Share Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
               {/* Facebook */}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -409,23 +409,23 @@ const ArticlePage = () => {
 
 
       {/* Article Content */}
-      <section className="px-6 pb-12">
+      <section className="px-4 md:px-6 pb-8 md:pb-12">
         <div className="container mx-auto max-w-6xl">
           {article.content ? (
             <div 
-              className="article-content"
+              className="article-content text-base md:text-lg"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
           ) : article.excerpt ? (
-            <p className="text-lg text-muted-foreground">{article.excerpt}</p>
+            <p className="text-base md:text-lg text-muted-foreground">{article.excerpt}</p>
           ) : null}
         </div>
       </section>
 
       {/* Source & Tags */}
-      <section className="px-6 pb-12">
+      <section className="px-4 md:px-6 pb-8 md:pb-12">
         <div className="container mx-auto max-w-6xl">
-          <div className="border-t border-border pt-8">
+          <div className="border-t border-border pt-6 md:pt-8">
             {article.external_url && (
               <p className="text-sm text-muted-foreground mb-4">
                 Source:{" "}
