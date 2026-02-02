@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Share2, Copy, Check } from "lucide-react";
+import { ArrowLeft, Share2, Copy, Check, User, Calendar, Hash, Clock } from "lucide-react";
 import { decodeHtmlEntities } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -272,14 +272,26 @@ const ArticlePage = () => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               {article.author && (
-                <span className="font-bold">{article.author}</span>
+                <span className="font-bold flex items-center gap-1">
+                  <User className="w-4 h-4" />
+                  {article.author}
+                </span>
               )}
-              <span className="font-bold">{formatLongDate(article.published_at)}</span>
+              <span className="font-bold flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                {formatLongDate(article.published_at)}
+              </span>
               {article.post_id && (
-                <span className="font-bold">ID: {article.post_id}</span>
+                <span className="font-bold flex items-center gap-1">
+                  <Hash className="w-4 h-4" />
+                  {article.post_id}
+                </span>
               )}
               {article.read_time && (
-                <span className="font-bold">{article.read_time}</span>
+                <span className="font-bold flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  {article.read_time}
+                </span>
               )}
             </div>
             
