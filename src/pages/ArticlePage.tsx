@@ -294,8 +294,8 @@ const ArticlePage = () => {
               )}
             </div>
             
-            {/* Share Buttons */}
-            <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+            {/* Share Buttons - Hidden on mobile, shown on desktop */}
+            <div className="hidden md:flex items-center gap-2 flex-wrap">
               {/* Facebook */}
               <Tooltip>
                 <TooltipTrigger asChild>
