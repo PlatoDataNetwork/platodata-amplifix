@@ -264,7 +264,7 @@ const ArticlePage = () => {
             </Link>
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-relaxed">
             {decodeHtmlEntities(article.title)}
           </h1>
           
