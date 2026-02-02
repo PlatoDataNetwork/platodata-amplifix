@@ -99,6 +99,16 @@ const Blog = () => {
               ))
             )}
           </div>
+
+          <div className="text-center pt-8 md:pt-12">
+            <Link
+              to={withLang("/intel")}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            >
+              View all articles
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
