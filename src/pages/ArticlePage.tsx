@@ -247,7 +247,7 @@ const ArticlePage = () => {
       
       {/* Article Header */}
       <section className="pt-32 pb-8 px-6">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-6xl">
           <div className="flex items-center gap-4 mb-6">
             <Link 
               to={withLang("/intel")} 
@@ -395,7 +395,7 @@ const ArticlePage = () => {
 
       {/* Article Content */}
       <section className="px-6 pb-12">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-6xl">
           {article.content ? (
             <div 
               className="article-content"
@@ -409,7 +409,7 @@ const ArticlePage = () => {
 
       {/* Source & Tags */}
       <section className="px-6 pb-12">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-6xl">
           <div className="border-t border-border pt-8">
             {article.external_url && (
               <p className="text-sm text-muted-foreground mb-4">
@@ -444,7 +444,7 @@ const ArticlePage = () => {
       {/* Related Articles */}
       {relatedArticles && relatedArticles.length > 0 && (
         <section className="px-6 pb-20">
-          <div className="container mx-auto max-w-4xl">
+          <div className="container mx-auto max-w-6xl">
             <h2 className="text-2xl font-bold text-foreground mb-6">Related Articles</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {relatedArticles.map((related) => (
