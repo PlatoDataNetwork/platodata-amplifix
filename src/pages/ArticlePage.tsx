@@ -146,8 +146,8 @@ const ArticlePage = () => {
   const pageDescription = autoExcerpt || `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on ${siteName}.`;
   const pageImage = article.image_url || `${SITE_URL}${DEFAULT_ARTICLE_IMAGE}`;
   const pageUrl = `${SITE_URL}${generateArticleUrl(article)}`;
-  // Shareable URL for social media crawlers (serves pre-rendered OG meta tags)
-  const shareUrl = `${SITE_URL}/share/article/${article.post_id}`;
+  // Use full article URL for sharing
+  const shareUrl = pageUrl;
 
   return (
     <div className="min-h-screen bg-background">
