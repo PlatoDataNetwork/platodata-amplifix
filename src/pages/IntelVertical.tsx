@@ -222,23 +222,23 @@ const IntelVertical = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-8 px-6">
+      <section className="pt-24 md:pt-32 pb-6 md:pb-8 px-4 md:px-6">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
+          <h1 className="text-3xl md:text-6xl font-bold text-primary mb-3 md:mb-4">
             {formatVerticalName(vertical || "")} Intelligence
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Stay updated with the latest {formatVerticalName(vertical || "")} news, insights, and intelligence.
           </p>
         </div>
       </section>
 
       {/* Search, Filter & View Controls */}
-      <section className="px-6 pb-8">
+      <section className="px-4 md:px-6 pb-6 md:pb-8">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
+          <div className="flex flex-col gap-3 md:gap-4 items-stretch">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-lg">
+            <div className="relative w-full md:max-w-lg md:mx-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
@@ -246,66 +246,69 @@ const IntelVertical = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="pl-10 pr-24 bg-transparent border-border"
+                className="pl-10 pr-20 md:pr-24 bg-transparent border-border text-sm md:text-base"
               />
-              <Button onClick={handleSearch} size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8">
+              <Button onClick={handleSearch} size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 md:h-8 text-xs md:text-sm px-2 md:px-3">
                 Search
               </Button>
             </div>
             
-            {/* Vertical Dropdown */}
-            <Select value={vertical || "all"} onValueChange={handleVerticalChange}>
-              <SelectTrigger className="w-full md:w-48 bg-transparent border-border">
-                <SelectValue placeholder="All Verticals" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border z-50">
-                <SelectItem value="all">All Verticals</SelectItem>
-                {verticals?.map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {formatVerticalName(v)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-border overflow-hidden">
-              <Button
-                variant={viewMode === "cards" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("cards")}
-                className="rounded-none gap-2"
-              >
-                <LayoutGrid className="w-4 h-4" />
-                Cards
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="rounded-none gap-2"
-              >
-                <List className="w-4 h-4" />
-                List
-              </Button>
+            {/* Filters Row */}
+            <div className="flex gap-2 md:gap-4 items-center justify-center">
+              {/* Vertical Dropdown */}
+              <Select value={vertical || "all"} onValueChange={handleVerticalChange}>
+                <SelectTrigger className="flex-1 md:flex-none md:w-48 bg-transparent border-border text-sm">
+                  <SelectValue placeholder="All Verticals" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border z-50">
+                  <SelectItem value="all">All Verticals</SelectItem>
+                  {verticals?.map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {formatVerticalName(v)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* View Mode Toggle */}
+              <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="rounded-none gap-1 md:gap-2 px-2 md:px-3 h-9"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cards</span>
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="rounded-none gap-1 md:gap-2 px-2 md:px-3 h-9"
+                >
+                  <List className="w-4 h-4" />
+                  <span className="hidden sm:inline">List</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Articles Grid/List */}
-      <section className="px-6 pb-12">
+      <section className="px-4 md:px-6 pb-8 md:pb-12">
         <div className="container mx-auto">
           {articlesLoading ? (
             viewMode === "cards" ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[...Array(12)].map((_, i) => (
                   <Card key={i} className="bg-card border-border">
                     <CardContent className="p-0">
-                      <Skeleton className="h-48 w-full" />
-                      <div className="p-6 space-y-3">
+                      <Skeleton className="h-36 md:h-48 w-full" />
+                      <div className="p-4 md:p-6 space-y-2 md:space-y-3">
                         <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-5 md:h-6 w-full" />
                         <Skeleton className="h-4 w-3/4" />
                       </div>
                     </CardContent>
@@ -313,15 +316,15 @@ const IntelVertical = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {[...Array(6)].map((_, i) => (
                   <Card key={i} className="bg-card border-border">
-                    <CardContent className="p-0 flex flex-col md:flex-row">
-                      <Skeleton className="h-32 md:w-48 shrink-0" />
-                      <div className="p-4 space-y-2 flex-1">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-5 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
+                    <CardContent className="p-0 flex flex-row">
+                      <Skeleton className="h-24 w-24 md:h-32 md:w-48 shrink-0" />
+                      <div className="p-3 md:p-4 space-y-2 flex-1">
+                        <Skeleton className="h-3 md:h-4 w-20" />
+                        <Skeleton className="h-4 md:h-5 w-full" />
+                        <Skeleton className="h-3 md:h-4 w-3/4" />
                       </div>
                     </CardContent>
                   </Card>
@@ -329,14 +332,14 @@ const IntelVertical = () => {
               </div>
             )
           ) : articles?.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">No articles found.</p>
-              <p className="text-sm text-muted-foreground mt-2">
+            <div className="text-center py-12 md:py-20">
+              <p className="text-muted-foreground text-base md:text-lg">No articles found.</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-2">
                 Try adjusting your search or filter criteria.
               </p>
             </div>
           ) : viewMode === "cards" ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {articles?.map((article) => (
                 <Link 
                   key={article.id} 
@@ -344,15 +347,15 @@ const IntelVertical = () => {
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full">
                     <CardContent className="p-0">
-                      <div className="h-48 overflow-hidden">
+                      <div className="h-36 md:h-48 overflow-hidden">
                         <img
                           src={article.image_url || DEFAULT_ARTICLE_IMAGE}
                           alt={article.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <div className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
+                      <div className="p-4 md:p-6">
+                        <div className="flex items-center gap-2 mb-2 md:mb-3">
                           <Badge variant="outline" className="text-xs">
                             {formatVerticalName(article.vertical_slug)}
                           </Badge>
@@ -362,11 +365,11 @@ const IntelVertical = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-medium text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-medium text-base md:text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {decodeHtmlEntities(article.title)}
                         </h3>
                         {article.excerpt && (
-                          <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+                          <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 md:line-clamp-3 mb-2 md:mb-3">
                             {decodeHtmlEntities(article.excerpt)}
                           </p>
                         )}
@@ -374,8 +377,8 @@ const IntelVertical = () => {
                           <span className="text-xs text-muted-foreground">
                             {formatDate(article.published_at)}
                           </span>
-                          <span className="text-primary text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                            Read <ArrowRight className="w-4 h-4" />
+                          <span className="text-primary text-xs md:text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Read <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                           </span>
                         </div>
                       </div>
@@ -385,48 +388,43 @@ const IntelVertical = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {articles?.map((article) => (
                 <Link 
                   key={article.id} 
                   to={generateArticleUrl(article)}
                 >
                   <Card className="bg-transparent border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
-                    <CardContent className="p-0 flex flex-col md:flex-row">
-                      <div className="h-40 md:h-auto md:w-56 shrink-0 overflow-hidden">
+                    <CardContent className="p-0 flex flex-row">
+                      <div className="h-24 w-24 md:h-auto md:w-56 shrink-0 overflow-hidden">
                         <img
                           src={article.image_url || DEFAULT_ARTICLE_IMAGE}
                           alt={article.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <div className="p-5 flex flex-col justify-between flex-1">
+                      <div className="p-3 md:p-5 flex flex-col justify-between flex-1 min-w-0">
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2 flex-wrap">
                             <Badge variant="outline" className="text-xs">
                               {formatVerticalName(article.vertical_slug)}
                             </Badge>
-                            {article.read_time && (
-                              <span className="text-xs text-muted-foreground">
-                                {article.read_time}
-                              </span>
-                            )}
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground hidden sm:inline">
                               {formatDate(article.published_at)}
                             </span>
                           </div>
-                          <h3 className="font-medium text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                          <h3 className="font-medium text-sm md:text-lg text-foreground mb-1 md:mb-2 group-hover:text-primary transition-colors line-clamp-2">
                             {decodeHtmlEntities(article.title)}
                           </h3>
                           {article.excerpt && (
-                            <p className="text-sm text-muted-foreground line-clamp-3">
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 hidden sm:block">
                               {decodeHtmlEntities(article.excerpt)}
                             </p>
                           )}
                         </div>
-                        <div className="mt-3">
-                          <span className="text-primary text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                            Read Full Article <ArrowRight className="w-4 h-4" />
+                        <div className="mt-2 md:mt-3">
+                          <span className="text-primary text-xs md:text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Read <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                           </span>
                         </div>
                       </div>
@@ -441,18 +439,18 @@ const IntelVertical = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <section className="px-6 pb-20">
+        <section className="px-4 md:px-6 pb-16 md:pb-20">
           <div className="container mx-auto">
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-1 md:gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="gap-1"
+                className="gap-1 px-2 md:px-3 h-8 md:h-9"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Previous
+                <span className="hidden sm:inline">Previous</span>
               </Button>
               
               <div className="flex items-center gap-1">
@@ -463,12 +461,12 @@ const IntelVertical = () => {
                       variant={currentPage === page ? "default" : "outline"}
                       size="sm"
                       onClick={() => goToPage(page)}
-                      className="w-10"
+                      className="w-8 h-8 md:w-10 md:h-9 text-xs md:text-sm p-0"
                     >
                       {page}
                     </Button>
                   ) : (
-                    <span key={index} className="px-2 text-muted-foreground">
+                    <span key={index} className="px-1 md:px-2 text-muted-foreground text-sm">
                       {page}
                     </span>
                   )
@@ -480,14 +478,14 @@ const IntelVertical = () => {
                 size="sm"
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="gap-1"
+                className="gap-1 px-2 md:px-3 h-8 md:h-9"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
             
-            <p className="text-center text-sm text-muted-foreground mt-4">
+            <p className="text-center text-xs md:text-sm text-muted-foreground mt-3 md:mt-4">
               Page {currentPage} of {totalPages} ({totalCount?.toLocaleString()} articles)
             </p>
           </div>
