@@ -342,16 +342,6 @@ const ArticlePage = () => {
         </div>
       </section>
 
-      {/* Featured Image */}
-      <section className="px-6 pb-8">
-        <div className="container mx-auto max-w-4xl">
-          <img
-            src={article.image_url || DEFAULT_ARTICLE_IMAGE}
-            alt={article.title}
-            className="w-full rounded-lg object-cover max-h-[500px]"
-          />
-        </div>
-      </section>
 
       {/* Article Content */}
       <section className="px-6 pb-12">
