@@ -12,6 +12,8 @@ function htmlHeaders() {
   const headers = new Headers(corsHeaders);
   // Some crawlers are strict about the response MIME type.
   headers.set("content-type", "text/html; charset=utf-8");
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("cache-control", "public, max-age=300");
   return headers;
 }
 
@@ -36,6 +38,19 @@ serve(async (req) => {
   }
 
   const isHead = req.method === "HEAD";
+
+  // Debug visibility: confirms whether LinkedIn (or other bots) is reaching this endpoint.
+  // (Keep lightweight; logs only one line per request.)
+  try {
+    const ua = req.headers.get("user-agent") || "";
+    const url = new URL(req.url);
+    const postIdFromQuery = url.searchParams.get("postId");
+    console.info(
+      `[og-meta] ${req.method} postId=${postIdFromQuery ?? ""} ua=${ua.slice(0, 120)}`,
+    );
+  } catch {
+    // ignore logging errors
+  }
 
   try {
     const url = new URL(req.url);

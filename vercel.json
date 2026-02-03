@@ -72,7 +72,7 @@
       "has": [
         {
           "type": "header",
-          "key": "User-Agent",
+          "key": "user-agent",
           "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|Slackbot|LinkedInBot|LinkedIn|linkedinbot|linkedin|Discordbot|TelegramBot|Telegram|TelegramBotAPI|bot\\.telegram|Googlebot|bingbot|Applebot|Pinterestbot|Redditbot|Tumblr|Viber|Snapchat|Skype|vkShare|W3C_Validator|Embedly|Quora|outbrain|Pinterest|Mastodon|ia_archiver|MJ12bot|Baiduspider|YandexBot|DuckDuckBot|Sogou|Exabot|facebot|ia_archiver|SemrushBot|AhrefsBot|PetalBot|MegaIndex|DataForSeoBot|ZoominfoBot|SeekportBot|Neevabot|ICC-Crawler).*"
         }
       ],
