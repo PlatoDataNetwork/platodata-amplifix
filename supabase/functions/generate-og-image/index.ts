@@ -76,12 +76,13 @@ serve(async (req) => {
       ? cleanTitle.substring(0, 97) + "..." 
       : cleanTitle;
 
-    const prompt = `Create a professional, modern 16:9 aspect ratio social media preview image for a news article. 
+    const prompt = `Create a professional, modern social media preview image with EXACTLY 1200x630 pixel dimensions (1.91:1 aspect ratio).
 The image should have a dark gradient background (deep blue to purple) with subtle tech/data visualization patterns.
 Include the article title "${displayTitle}" prominently displayed in white, bold text in the center.
 Add a small category badge showing "${verticalName}" in the top-left corner.
 Add "platodata.io" branding subtly in the bottom-right corner.
 The style should be professional, sleek, and suitable for financial/tech news.
+IMPORTANT: The final image MUST be exactly 1200 pixels wide and 630 pixels tall for optimal social media sharing.
 Ultra high resolution, clean typography.`;
 
     console.log("Generating image for article:", article.id, "with prompt:", prompt);
