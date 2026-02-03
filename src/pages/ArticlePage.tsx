@@ -267,7 +267,7 @@ const ArticlePage = () => {
               {article.post_id && (
                 <span className="font-bold flex items-center gap-1">
                   <Hash className="w-3 h-3 md:w-4 md:h-4" />
-                  {article.post_id}
+                  Source Node : {article.post_id}
                 </span>
               )}
               {article.read_time && (
