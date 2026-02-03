@@ -27,6 +27,89 @@ interface DefaultFeaturedImage {
   created_at: string;
 }
 
+// Target dimensions for optimal social media previews (WhatsApp, Facebook, LinkedIn, Twitter)
+const TARGET_WIDTH = 1200;
+const TARGET_HEIGHT = 630;
+
+/**
+ * Resize an image file to exactly 1200x630 pixels for optimal OG image display.
+ * Uses canvas to resize and crop to the target aspect ratio.
+ */
+const resizeImageToOG = (file: File): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      reject(new Error("Failed to get canvas context"));
+      return;
+    }
+
+    img.onload = () => {
+      // Set canvas to target OG dimensions
+      canvas.width = TARGET_WIDTH;
+      canvas.height = TARGET_HEIGHT;
+
+      // Calculate source dimensions to maintain aspect ratio with cover behavior
+      const targetAspect = TARGET_WIDTH / TARGET_HEIGHT;
+      const sourceAspect = img.width / img.height;
+
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+
+      if (sourceAspect > targetAspect) {
+        // Image is wider - crop sides
+        sourceWidth = img.height * targetAspect;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else {
+        // Image is taller - crop top/bottom
+        sourceHeight = img.width / targetAspect;
+        sourceY = (img.height - sourceHeight) / 2;
+      }
+
+      // Fill with white background first (in case of transparency)
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+      // Draw the resized image
+      ctx.drawImage(
+        img,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        TARGET_WIDTH,
+        TARGET_HEIGHT
+      );
+
+      // Convert to blob with high quality JPEG
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to create image blob"));
+          }
+        },
+        "image/jpeg",
+        0.9 // 90% quality for good balance of size and quality
+      );
+    };
+
+    img.onerror = () => {
+      reject(new Error("Failed to load image"));
+    };
+
+    // Load the image from file
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 const DefaultFeaturedImages = () => {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
@@ -77,7 +160,7 @@ const DefaultFeaturedImages = () => {
     }
   };
 
-  // Process files for upload
+  // Process files for upload with automatic resizing to 1200x630
   const processFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
@@ -93,41 +176,50 @@ const DefaultFeaturedImages = () => {
           continue;
         }
 
-        // Upload to Supabase Storage
-        const fileExt = file.name.split(".").pop();
-        const fileName = `default-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from("article-images")
-          .upload(fileName, file);
+        try {
+          // Resize image to 1200x630 for optimal social media previews
+          const resizedBlob = await resizeImageToOG(file);
+          
+          // Upload to Supabase Storage
+          const fileName = `default-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("article-images")
+            .upload(fileName, resizedBlob, {
+              contentType: "image/jpeg",
+            });
 
-        if (uploadError) {
-          toast.error(`Failed to upload ${file.name}: ${uploadError.message}`);
+          if (uploadError) {
+            toast.error(`Failed to upload ${file.name}: ${uploadError.message}`);
+            errorCount++;
+            continue;
+          }
+
+          // Get the public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from("article-images")
+            .getPublicUrl(fileName);
+
+          // Save to database
+          const { error: dbError } = await supabase
+            .from("default_featured_images")
+            .insert({ image_url: publicUrl });
+
+          if (dbError) {
+            toast.error(`Failed to save ${file.name}: ${dbError.message}`);
+            errorCount++;
+            continue;
+          }
+
+          successCount++;
+        } catch (resizeError) {
+          toast.error(`Failed to process ${file.name}: ${resizeError instanceof Error ? resizeError.message : "Unknown error"}`);
           errorCount++;
-          continue;
         }
-
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from("article-images")
-          .getPublicUrl(fileName);
-
-        // Save to database
-        const { error: dbError } = await supabase
-          .from("default_featured_images")
-          .insert({ image_url: publicUrl });
-
-        if (dbError) {
-          toast.error(`Failed to save ${file.name}: ${dbError.message}`);
-          errorCount++;
-          continue;
-        }
-
-        successCount++;
       }
 
       if (successCount > 0) {
-        toast.success(`${successCount} image${successCount > 1 ? "s" : ""} uploaded successfully`);
+        toast.success(`${successCount} image${successCount > 1 ? "s" : ""} uploaded and resized to 1200×630`);
         queryClient.invalidateQueries({ queryKey: ["default-featured-images"] });
       }
     } finally {
@@ -181,7 +273,10 @@ const DefaultFeaturedImages = () => {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Default Featured Images</h2>
         <p className="text-muted-foreground mt-1">
-          Upload multiple images that will be randomly assigned to articles without featured images.
+          Upload images that will be randomly assigned to articles without featured images.
+          <span className="block text-xs mt-1">
+            Images are automatically resized to 1200×630 pixels for optimal social media previews.
+          </span>
         </p>
       </div>
 
@@ -189,7 +284,7 @@ const DefaultFeaturedImages = () => {
         <CardHeader>
           <CardTitle className="text-lg">Upload Images</CardTitle>
           <CardDescription>
-            Drag and drop images or click to select
+            Drag and drop images or click to select — auto-resized to 1200×630
           </CardDescription>
         </CardHeader>
         <CardContent>
