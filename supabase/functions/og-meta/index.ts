@@ -3,8 +3,27 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  // Keep this permissive since this endpoint is public and primarily used by crawlers.
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function htmlHeaders() {
+  const headers = new Headers(corsHeaders);
+  // Some crawlers are strict about the response MIME type.
+  headers.set("content-type", "text/html; charset=utf-8");
+  return headers;
+}
+
+function jsonHeaders() {
+  const headers = new Headers(corsHeaders);
+  headers.set("content-type", "application/json; charset=utf-8");
+  return headers;
+}
+
+function toUtf8Bytes(text: string) {
+  return new TextEncoder().encode(text);
+}
 
 const SITE_URL = "https://www.platodata.io";
 const SITE_NAME = "Platodata";
@@ -15,6 +34,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const isHead = req.method === "HEAD";
 
   try {
     const url = new URL(req.url);
@@ -30,15 +51,14 @@ serve(async (req) => {
 
     // If no postId, return default meta tags
     if (!postId) {
-      return new Response(generateMetaHtml({
+      const html = generateMetaHtml({
         title: `${SITE_NAME} - Secure Network Protocol for the Next Web`,
         description: DEFAULT_DESCRIPTION,
         image: DEFAULT_IMAGE,
         url: SITE_URL,
         type: "website",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
       });
+      return new Response(isHead ? null : toUtf8Bytes(html), { headers: htmlHeaders() });
     }
 
     // Fetch article from database
@@ -54,15 +74,14 @@ serve(async (req) => {
       .maybeSingle();
 
     if (error || !article) {
-      return new Response(generateMetaHtml({
+      const html = generateMetaHtml({
         title: `Article Not Found | ${SITE_NAME}`,
         description: DEFAULT_DESCRIPTION,
         image: DEFAULT_IMAGE,
         url: SITE_URL,
         type: "website",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
       });
+      return new Response(isHead ? null : toUtf8Bytes(html), { headers: htmlHeaders() });
     }
 
     // Generate excerpt from content if not available
@@ -73,7 +92,7 @@ serve(async (req) => {
       .replace(/\s+/g, "-");
     const articleUrl = `${SITE_URL}/w3ai/${postId}/${article.vertical_slug}/${titleSlug}`;
 
-    return new Response(generateMetaHtml({
+    const html = generateMetaHtml({
       title: decodeHtmlEntities(article.title),
       description: decodeHtmlEntities(excerpt),
       image: article.image_url || DEFAULT_IMAGE,
@@ -82,16 +101,16 @@ serve(async (req) => {
       author: article.author,
       publishedTime: article.published_at,
       section: formatVerticalName(article.vertical_slug),
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
     });
+
+    return new Response(isHead ? null : toUtf8Bytes(html), { headers: htmlHeaders() });
 
   } catch (error) {
     console.error("Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: jsonHeaders(),
     });
   }
 });
@@ -143,11 +162,11 @@ function generateMetaHtml(meta: {
   <link rel="canonical" href="${meta.url}" />
 </head>
 <body>
-  <script>window.location.href = "${meta.url}";</script>
-  <noscript>
-    <meta http-equiv="refresh" content="0;url=${meta.url}" />
-  </noscript>
-  <p>Redirecting to <a href="${meta.url}">${escapeHtml(meta.title)}</a>...</p>
+  <main>
+    <h1>${escapeHtml(meta.title)}</h1>
+    <p>${escapeHtml(meta.description)}</p>
+    <p><a href="${meta.url}">Open article</a></p>
+  </main>
 </body>
 </html>`;
 }
