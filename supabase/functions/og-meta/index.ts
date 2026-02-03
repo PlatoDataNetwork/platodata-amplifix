@@ -153,15 +153,19 @@ function generateMetaHtml(meta: {
   <title>${escapeHtml(meta.title)}</title>
   <meta name="description" content="${escapeHtml(meta.description)}" />
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="${meta.type}" />
   <meta property="og:url" content="${meta.url}" />
   <meta property="og:title" content="${escapeHtml(meta.title)}" />
   <meta property="og:description" content="${escapeHtml(meta.description)}" />
   <meta property="og:image" content="${meta.image}" />
+  <meta property="og:image:secure_url" content="${meta.image}" />
+  <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="${escapeHtml(meta.title)}" />
   <meta property="og:site_name" content="${SITE_NAME}" />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -170,6 +174,7 @@ function generateMetaHtml(meta: {
   <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
   <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
   <meta name="twitter:image" content="${meta.image}" />
+  <meta name="twitter:image:alt" content="${escapeHtml(meta.title)}" />
 
   ${articleMeta}
 
