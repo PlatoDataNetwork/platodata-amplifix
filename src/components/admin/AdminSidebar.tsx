@@ -14,7 +14,8 @@ import {
   Rss,
   ScrollText,
   Images,
-  Sparkles
+  Sparkles,
+  Maximize
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,7 +36,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -187,6 +188,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 >
                   <Images className="w-6 h-6" />
                   <span>Default Images</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Batch Image Resizer */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("batch-resize")}
+                  isActive={currentView === "batch-resize"}
+                  className="w-full text-base py-3"
+                >
+                  <Maximize className="w-6 h-6" />
+                  <span>Batch Resize</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
