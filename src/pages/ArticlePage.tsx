@@ -44,22 +44,6 @@ const ArticlePage = () => {
     enabled: !!postId,
   });
 
-  // Fetch related articles for article page
-  const { data: relatedArticles } = useQuery({
-    queryKey: ["related-articles", article?.vertical_slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("articles")
-        .select("*")
-        .eq("vertical_slug", article?.vertical_slug)
-        .neq("id", article?.id)
-        .order("published_at", { ascending: false })
-        .limit(3);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!article?.vertical_slug,
-  });
 
   const formatLongDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -456,34 +440,6 @@ const ArticlePage = () => {
         </div>
       </section>
 
-      {/* Related Articles */}
-      {relatedArticles && relatedArticles.length > 0 && (
-        <section className="px-6 pb-20">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Related Articles</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {relatedArticles.map((related) => (
-                <Link 
-                  key={related.id} 
-                  to={withLang(generateArticleUrl(related))}
-                  className="group"
-                >
-                  <div className="h-32 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src={related.image_url || DEFAULT_ARTICLE_IMAGE}
-                      alt={related.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 text-sm">
-                    {decodeHtmlEntities(related.title)}
-                  </h3>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Mobile Sticky Share Bar */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-background/95 backdrop-blur-sm border-t border-border p-3 z-50">
