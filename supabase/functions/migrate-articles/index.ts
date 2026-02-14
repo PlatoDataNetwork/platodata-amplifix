@@ -1,0 +1,119 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
+}
+
+const SOURCE_BASE = 'https://rfkdcmvzvxcsoecoeddi.supabase.co/functions/v1/export-articles'
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  // Secure with API key
+  const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key')
+  const validApiKey = Deno.env.get('PLATOAI_KEY') || Deno.env.get('ARTICLES_API_KEY')
+  if (!apiKey || apiKey !== validApiKey) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+
+    const url = new URL(req.url)
+    const vertical = url.searchParams.get('vertical') || 'artificial-intelligence'
+    const pageSize = parseInt(url.searchParams.get('page_size') || '500')
+    const startPage = parseInt(url.searchParams.get('start_page') || '1')
+
+    // Step 1: Get count from source
+    const countRes = await fetch(`${SOURCE_BASE}?vertical=${vertical}&count_only=true`)
+    if (!countRes.ok) throw new Error(`Source count failed: ${countRes.status}`)
+    const countData = await countRes.json()
+    const totalPages = Math.ceil((countData.total || 0) / pageSize)
+
+    console.log(`Migration: ${countData.total} articles, ${totalPages} pages, starting at page ${startPage}`)
+
+    const results: any[] = []
+
+    for (let page = startPage; page <= totalPages; page++) {
+      console.log(`Fetching page ${page}/${totalPages}...`)
+      
+      const exportRes = await fetch(`${SOURCE_BASE}?vertical=${vertical}&page=${page}&page_size=${pageSize}`)
+      if (!exportRes.ok) {
+        results.push({ page, error: `fetch failed: ${exportRes.status}` })
+        continue
+      }
+
+      const data = await exportRes.json()
+      const { articles = [], translations = [], tags = [], article_tags = [] } = data
+      const stats = { articles: 0, tags: 0, translations: 0, article_tags: 0, errors: [] as string[] }
+
+      // Upsert tags
+      if (tags.length > 0) {
+        for (let i = 0; i < tags.length; i += 500) {
+          const batch = tags.slice(i, i + 500)
+          const { error } = await supabase.from('tags').upsert(batch, { onConflict: 'id' })
+          if (error) stats.errors.push(`tags: ${error.message}`)
+          else stats.tags += batch.length
+        }
+      }
+
+      // Upsert articles
+      if (articles.length > 0) {
+        for (let i = 0; i < articles.length; i += 500) {
+          const batch = articles.slice(i, i + 500)
+          const { error } = await supabase.from('articles').upsert(batch, { onConflict: 'id' })
+          if (error) stats.errors.push(`articles: ${error.message}`)
+          else stats.articles += batch.length
+        }
+      }
+
+      // Upsert translations
+      if (translations.length > 0) {
+        for (let i = 0; i < translations.length; i += 500) {
+          const batch = translations.slice(i, i + 500)
+          const { error } = await supabase.from('article_translations').upsert(batch, { onConflict: 'id' })
+          if (error) stats.errors.push(`translations: ${error.message}`)
+          else stats.translations += batch.length
+        }
+      }
+
+      // Upsert article_tags
+      if (article_tags.length > 0) {
+        for (let i = 0; i < article_tags.length; i += 500) {
+          const batch = article_tags.slice(i, i + 500)
+          const { error } = await supabase.from('article_tags').upsert(batch, { onConflict: 'article_id,tag_id' })
+          if (error) stats.errors.push(`article_tags: ${error.message}`)
+          else stats.article_tags += batch.length
+        }
+      }
+
+      results.push({ page, stats })
+      console.log(`Page ${page} done:`, stats)
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      vertical,
+      total_source_articles: countData.total,
+      pages_processed: results.length,
+      results,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (error) {
+    console.error('Migration error:', error)
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+})
