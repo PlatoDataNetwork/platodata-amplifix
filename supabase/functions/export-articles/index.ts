@@ -10,7 +10,6 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  // Validate API key
   const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key')
   const validApiKey = Deno.env.get('PLATOAI_KEY')
   if (!apiKey || apiKey !== validApiKey) {
@@ -30,33 +29,49 @@ Deno.serve(async (req) => {
     const vertical = url.searchParams.get('vertical') || 'artificial-intelligence'
     const includeTags = url.searchParams.get('include_tags') !== 'false'
     const includeTranslations = url.searchParams.get('include_translations') !== 'false'
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const pageSize = Math.min(parseInt(url.searchParams.get('page_size') || '1000'), 2000)
+    const countOnly = url.searchParams.get('count_only') === 'true'
 
-    // Paginate articles (1000 per batch)
-    const allArticles: any[] = []
-    let offset = 0
-    const batchSize = 1000
-    while (true) {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('vertical_slug', vertical)
-        .order('published_at', { ascending: false })
-        .range(offset, offset + batchSize - 1)
+    // Count total first
+    const { count: totalCount, error: countError } = await supabase
+      .from('articles')
+      .select('id', { count: 'exact', head: true })
+      .eq('vertical_slug', vertical)
 
-      if (error) throw error
-      if (!data || data.length === 0) break
-      allArticles.push(...data)
-      if (data.length < batchSize) break
-      offset += batchSize
+    if (countError) throw countError
+
+    if (countOnly) {
+      return new Response(JSON.stringify({
+        vertical,
+        total: totalCount,
+        suggested_pages: Math.ceil((totalCount || 0) / pageSize),
+        page_size: pageSize,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    console.log(`Exported ${allArticles.length} articles for vertical: ${vertical}`)
+    const offset = (page - 1) * pageSize
+    const totalPages = Math.ceil((totalCount || 0) / pageSize)
 
-    const result: any = { articles: allArticles }
+    // Fetch one page of articles
+    const { data: articles, error } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('vertical_slug', vertical)
+      .order('published_at', { ascending: false })
+      .range(offset, offset + pageSize - 1)
 
-    // Fetch translations
-    if (includeTranslations && allArticles.length > 0) {
-      const articleIds = allArticles.map(a => a.id)
+    if (error) throw error
+
+    console.log(`Page ${page}/${totalPages}: fetched ${articles?.length || 0} articles (offset ${offset})`)
+
+    const result: any = { articles: articles || [] }
+
+    // Fetch translations for this page's articles
+    if (includeTranslations && articles && articles.length > 0) {
+      const articleIds = articles.map(a => a.id)
       const allTranslations: any[] = []
       for (let i = 0; i < articleIds.length; i += 500) {
         const batch = articleIds.slice(i, i + 500)
@@ -69,9 +84,9 @@ Deno.serve(async (req) => {
       result.translations = allTranslations
     }
 
-    // Fetch tags
-    if (includeTags && allArticles.length > 0) {
-      const articleIds = allArticles.map(a => a.id)
+    // Fetch tags for this page's articles
+    if (includeTags && articles && articles.length > 0) {
+      const articleIds = articles.map(a => a.id)
       const allArticleTags: any[] = []
       for (let i = 0; i < articleIds.length; i += 500) {
         const batch = articleIds.slice(i, i + 500)
@@ -83,7 +98,6 @@ Deno.serve(async (req) => {
       }
       result.article_tags = allArticleTags
 
-      // Fetch the actual tag records
       const tagIds = [...new Set(allArticleTags.map(at => at.tag_id))]
       if (tagIds.length > 0) {
         const { data: tags } = await supabase
@@ -96,10 +110,11 @@ Deno.serve(async (req) => {
 
     result.meta = {
       vertical,
-      total_articles: allArticles.length,
-      total_translations: result.translations?.length || 0,
-      total_tags: result.tags?.length || 0,
-      total_article_tags: result.article_tags?.length || 0,
+      page,
+      page_size: pageSize,
+      total_pages: totalPages,
+      total_articles: totalCount,
+      articles_in_page: articles?.length || 0,
       exported_at: new Date().toISOString(),
     }
 
@@ -107,7 +122,7 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="export-${vertical}.json"`,
+        'Content-Disposition': `attachment; filename="export-${vertical}-page${page}.json"`,
       },
     })
   } catch (error) {
