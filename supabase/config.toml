@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.import-articles]
 verify_jwt = false
+
+[functions.migrate-articles]
+verify_jwt = false
