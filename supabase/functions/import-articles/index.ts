@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
   }
 
   const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key')
-  const validApiKey = Deno.env.get('PLATOAI_KEY')
+  const validApiKey = Deno.env.get('PLATOAI_KEY') || Deno.env.get('ARTICLES_API_KEY')
   if (!apiKey || apiKey !== validApiKey) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
