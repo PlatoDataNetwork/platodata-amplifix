@@ -1,0 +1,1 @@
+ALTER TABLE public.articles DROP CONSTRAINT IF EXISTS articles_post_id_key;
