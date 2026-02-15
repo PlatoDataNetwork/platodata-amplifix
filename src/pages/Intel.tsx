@@ -104,23 +104,23 @@ const Intel = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-8 px-6">
+      <section className="pt-24 md:pt-32 pb-6 md:pb-8 px-4 md:px-6">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
+          <h1 className="text-3xl md:text-6xl font-bold text-primary mb-3 md:mb-4">
             Platodata Intelligence
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Stay updated with the latest AI, data intelligence, Web3, and emerging technologies news, insights, and intelligence.
           </p>
         </div>
       </section>
 
       {/* Search, Filter & View Controls */}
-      <section className="px-6 pb-8">
+      <section className="px-4 md:px-6 pb-6 md:pb-8">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-center">
+          <div className="flex flex-col gap-3 md:gap-4 items-stretch">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-lg">
+            <div className="relative w-full md:max-w-lg md:mx-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
@@ -128,81 +128,84 @@ const Intel = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="pl-10 pr-24 bg-transparent border-border"
+                className="pl-10 pr-20 md:pr-24 bg-transparent border-border text-sm md:text-base"
               />
-              <Button onClick={handleSearch} size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8">
+              <Button onClick={handleSearch} size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 md:h-8 text-xs md:text-sm px-2 md:px-3">
                 Search
               </Button>
             </div>
             
-            {/* Vertical Dropdown */}
-            <Select value="all" onValueChange={handleVerticalChange}>
-              <SelectTrigger className="w-full md:w-48 bg-transparent border-border">
-                <SelectValue placeholder="All Verticals" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border z-50">
-                <SelectItem value="all">All Verticals</SelectItem>
-                {verticals?.map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {formatVerticalName(v)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-border overflow-hidden">
-              <Button
-                variant={viewMode === "cards" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("cards")}
-                className="rounded-none gap-2"
-              >
-                <LayoutGrid className="w-4 h-4" />
-                Cards
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="rounded-none gap-2"
-              >
-                <List className="w-4 h-4" />
-                List
-              </Button>
+            {/* Filters Row */}
+            <div className="flex gap-2 md:gap-4 items-center justify-center">
+              {/* Vertical Dropdown */}
+              <Select value="all" onValueChange={handleVerticalChange}>
+                <SelectTrigger className="flex-1 md:flex-none md:w-48 bg-transparent border-border text-sm">
+                  <SelectValue placeholder="All Verticals" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border z-50">
+                  <SelectItem value="all">All Verticals</SelectItem>
+                  {verticals?.map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {formatVerticalName(v)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* View Mode Toggle */}
+              <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="rounded-none gap-1 md:gap-2 px-2 md:px-3 h-9"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cards</span>
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="rounded-none gap-1 md:gap-2 px-2 md:px-3 h-9"
+                >
+                  <List className="w-4 h-4" />
+                  <span className="hidden sm:inline">List</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Verticals Grid */}
-      <section className="px-6 pb-20">
+      <section className="px-4 md:px-6 pb-16 md:pb-20">
         <div className="container mx-auto">
           {isLoading ? (
-            <div className={viewMode === "cards" ? "grid grid-cols-2 md:grid-cols-4 gap-4" : "space-y-4"}>
+            <div className={viewMode === "cards" ? "grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4" : "space-y-3 md:space-y-4"}>
               {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className={viewMode === "cards" ? "h-32 w-full rounded-lg" : "h-16 w-full rounded-lg"} />
+                <Skeleton key={i} className={viewMode === "cards" ? "h-24 md:h-32 w-full rounded-lg" : "h-14 md:h-16 w-full rounded-lg"} />
               ))}
             </div>
           ) : filteredVerticals?.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">No categories found.</p>
+            <div className="text-center py-12 md:py-20">
+              <p className="text-muted-foreground text-base md:text-lg">No categories found.</p>
               {searchQuery && (
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs md:text-sm text-muted-foreground mt-2">
                   Try adjusting your search query.
                 </p>
               )}
             </div>
           ) : viewMode === "cards" ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {filteredVerticals?.map((vertical) => (
                 <Link 
                   key={vertical} 
                   to={withLang(`/w3ai/vertical/${vertical}`)}
                   className="group"
                 >
-                  <div className="bg-transparent border border-border rounded-lg p-6 h-32 flex items-center justify-center hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
-                    <span className="text-foreground font-bold text-2xl md:text-3xl text-center group-hover:text-white transition-colors">
+                  <div className="bg-transparent border border-border rounded-lg p-4 md:p-6 h-24 md:h-32 flex items-center justify-center hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
+                    <span className="text-foreground font-bold text-lg md:text-2xl lg:text-3xl text-center group-hover:text-white transition-colors leading-tight">
                       {formatVerticalName(vertical)}
                     </span>
                   </div>
@@ -210,19 +213,19 @@ const Intel = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {filteredVerticals?.map((vertical) => (
                 <Link 
                   key={vertical} 
                   to={withLang(`/w3ai/vertical/${vertical}`)}
                   className="group block"
                 >
-                  <div className="bg-transparent border border-border rounded-lg px-6 py-4 flex items-center justify-between hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
-                    <span className="text-foreground font-bold text-xl group-hover:text-white transition-colors">
+                  <div className="bg-transparent border border-border rounded-lg px-4 md:px-6 py-3 md:py-4 flex items-center justify-between hover:border-primary hover:bg-gradient-to-r hover:from-primary hover:to-primary/70 transition-all duration-300 group-hover:text-white">
+                    <span className="text-foreground font-bold text-base md:text-xl group-hover:text-white transition-colors">
                       {formatVerticalName(vertical)}
                     </span>
-                    <span className="text-muted-foreground text-sm group-hover:text-white/80 transition-colors">
-                      View articles →
+                    <span className="text-muted-foreground text-xs md:text-sm group-hover:text-white/80 transition-colors">
+                      View →
                     </span>
                   </div>
                 </Link>

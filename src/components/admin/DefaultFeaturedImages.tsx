@@ -1,0 +1,443 @@
+import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Upload, Trash2, Loader2, ImageIcon, ZoomIn } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface DefaultFeaturedImage {
+  id: string;
+  image_url: string;
+  created_at: string;
+}
+
+// Target dimensions for optimal social media previews (WhatsApp, Facebook, LinkedIn, Twitter)
+const TARGET_WIDTH = 1200;
+const TARGET_HEIGHT = 630;
+
+/**
+ * Resize an image file to exactly 1200x630 pixels for optimal OG image display.
+ * Uses canvas to resize and crop to the target aspect ratio.
+ */
+const resizeImageToOG = (file: File): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      reject(new Error("Failed to get canvas context"));
+      return;
+    }
+
+    img.onload = () => {
+      // Set canvas to target OG dimensions
+      canvas.width = TARGET_WIDTH;
+      canvas.height = TARGET_HEIGHT;
+
+      // Calculate source dimensions to maintain aspect ratio with cover behavior
+      const targetAspect = TARGET_WIDTH / TARGET_HEIGHT;
+      const sourceAspect = img.width / img.height;
+
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+
+      if (sourceAspect > targetAspect) {
+        // Image is wider - crop sides
+        sourceWidth = img.height * targetAspect;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else {
+        // Image is taller - crop top/bottom
+        sourceHeight = img.width / targetAspect;
+        sourceY = (img.height - sourceHeight) / 2;
+      }
+
+      // Fill with white background first (in case of transparency)
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+      // Draw the resized image
+      ctx.drawImage(
+        img,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        TARGET_WIDTH,
+        TARGET_HEIGHT
+      );
+
+      // Convert to blob with high quality JPEG
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to create image blob"));
+          }
+        },
+        "image/jpeg",
+        0.9 // 90% quality for good balance of size and quality
+      );
+    };
+
+    img.onerror = () => {
+      reject(new Error("Failed to load image"));
+    };
+
+    // Load the image from file
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+const DefaultFeaturedImages = () => {
+  const queryClient = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [deleteImageId, setDeleteImageId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  // Fetch all default featured images
+  const { data: images, isLoading } = useQuery({
+    queryKey: ["default-featured-images"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("default_featured_images")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as DefaultFeaturedImage[];
+    },
+  });
+
+  // Delete image mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("default_featured_images")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["default-featured-images"] });
+      toast.success("Image deleted");
+      setDeleteImageId(null);
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete: ${error.message}`);
+      setDeleteImageId(null);
+    },
+  });
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteImageId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteImageId) {
+      deleteMutation.mutate(deleteImageId);
+    }
+  };
+
+  // Process files for upload with automatic resizing to 1200x630
+  const processFiles = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith("image/")) {
+          toast.error(`${file.name} is not an image`);
+          errorCount++;
+          continue;
+        }
+
+        try {
+          // Resize image to 1200x630 for optimal social media previews
+          const resizedBlob = await resizeImageToOG(file);
+          
+          // Upload to Supabase Storage
+          const fileName = `default-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("article-images")
+            .upload(fileName, resizedBlob, {
+              contentType: "image/jpeg",
+            });
+
+          if (uploadError) {
+            toast.error(`Failed to upload ${file.name}: ${uploadError.message}`);
+            errorCount++;
+            continue;
+          }
+
+          // Get the public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from("article-images")
+            .getPublicUrl(fileName);
+
+          // Save to database
+          const { error: dbError } = await supabase
+            .from("default_featured_images")
+            .insert({ image_url: publicUrl });
+
+          if (dbError) {
+            toast.error(`Failed to save ${file.name}: ${dbError.message}`);
+            errorCount++;
+            continue;
+          }
+
+          successCount++;
+        } catch (resizeError) {
+          toast.error(`Failed to process ${file.name}: ${resizeError instanceof Error ? resizeError.message : "Unknown error"}`);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} image${successCount > 1 ? "s" : ""} uploaded and resized to 1200×630`);
+        queryClient.invalidateQueries({ queryKey: ["default-featured-images"] });
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Handle file input change
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      await processFiles(files);
+      // Reset the input
+      e.target.value = "";
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set dragging to false if we're leaving the drop zone entirely
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await processFiles(files);
+    }
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">Default Featured Images</h2>
+        <p className="text-muted-foreground mt-1">
+          Upload images that will be randomly assigned to articles without featured images.
+          <span className="block text-xs mt-1">
+            Images are automatically resized to 1200×630 pixels for optimal social media previews.
+          </span>
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Upload Images</CardTitle>
+          <CardDescription>
+            Drag and drop images or click to select — auto-resized to 1200×630
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onClick={() => !isUploading && document.getElementById("multi_image_upload")?.click()}
+            className={cn(
+              "relative border-2 border-dashed rounded-lg p-8 transition-all cursor-pointer",
+              "flex flex-col items-center justify-center gap-3",
+              isDragging 
+                ? "border-primary bg-primary/5" 
+                : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
+              isUploading && "pointer-events-none opacity-60"
+            )}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Uploading...</p>
+              </>
+            ) : isDragging ? (
+              <>
+                <Upload className="w-10 h-10 text-primary" />
+                <p className="text-sm font-medium text-primary">Drop images here</p>
+              </>
+            ) : (
+              <>
+                <Upload className="w-10 h-10 text-muted-foreground" />
+                <div className="text-center">
+                  <p className="text-sm font-medium">Drag and drop images here</p>
+                  <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+                </div>
+              </>
+            )}
+            <input
+              id="multi_image_upload"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 text-center">
+            {images?.length ?? 0} images in pool
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Image Pool</CardTitle>
+          <CardDescription>
+            These images will be randomly used when articles don't have a featured image
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : images && images.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {images.map((image) => (
+                <div
+                  key={image.id}
+                  className="group relative aspect-video rounded-lg overflow-hidden border border-border bg-muted"
+                >
+                  <img
+                    src={image.image_url}
+                    alt="Default featured"
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setPreviewImage(image.image_url)}
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none">
+                    <div className="pointer-events-auto flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setPreviewImage(image.image_url)}
+                      >
+                        <ZoomIn className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleDeleteClick(image.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <ImageIcon className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">No images in pool yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload images to start using random featured images
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteImageId} onOpenChange={(open) => !open && setDeleteImageId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this image from the pool? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Image Preview Modal */}
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none">
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-auto max-h-[85vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default DefaultFeaturedImages;

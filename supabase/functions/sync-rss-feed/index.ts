@@ -18,6 +18,10 @@ interface RssFeed {
   check_duplicate_link: boolean;
   max_articles_per_sync: number;
   strip_images: boolean;
+  strip_inline_styles: boolean;
+  default_author: string | null;
+  source_link_text: string | null;
+  source_link_url: string | null;
 }
 
 interface FeedItem {
@@ -29,7 +33,6 @@ interface FeedItem {
   guid: string;
   author: string;
   imageUrl: string | null;
-  postId: number | null;
 }
 
 // Parse RSS/Atom feed XML
@@ -56,8 +59,6 @@ function parseFeed(xmlText: string): FeedItem[] {
       const author = extractAtomAuthor(entry) || "";
       const imageUrl = extractImageFromContent(content) || extractMediaContent(entry);
       
-      const postId = extractPostId(entry, guid, link);
-      
       items.push({
         title: cleanHtml(title),
         link,
@@ -67,7 +68,6 @@ function parseFeed(xmlText: string): FeedItem[] {
         guid,
         author: cleanHtml(author),
         imageUrl,
-        postId,
       });
     }
   } else {
@@ -87,8 +87,6 @@ function parseFeed(xmlText: string): FeedItem[] {
       const author = extractTagContent(item, "dc:creator") || extractTagContent(item, "author") || "";
       const imageUrl = extractMediaContent(item) || extractEnclosure(item) || extractImageFromContent(content);
       
-      const postId = extractPostId(item, guid, link);
-      
       items.push({
         title: cleanHtml(title),
         link,
@@ -98,7 +96,6 @@ function parseFeed(xmlText: string): FeedItem[] {
         guid,
         author: cleanHtml(author),
         imageUrl,
-        postId,
       });
     }
   }
@@ -175,53 +172,24 @@ function extractImageFromContent(content: string): string | null {
   return match ? match[1] : null;
 }
 
-// Extract post_id from various RSS feed formats
-function extractPostId(itemXml: string, guid: string, link: string): number | null {
-  // 1. WordPress <wp:post_id> tag
-  const wpPostIdMatch = itemXml.match(/<wp:post_id[^>]*>(\d+)<\/wp:post_id>/i);
-  if (wpPostIdMatch) {
-    return parseInt(wpPostIdMatch[1], 10);
+// Get the next available post_id by finding the max in the database and incrementing
+// deno-lint-ignore no-explicit-any
+async function getNextPostId(supabase: any): Promise<number> {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("post_id")
+    .not("post_id", "is", null)
+    .order("post_id", { ascending: false })
+    .limit(1);
+  
+  if (error) {
+    console.error("Error fetching max post_id:", error);
+    // Fallback to a reasonable starting number
+    return 1;
   }
   
-  // 2. Generic <post_id> or <postId> tag
-  const genericPostIdMatch = itemXml.match(/<post[_-]?id[^>]*>(\d+)<\/post[_-]?id>/i);
-  if (genericPostIdMatch) {
-    return parseInt(genericPostIdMatch[1], 10);
-  }
-  
-  // 3. <id> tag with numeric content (common in some feeds)
-  const idTagMatch = itemXml.match(/<id[^>]*>(\d+)<\/id>/i);
-  if (idTagMatch) {
-    return parseInt(idTagMatch[1], 10);
-  }
-  
-  // 4. Extract from GUID if it contains ?p=123 pattern (WordPress)
-  const guidParamMatch = guid.match(/[?&]p=(\d+)/);
-  if (guidParamMatch) {
-    return parseInt(guidParamMatch[1], 10);
-  }
-  
-  // 5. Extract from GUID if it's just a number
-  if (/^\d+$/.test(guid)) {
-    return parseInt(guid, 10);
-  }
-  
-  // 6. Extract from link URL patterns like /post/123 or /article/123 or ?p=123
-  const linkPatterns = [
-    /[?&]p=(\d+)/,                    // WordPress ?p=123
-    /\/(?:post|article|news|blog|p)\/(\d+)/i,  // /post/123, /article/123
-    /\/(\d+)\/?(?:\?|#|$)/,           // /123/ or /123
-    /-(\d+)\/?(?:\?|#|$)/,            // slug-123
-  ];
-  
-  for (const pattern of linkPatterns) {
-    const match = link.match(pattern);
-    if (match) {
-      return parseInt(match[1], 10);
-    }
-  }
-  
-  return null;
+  const maxPostId = data && data.length > 0 && data[0].post_id ? data[0].post_id : 0;
+  return maxPostId + 1;
 }
 
 function cleanHtml(text: string): string {
@@ -247,6 +215,28 @@ function stripImagesFromContent(html: string): string {
     .replace(/<picture[^>]*>[\s\S]*?<\/picture>/gi, "")
     // Remove empty paragraphs left behind
     .replace(/<p[^>]*>\s*<\/p>/gi, "")
+    .trim();
+}
+
+// Remove inline styles from HTML content for theme compatibility
+function stripInlineStylesFromContent(html: string): string {
+  return html
+    // Remove style attributes from all tags
+    .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
+    // Remove bgcolor attributes
+    .replace(/\s+bgcolor\s*=\s*["'][^"']*["']/gi, "")
+    // Remove color attributes
+    .replace(/\s+color\s*=\s*["'][^"']*["']/gi, "")
+    // Remove width/height attributes (except on img tags which we want to preserve aspect ratio)
+    .replace(/(<(?!img)[^>]*)\s+(?:width|height)\s*=\s*["'][^"']*["']/gi, "$1")
+    // Remove align attributes
+    .replace(/\s+align\s*=\s*["'][^"']*["']/gi, "")
+    // Remove valign attributes
+    .replace(/\s+valign\s*=\s*["'][^"']*["']/gi, "")
+    // Remove border attributes
+    .replace(/\s+border\s*=\s*["'][^"']*["']/gi, "")
+    // Remove cellpadding/cellspacing attributes
+    .replace(/\s+cell(?:padding|spacing)\s*=\s*["'][^"']*["']/gi, "")
     .trim();
 }
 
@@ -428,6 +418,10 @@ Deno.serve(async (req) => {
     const itemsToProcess = maxArticles > 0 ? newItems.slice(0, maxArticles) : newItems;
     console.log(`Processing ${itemsToProcess.length} items (max limit: ${maxArticles > 0 ? maxArticles : 'unlimited'})`);
     
+    // Get the starting post_id for new articles
+    let nextPostId = await getNextPostId(supabase);
+    console.log(`Starting post_id: ${nextPostId}`);
+    
     let articlesImported = 0;
     let duplicatesSkipped = 0;
     
@@ -460,13 +454,46 @@ Deno.serve(async (req) => {
         const isExcerptMode = rssFeed.import_mode === "excerpt_with_link";
         const rawContent = isExcerptMode ? item.description : item.content;
         // Strip images from content if enabled (default is true)
-        const articleContent = rssFeed.strip_images !== false 
+        let articleContent = rssFeed.strip_images !== false 
           ? stripImagesFromContent(rawContent || "") 
           : (rawContent || "");
+        
+        // Strip inline styles from content if enabled (default is true)
+        if (rssFeed.strip_inline_styles !== false) {
+          articleContent = stripInlineStylesFromContent(articleContent);
+        }
+        
+        // Append source link at the end of content if configured (use the item's original link)
+        if (rssFeed.source_link_url && item.link) {
+          const sourceLabel = rssFeed.source_link_text || "Source";
+          const sourceLink = `<p style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee;"><strong>${sourceLabel} :</strong> <a target="_blank" href="${item.link}">${item.link}</a></p>`;
+          articleContent = articleContent + sourceLink;
+        }
+        
         const publishDate = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
         
-        // Use default image from feed if set, otherwise null (ignore RSS images)
-        const imageUrl = rssFeed.default_image_url || null;
+        // Determine image URL: feed default > random from pool > null
+        let imageUrl = rssFeed.default_image_url || null;
+        
+        // If no feed default image, try to get a random one from the pool
+        if (!imageUrl) {
+          const { data: randomImages } = await supabase
+            .from("default_featured_images")
+            .select("image_url")
+            .limit(100);
+          
+          if (randomImages && randomImages.length > 0) {
+            const randomIndex = Math.floor(Math.random() * randomImages.length);
+            imageUrl = randomImages[randomIndex].image_url;
+          }
+        }
+        
+        // Use default author from feed if set, otherwise use RSS author
+        const articleAuthor = rssFeed.default_author || item.author || null;
+        
+        // Assign the next post_id
+        const articlePostId = nextPostId;
+        nextPostId++; // Increment for the next article
         
         // Create article
         const { data: article, error: articleError } = await supabase
@@ -475,19 +502,18 @@ Deno.serve(async (req) => {
             title: item.title || "Untitled",
             content: articleContent,
             excerpt: item.description?.substring(0, 300) || null,
-            author: item.author || null,
+            author: articleAuthor,
             published_at: publishDate,
             vertical_slug: rssFeed.vertical_slug,
             image_url: imageUrl,
             external_url: isExcerptMode ? item.link : null,
             read_time: estimateReadTime(articleContent || ""),
-            post_id: item.postId,
+            post_id: articlePostId,
             metadata: {
               source_feed: rssFeed.name,
               original_url: item.link,
               imported_at: new Date().toISOString(),
               is_draft: rssFeed.publish_status === "draft",
-              original_post_id: item.postId,
             },
           })
           .select("id")

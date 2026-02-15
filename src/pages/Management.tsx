@@ -19,19 +19,25 @@ import SitemapsSettings from "@/components/admin/settings/SitemapsSettings";
 import RobotsSettings from "@/components/admin/settings/RobotsSettings";
 import FeedsSyndicator from "@/components/admin/FeedsSyndicator";
 import FeedSyncLogs from "@/components/admin/FeedSyncLogs";
+import DefaultFeaturedImages from "@/components/admin/DefaultFeaturedImages";
+import OGImageGenerator from "@/components/admin/OGImageGenerator";
+import SocialPreviewDebugger from "@/components/admin/SocialPreviewDebugger";
+import BatchImageResizer from "@/components/admin/BatchImageResizer";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [initialVerticalFilter, setInitialVerticalFilter] = useState<string | undefined>();
+  const [initialFeedIdFilter, setInitialFeedIdFilter] = useState<string | undefined>();
   const [editingFeedId, setEditingFeedId] = useState<string | undefined>();
 
   const handleViewChange = (view: View, verticalSlug?: string) => {
     setCurrentView(view);
     setInitialVerticalFilter(verticalSlug);
+    setInitialFeedIdFilter(undefined);
     if (view !== "edit-feed") {
       setEditingFeedId(undefined);
     }
@@ -40,6 +46,12 @@ const Management = () => {
   const handleEditFeed = (feedId: string) => {
     setEditingFeedId(feedId);
     setCurrentView("edit-feed");
+  };
+
+  const handleViewArticlesByFeed = (feedId: string) => {
+    setInitialFeedIdFilter(feedId);
+    setInitialVerticalFilter(undefined);
+    setCurrentView("articles");
   };
 
   // Fetch article count
@@ -207,6 +219,7 @@ const Management = () => {
           <ArticleManagement 
             onBack={() => setCurrentView("dashboard")} 
             initialVertical={initialVerticalFilter}
+            initialFeedId={initialFeedIdFilter}
           />
         );
       case "new-article":
@@ -224,6 +237,7 @@ const Management = () => {
           <FeedsSyndicator 
             onAddFeed={() => setCurrentView("new-feed")} 
             onEditFeed={handleEditFeed}
+            onViewArticles={handleViewArticlesByFeed}
           />
         );
       case "new-feed":
@@ -243,6 +257,14 @@ const Management = () => {
         );
       case "feeds-logs":
         return <FeedSyncLogs />;
+      case "default-images":
+        return <DefaultFeaturedImages />;
+      case "batch-resize":
+        return <BatchImageResizer />;
+      case "og-generator":
+        return <OGImageGenerator />;
+      case "social-preview":
+        return <SocialPreviewDebugger />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":

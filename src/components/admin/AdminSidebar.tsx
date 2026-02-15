@@ -12,7 +12,10 @@ import {
   Map,
   Bot,
   Rss,
-  ScrollText
+  ScrollText,
+  Images,
+  Sparkles,
+  Maximize
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,7 +36,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -175,6 +178,54 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
+              {/* Default Featured Images */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("default-images")}
+                  isActive={currentView === "default-images"}
+                  className="w-full text-base py-3"
+                >
+                  <Images className="w-6 h-6" />
+                  <span>Default Images</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Batch Image Resizer */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("batch-resize")}
+                  isActive={currentView === "batch-resize"}
+                  className="w-full text-base py-3"
+                >
+                  <Maximize className="w-6 h-6" />
+                  <span>Batch Resize</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* AI OG Image Generator */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("og-generator")}
+                  isActive={currentView === "og-generator"}
+                  className="w-full text-base py-3"
+                >
+                  <Sparkles className="w-6 h-6" />
+                  <span>OG Image Generator</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Social Preview Debugger */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("social-preview")}
+                  isActive={currentView === "social-preview"}
+                  className="w-full text-base py-3"
+                >
+                  <Globe className="w-6 h-6" />
+                  <span>Social Preview</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               {/* Users - coming soon */}
               <SidebarMenuItem>

@@ -139,6 +139,24 @@ export type Database = {
         }
         Relationships: []
       }
+      default_featured_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
       feed_sync_logs: {
         Row: {
           article_id: string | null
@@ -187,6 +205,7 @@ export type Database = {
           check_duplicate_link: boolean
           check_duplicate_title: boolean
           created_at: string
+          default_author: string | null
           default_image_url: string | null
           feed_url: string
           id: string
@@ -196,8 +215,11 @@ export type Database = {
           max_articles_per_sync: number
           name: string
           publish_status: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text: string | null
+          source_link_url: string | null
           status: Database["public"]["Enums"]["feed_status"]
           strip_images: boolean
+          strip_inline_styles: boolean
           sync_interval_hours: number
           updated_at: string
           vertical_slug: string
@@ -207,6 +229,7 @@ export type Database = {
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string
+          default_author?: string | null
           default_image_url?: string | null
           feed_url: string
           id?: string
@@ -216,8 +239,11 @@ export type Database = {
           max_articles_per_sync?: number
           name: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text?: string | null
+          source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
+          strip_inline_styles?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug: string
@@ -227,6 +253,7 @@ export type Database = {
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string
+          default_author?: string | null
           default_image_url?: string | null
           feed_url?: string
           id?: string
@@ -236,8 +263,11 @@ export type Database = {
           max_articles_per_sync?: number
           name?: string
           publish_status?: Database["public"]["Enums"]["feed_publish_status"]
+          source_link_text?: string | null
+          source_link_url?: string | null
           status?: Database["public"]["Enums"]["feed_status"]
           strip_images?: boolean
+          strip_inline_styles?: boolean
           sync_interval_hours?: number
           updated_at?: string
           vertical_slug?: string

@@ -90,12 +90,36 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     }
   }, [existingArticleTags]);
 
+  // Helper to get next sequential post_id
+  const getNextPostId = async (): Promise<number> => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("post_id")
+      .not("post_id", "is", null)
+      .order("post_id", { ascending: false })
+      .limit(1);
+    
+    if (error) {
+      console.error("Error fetching max post_id:", error);
+      return 1;
+    }
+    
+    if (data && data.length > 0 && data[0].post_id) {
+      return data[0].post_id + 1;
+    }
+    
+    return 1;
+  };
+
   // Create article mutation
   const createMutation = useMutation({
     mutationFn: async (data: Omit<Article, "id" | "created_at" | "updated_at" | "post_id" | "metadata">) => {
+      // Get the next sequential post_id
+      const nextPostId = await getNextPostId();
+      
       const { data: newArticle, error } = await supabase
         .from("articles")
-        .insert(data)
+        .insert({ ...data, post_id: nextPostId })
         .select("id")
         .single();
       if (error) throw error;
@@ -128,8 +152,15 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
 
   // Update article mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<Article> & { id: string }) => {
-      const { id, ...updates } = data;
+    mutationFn: async (data: Partial<Article> & { id: string; currentPostId?: number | null }) => {
+      const { id, currentPostId, ...updates } = data;
+      
+      // If article doesn't have a post_id, assign one
+      if (!currentPostId) {
+        const nextPostId = await getNextPostId();
+        (updates as Partial<Article>).post_id = nextPostId;
+      }
+      
       const { error } = await supabase.from("articles").update(updates).eq("id", id);
       if (error) throw error;
       return id;
@@ -199,7 +230,7 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     };
 
     if (isEditing && article) {
-      updateMutation.mutate({ id: article.id, ...articleData });
+      updateMutation.mutate({ id: article.id, currentPostId: article.post_id, ...articleData });
     } else {
       createMutation.mutate(articleData);
     }
@@ -295,6 +326,22 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
           <div className="space-y-6">
             <div className="bg-card border border-border rounded-lg p-4 space-y-4">
               <h3 className="font-semibold text-foreground">Article Details</h3>
+
+              {/* Post ID - shown when editing an existing article */}
+              {isEditing && article?.post_id && (
+                <div className="space-y-2">
+                  <Label>Post ID</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={article.post_id.toString()}
+                      readOnly
+                      disabled
+                      className="bg-muted text-muted-foreground font-mono"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Auto-assigned unique identifier</p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="vertical">Vertical *</Label>
