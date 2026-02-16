@@ -7,8 +7,6 @@ const corsHeaders = {
 
 const SITE_URL = "https://www.platodata.io";
 const ARTICLES_PER_SITEMAP = 5000;
-
-// XSL stylesheet URL - served from the same domain to avoid CORS issues
 const XSL_URL = `${SITE_URL}/sitemap.xsl`;
 
 // Supported languages (excluding English which is the default)
@@ -17,6 +15,35 @@ const SUPPORTED_LANGUAGES = [
   "hu","id","it","ja","km","ko","no","fa","pl","pt","pa","ro","ru","sl",
   "es","sv","th","tr","uk","ur","vi"
 ];
+
+// All languages including English for hreflang generation
+const ALL_LANGUAGES = ["en", ...SUPPORTED_LANGUAGES];
+
+// Map internal codes to proper hreflang codes (BCP 47)
+const hreflangCode = (code: string): string => {
+  const map: Record<string, string> = {
+    "zh-CN": "zh-Hans",
+    "zh-TW": "zh-Hant",
+    "iw": "he",
+    "no": "nb",
+  };
+  return map[code] || code;
+};
+
+// Generate hreflang alternate links for a given path (e.g. "/intel", "/w3ai/123/...")
+const generateHreflangLinks = (urlPath: string): string => {
+  let links = "";
+  for (const lc of ALL_LANGUAGES) {
+    const href = lc === "en"
+      ? `${SITE_URL}${urlPath}`
+      : `${SITE_URL}/${lc}${urlPath}`;
+    const hl = hreflangCode(lc);
+    links += `    <xhtml:link rel="alternate" hreflang="${hl}" href="${href}" />\n`;
+  }
+  // x-default points to English
+  links += `    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${urlPath}" />\n`;
+  return links;
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,11 +59,9 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // URL prefix for the current language
     const langPrefix = lang ? `/${lang}` : "";
     const baseUrl = `${SITE_URL}${langPrefix}`;
 
-    // Helper function to generate article URL slug
     const generateArticleSlug = (title: string) => {
       return title
         .toLowerCase()
@@ -44,13 +69,11 @@ Deno.serve(async (req) => {
         .replace(/\s+/g, "-");
     };
 
-    // Helper function to format date for sitemap
     const formatDate = (dateString: string | null) => {
       if (!dateString) return new Date().toISOString().split("T")[0];
       return new Date(dateString).toISOString().split("T")[0];
     };
 
-    // Helper to return XML response
     const xmlResponse = (xml: string) => {
       return new Response(xml, {
         headers: {
@@ -61,7 +84,10 @@ Deno.serve(async (req) => {
       });
     };
 
-    // Main sitemap index
+    // Namespace header for urlset sitemaps with hreflang
+    const urlsetOpen = `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`;
+
+    // ── Main sitemap index ──
     if (path === "sitemap.xml") {
       const { count, error: countError } = await supabase
         .from("articles")
@@ -94,7 +120,7 @@ Deno.serve(async (req) => {
 `;
       }
 
-      // If this is the root (English) sitemap index, also link to all language sitemap indexes
+      // Root index also references all language sitemap indexes
       if (!lang) {
         for (const langCode of SUPPORTED_LANGUAGES) {
           xml += `  <sitemap>
@@ -109,31 +135,31 @@ Deno.serve(async (req) => {
       return xmlResponse(xml);
     }
 
-    // Page sitemap - static pages
+    // ── Page sitemap ──
     if (path === "page-sitemap.xml") {
-      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      const pages = [
+        { path: "/", changefreq: "daily", priority: "1.0" },
+        { path: "/intel", changefreq: "hourly", priority: "0.9" },
+        { path: "/solutions", changefreq: "weekly", priority: "0.8" },
+      ];
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/intel</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/solutions</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-</urlset>`;
+${urlsetOpen}
+`;
+      for (const p of pages) {
+        xml += `  <url>
+    <loc>${baseUrl}${p.path}</loc>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+${generateHreflangLinks(p.path)}  </url>
+`;
+      }
+      xml += `</urlset>`;
       return xmlResponse(xml);
     }
 
-    // Vertical sitemap
+    // ── Vertical sitemap ──
     if (path === "vertical-sitemap.xml") {
       const { data: verticals, error: verticalsError } = await supabase
         .rpc("get_article_verticals");
@@ -142,16 +168,17 @@ Deno.serve(async (req) => {
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlsetOpen}
 `;
 
       if (verticals) {
         for (const v of verticals) {
+          const vPath = `/w3ai/vertical/${v.vertical_slug}`;
           xml += `  <url>
-    <loc>${baseUrl}/w3ai/vertical/${v.vertical_slug}</loc>
+    <loc>${baseUrl}${vPath}</loc>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
-  </url>
+${generateHreflangLinks(vPath)}  </url>
 `;
         }
       }
@@ -160,7 +187,7 @@ Deno.serve(async (req) => {
       return xmlResponse(xml);
     }
 
-    // Post sitemaps - articles paginated
+    // ── Post sitemaps ──
     const postSitemapMatch = path.match(/^post-sitemap(\d+)\.xml$/);
     if (postSitemapMatch) {
       const pageNum = parseInt(postSitemapMatch[1], 10);
@@ -190,20 +217,20 @@ Deno.serve(async (req) => {
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="${XSL_URL}"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlsetOpen}
 `;
 
       for (const article of allArticles) {
         const titleSlug = generateArticleSlug(article.title);
-        const articleUrl = `${baseUrl}/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
+        const articlePath = `/w3ai/${article.post_id}/${article.vertical_slug}/${titleSlug}`;
         const lastmod = formatDate(article.updated_at || article.published_at);
 
         xml += `  <url>
-    <loc>${articleUrl}</loc>
+    <loc>${baseUrl}${articlePath}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>
+${generateHreflangLinks(articlePath)}  </url>
 `;
       }
 
@@ -211,7 +238,6 @@ Deno.serve(async (req) => {
       return xmlResponse(xml);
     }
 
-    // Unknown sitemap path
     return new Response("Not Found", { status: 404, headers: corsHeaders });
 
   } catch (error) {
