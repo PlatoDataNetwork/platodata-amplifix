@@ -98,7 +98,7 @@ const AnalyticsDashboard = () => {
   // Traffic source breakdown
   const { data: sourceData, isLoading: sourceLoading, refetch: refetchSource } = useQuery({
     queryKey: ["ga-realtime-source"],
-    queryFn: () => fetchGAData("realtime-overview", { dimension: "firstUserSource" }),
+    queryFn: () => fetchGAData("realtime-overview", { dimension: "audienceName" }),
     refetchInterval: autoRefresh ? 30000 : false,
     staleTime: 15000,
   });
@@ -187,7 +187,7 @@ const AnalyticsDashboard = () => {
                   <SelectItem value="city">City</SelectItem>
                   <SelectItem value="deviceCategory">Device</SelectItem>
                   <SelectItem value="platform">Platform</SelectItem>
-                  <SelectItem value="firstUserSource">Source</SelectItem>
+                  <SelectItem value="audienceName">Audience</SelectItem>
                 </SelectContent>
               </Select>
             </div>
