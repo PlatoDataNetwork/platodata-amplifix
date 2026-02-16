@@ -88,8 +88,8 @@ const DataFeeds = () => {
         </span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">
-          Data
+        <span className="text-sm text-primary">
+          Data Feed
         </span>
         <div className="flex items-center gap-3">
           <Link
