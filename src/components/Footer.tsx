@@ -56,8 +56,13 @@ const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <a href={withLang("/#resources")} className="hover:text-foreground transition-colors">
-                    Blog
+                  <a href={withLang("/intel")} className="hover:text-foreground transition-colors">
+                    Intel
+                  </a>
+                </li>
+                <li>
+                  <a href={withLang("/data-feeds")} className="hover:text-foreground transition-colors">
+                    Data Feeds
                   </a>
                 </li>
                 <li>
