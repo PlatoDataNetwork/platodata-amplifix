@@ -70,6 +70,7 @@ const DATE_RANGES = [
   { label: "Last 7 days", value: "7", startDate: "7daysAgo" },
   { label: "Last 30 days", value: "30", startDate: "30daysAgo" },
   { label: "Last 90 days", value: "90", startDate: "90daysAgo" },
+  { label: "Last 365 days", value: "365", startDate: "365daysAgo" },
 ];
 
 const CHART_COLORS = {
