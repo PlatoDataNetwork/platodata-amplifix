@@ -5,11 +5,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+function base64url(data: string | ArrayBuffer): string {
+  let b64: string;
+  if (typeof data === "string") {
+    b64 = btoa(data);
+  } else {
+    b64 = btoa(String.fromCharCode(...new Uint8Array(data)));
+  }
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 async function getAccessToken(serviceAccountJson: string): Promise<string> {
   const sa = JSON.parse(serviceAccountJson);
   const now = Math.floor(Date.now() / 1000);
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-  const payload = btoa(JSON.stringify({
+  const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = base64url(JSON.stringify({
     iss: sa.client_email,
     scope: "https://www.googleapis.com/auth/analytics.readonly",
     aud: "https://oauth2.googleapis.com/token",
@@ -40,7 +50,7 @@ async function getAccessToken(serviceAccountJson: string): Promise<string> {
     new TextEncoder().encode(signInput)
   );
 
-  const sig = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const sig = base64url(signature);
   const jwt = `${signInput}.${sig}`;
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
