@@ -1150,7 +1150,7 @@ const FeedsSyndicator = ({
                         {feed.default_image_url ? (
                           <img 
                             src={feed.default_image_url} 
-                            alt="" 
+                            alt={feed.name || "Feed icon"} 
                             className="w-8 h-8 rounded object-cover"
                           />
                         ) : (

@@ -189,7 +189,7 @@ const OGImageGenerator = () => {
                         <div className="w-16 h-10 rounded overflow-hidden bg-muted">
                           <img
                             src={article.image_url}
-                            alt=""
+                            alt={article.title || "Article image"}
                             className="w-full h-full object-cover opacity-50"
                           />
                         </div>
