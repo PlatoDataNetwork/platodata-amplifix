@@ -111,6 +111,7 @@ serve(async (req) => {
         dimensions: [
           { name: "unifiedScreenName" },
         ],
+        metricAggregations: ["TOTAL"],
         limit: 20,
       };
 
