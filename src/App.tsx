@@ -34,7 +34,7 @@ const App = () => (
 
           <BrowserRouter>
             <GoogleTranslateLoader />
-            <div id="google_translate_element" style={{ display: "none" }} />
+            <div id="google_translate_element" className="hidden" />
             <GTranslateBridge />
             <Routes>
               {/* Non-prefixed routes (default language) */}

@@ -329,7 +329,7 @@ const ArticleManagement = ({ onBack, initialVertical, initialFeedId }: ArticleMa
                       {article.image_url && (
                         <img
                           src={article.image_url}
-                          alt=""
+                          alt={article.title || "Article thumbnail"}
                           className="w-12 h-12 rounded object-cover flex-shrink-0"
                         />
                       )}

@@ -125,8 +125,8 @@ const ArticlePage = () => {
   const pageTitle = decodeHtmlEntities(article.title);
   // Use existing excerpt or auto-generate from content
   const autoExcerpt = article.excerpt 
-    ? decodeHtmlEntities(article.excerpt).slice(0, 160) 
-    : generateExcerpt(article.content, 160);
+    ? generateExcerpt(article.excerpt, 155) 
+    : generateExcerpt(article.content, 155);
   const pageDescription = autoExcerpt || `Read the latest ${formatVerticalName(article.vertical_slug)} intelligence on ${siteName}.`;
   const pageImage = article.image_url || `${SITE_URL}${DEFAULT_ARTICLE_IMAGE}`;
   const pageUrl = `${SITE_URL}${generateArticleUrl(article)}`;
@@ -248,7 +248,7 @@ const ArticlePage = () => {
             </Link>
           </div>
           
-          <h1 className="text-2xl md:text-5xl font-bold text-foreground mb-4 md:mb-6" style={{ lineHeight: '1.2' }}>
+          <h1 className="text-2xl md:text-5xl font-bold text-foreground mb-4 md:mb-6 leading-[1.2]">
             {decodeHtmlEntities(article.title)}
           </h1>
           
