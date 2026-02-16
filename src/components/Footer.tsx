@@ -85,6 +85,11 @@ const Footer = () => {
                     GitHub
                   </a>
                 </li>
+                <li>
+                  <a href="https://www.facebook.com/PlatoDataIntelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Facebook
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
