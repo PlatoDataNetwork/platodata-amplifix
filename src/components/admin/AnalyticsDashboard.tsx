@@ -3,14 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Activity, Users, Eye, MousePointerClick, RefreshCw,
-  Monitor, Smartphone, Tablet, Globe, FileText, Filter,
+  Monitor, Smartphone, Tablet, Globe, FileText,
   TrendingUp, BarChart3, Calendar
 } from "lucide-react";
 import {
@@ -81,9 +80,6 @@ const CHART_COLORS = {
 };
 
 const AnalyticsDashboard = () => {
-  const [filterDimension, setFilterDimension] = useState<string>("");
-  const [filterValue, setFilterValue] = useState<string>("");
-  const [appliedFilter, setAppliedFilter] = useState<{ dimension: string; value: string } | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [dateRange, setDateRange] = useState("7");
   const [historicalDimension, setHistoricalDimension] = useState("date");
@@ -92,15 +88,8 @@ const AnalyticsDashboard = () => {
 
   // Main realtime data
   const { data: realtimeData, isLoading: realtimeLoading, refetch: refetchRealtime, error: realtimeError } = useQuery({
-    queryKey: ["ga-realtime", appliedFilter],
-    queryFn: () => {
-      const params: Record<string, string> = {};
-      if (appliedFilter?.dimension && appliedFilter?.value) {
-        params.filterDimension = appliedFilter.dimension;
-        params.filterValue = appliedFilter.value;
-      }
-      return fetchGAData("realtime", params);
-    },
+    queryKey: ["ga-realtime"],
+    queryFn: () => fetchGAData("realtime"),
     refetchInterval: autoRefresh ? 30000 : false,
     staleTime: 15000,
   });
@@ -167,17 +156,6 @@ const AnalyticsDashboard = () => {
     refetchHistorical();
   };
 
-  const handleApplyFilter = () => {
-    if (filterDimension && filterValue) {
-      setAppliedFilter({ dimension: filterDimension, value: filterValue });
-    }
-  };
-
-  const handleClearFilter = () => {
-    setFilterDimension("");
-    setFilterValue("");
-    setAppliedFilter(null);
-  };
 
   // Extract totals from realtime data
   const totalActiveUsers = realtimeData?.totals?.[0]?.metricValues?.[0]?.value || "0";
@@ -272,60 +250,6 @@ const AnalyticsDashboard = () => {
 
         {/* ── REAL-TIME TAB ── */}
         <TabsContent value="realtime" className="space-y-6">
-          {/* Filters */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Filters
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-3 items-end">
-                <div className="flex-1 min-w-[180px]">
-                  <label className="text-xs text-muted-foreground mb-1 block">Dimension</label>
-                  <Select value={filterDimension} onValueChange={setFilterDimension}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select dimension" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unifiedScreenName">Page Title</SelectItem>
-                      <SelectItem value="country">Country</SelectItem>
-                      <SelectItem value="city">City</SelectItem>
-                      <SelectItem value="deviceCategory">Device</SelectItem>
-                      <SelectItem value="platform">Platform</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1 min-w-[180px]">
-                  <label className="text-xs text-muted-foreground mb-1 block">Contains</label>
-                  <Input
-                    placeholder="Filter value..."
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleApplyFilter()}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={handleApplyFilter} disabled={!filterDimension || !filterValue}>
-                    Apply
-                  </Button>
-                  {appliedFilter && (
-                    <Button size="sm" variant="outline" onClick={handleClearFilter}>
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {appliedFilter && (
-                <div className="mt-3">
-                  <Badge variant="secondary">
-                    {appliedFilter.dimension} contains "{appliedFilter.value}"
-                  </Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Overview Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
