@@ -36,7 +36,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -66,6 +66,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 >
                   <LayoutDashboard className="w-6 h-6" />
                   <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Analytics */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("analytics")}
+                  isActive={currentView === "analytics"}
+                  className="w-full text-base py-3"
+                >
+                  <BarChart3 className="w-6 h-6" />
+                  <span>Analytics</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
