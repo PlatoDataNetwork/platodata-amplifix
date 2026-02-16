@@ -184,6 +184,45 @@ serve(async (req) => {
       });
     }
 
+    if (reportType === "historical") {
+      // Historical report using GA4 Data API runReport
+      const startDate = url.searchParams.get("startDate") || "7daysAgo";
+      const endDate = url.searchParams.get("endDate") || "today";
+      const metrics = url.searchParams.get("metrics") || "sessions,totalUsers,screenPageViews,eventCount";
+      const dimension = url.searchParams.get("dimension") || "date";
+
+      const metricsList = metrics.split(",").map((m: string) => ({ name: m.trim() }));
+
+      const body: Record<string, unknown> = {
+        dateRanges: [{ startDate, endDate }],
+        metrics: metricsList,
+        dimensions: [{ name: dimension }],
+        orderBys: [{ dimension: { dimensionName: dimension, orderType: "ALPHANUMERIC" }, desc: false }],
+        limit: 100,
+      };
+
+      const res = await fetch(
+        `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(JSON.stringify(data));
+      }
+
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid report type" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
