@@ -80,6 +80,7 @@ const Blog = () => {
                     <img
                       src={article.image_url || DEFAULT_ARTICLE_IMAGE}
                       alt={decodeHtmlEntities(article.title)}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>

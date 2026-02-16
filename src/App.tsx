@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,15 +12,17 @@ import GTranslateBridge from "@/components/GTranslateBridge";
 import GoogleTranslateLoader from "@/components/GoogleTranslateLoader";
 
 import Index from "./pages/Index";
-import Solutions from "./pages/Solutions";
-import Intel from "./pages/Intel";
-import IntelVertical from "./pages/IntelVertical";
-import ArticlePage from "./pages/ArticlePage";
-import DataFeeds from "./pages/DataFeeds";
-import ApiDocs from "./pages/ApiDocs";
-import Login from "./pages/Login";
-import Management from "./pages/Management";
-import NotFound from "./pages/NotFound";
+
+// Lazy-loaded routes for code-splitting
+const Solutions = lazy(() => import("./pages/Solutions"));
+const Intel = lazy(() => import("./pages/Intel"));
+const IntelVertical = lazy(() => import("./pages/IntelVertical"));
+const ArticlePage = lazy(() => import("./pages/ArticlePage"));
+const DataFeeds = lazy(() => import("./pages/DataFeeds"));
+const ApiDocs = lazy(() => import("./pages/ApiDocs"));
+const Login = lazy(() => import("./pages/Login"));
+const Management = lazy(() => import("./pages/Management"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -36,35 +39,37 @@ const App = () => (
             <GoogleTranslateLoader />
             <div id="google_translate_element" className="hidden" />
             <GTranslateBridge />
-            <Routes>
-              {/* Non-prefixed routes (default language) */}
-              <Route path="/" element={<Index />} />
-              <Route path="/solutions" element={<Solutions />} />
-              <Route path="/intel" element={<Intel />} />
-              <Route path="/w3ai/vertical/:vertical" element={<IntelVertical />} />
-              <Route path="/w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
-              <Route path="/data-feeds" element={<DataFeeds />} />
-              <Route path="/api-docs" element={<ApiDocs />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/management" element={<Management />} />
+            <Suspense fallback={<div className="min-h-screen" />}>
+              <Routes>
+                {/* Non-prefixed routes (default language) */}
+                <Route path="/" element={<Index />} />
+                <Route path="/solutions" element={<Solutions />} />
+                <Route path="/intel" element={<Intel />} />
+                <Route path="/w3ai/vertical/:vertical" element={<IntelVertical />} />
+                <Route path="/w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
+                <Route path="/data-feeds" element={<DataFeeds />} />
+                <Route path="/api-docs" element={<ApiDocs />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/management" element={<Management />} />
 
-              {/* Language-prefixed routes, e.g. /nl, /nl/intel */}
-              <Route path="/:lang" element={<LangLayout />}>
-                <Route index element={<Index />} />
-                <Route path="solutions" element={<Solutions />} />
-                <Route path="intel" element={<Intel />} />
-                <Route path="w3ai/vertical/:vertical" element={<IntelVertical />} />
-                <Route path="w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
-                <Route path="data-feeds" element={<DataFeeds />} />
-                <Route path="api-docs" element={<ApiDocs />} />
-                <Route path="login" element={<Login />} />
-                <Route path="management" element={<Management />} />
+                {/* Language-prefixed routes, e.g. /nl, /nl/intel */}
+                <Route path="/:lang" element={<LangLayout />}>
+                  <Route index element={<Index />} />
+                  <Route path="solutions" element={<Solutions />} />
+                  <Route path="intel" element={<Intel />} />
+                  <Route path="w3ai/vertical/:vertical" element={<IntelVertical />} />
+                  <Route path="w3ai/:postId/:vertical/:slug" element={<ArticlePage />} />
+                  <Route path="data-feeds" element={<DataFeeds />} />
+                  <Route path="api-docs" element={<ApiDocs />} />
+                  <Route path="login" element={<Login />} />
+                  <Route path="management" element={<Management />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Route>
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
