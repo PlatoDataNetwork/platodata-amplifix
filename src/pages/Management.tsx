@@ -23,8 +23,9 @@ import DefaultFeaturedImages from "@/components/admin/DefaultFeaturedImages";
 import OGImageGenerator from "@/components/admin/OGImageGenerator";
 import SocialPreviewDebugger from "@/components/admin/SocialPreviewDebugger";
 import BatchImageResizer from "@/components/admin/BatchImageResizer";
+import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 
-type View = "dashboard" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -214,9 +215,11 @@ const Management = () => {
             </div>
           </>
         );
+      case "analytics":
+        return <AnalyticsDashboard />;
       case "articles":
         return (
-          <ArticleManagement 
+          <ArticleManagement
             onBack={() => setCurrentView("dashboard")} 
             initialVertical={initialVerticalFilter}
             initialFeedId={initialFeedIdFilter}
