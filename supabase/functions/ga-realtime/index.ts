@@ -29,11 +29,14 @@ async function getAccessToken(serviceAccountJson: string): Promise<string> {
 
   const signInput = `${header}.${payload}`;
 
-  // Import the private key
+  // Import the private key - handle both real newlines and literal \n
   const pemContents = sa.private_key
-    .replace(/-----BEGIN PRIVATE KEY-----/, "")
-    .replace(/-----END PRIVATE KEY-----/, "")
-    .replace(/\n/g, "");
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\\n/g, "")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "")
+    .replace(/\s/g, "");
   const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
 
   const key = await crypto.subtle.importKey(
