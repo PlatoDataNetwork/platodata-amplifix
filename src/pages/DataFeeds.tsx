@@ -94,7 +94,7 @@ const DataFeeds = () => {
         <div className="flex items-center gap-3">
           <Link
             to={getApiDocsUrl()}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-primary hover:text-primary/80 transition-colors"
           >
             API
           </Link>
