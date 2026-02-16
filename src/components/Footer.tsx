@@ -71,23 +71,33 @@ const Footer = () => {
               <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Connect</h4>
               <ul className="space-y-2 md:space-y-3 text-xs md:text-sm text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Twitter
+                  <a href="https://www.facebook.com/PlatoDataIntelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Facebook
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Discord
+                  <a href="https://x.com/plato_data" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Twitter (X)
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
+                  <a href="https://t.me/PlatoData" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Telegram
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.linkedin.com/company/plato-data-intelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    LinkedIn
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/etheralabs/platodata" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
                     GitHub
                   </a>
                 </li>
                 <li>
-                  <a href="https://www.facebook.com/PlatoDataIntelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    Facebook
+                  <a href="https://discord.gg/hSjs2JxD" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Discord
                   </a>
                 </li>
               </ul>
