@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Facebook, Twitter, Send, Linkedin, Github, MessageCircle } from "lucide-react";
 import platoIcon from "@/assets/plato-icon.png";
 import { useLangRouting } from "@/hooks/useLangRouting";
 
@@ -71,33 +72,33 @@ const Footer = () => {
               <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Connect</h4>
               <ul className="space-y-2 md:space-y-3 text-xs md:text-sm text-muted-foreground">
                 <li>
-                  <a href="https://www.facebook.com/PlatoDataIntelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    Facebook
+                  <a href="https://www.facebook.com/PlatoDataIntelligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <Facebook className="w-3.5 h-3.5" /> Facebook
                   </a>
                 </li>
                 <li>
-                  <a href="https://x.com/plato_data" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    Twitter (X)
+                  <a href="https://x.com/plato_data" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <Twitter className="w-3.5 h-3.5" /> Twitter (X)
                   </a>
                 </li>
                 <li>
-                  <a href="https://t.me/PlatoData" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    Telegram
+                  <a href="https://t.me/PlatoData" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <Send className="w-3.5 h-3.5" /> Telegram
                   </a>
                 </li>
                 <li>
-                  <a href="https://www.linkedin.com/company/plato-data-intelligence" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    LinkedIn
+                  <a href="https://www.linkedin.com/company/plato-data-intelligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <Linkedin className="w-3.5 h-3.5" /> LinkedIn
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/etheralabs/platodata" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    GitHub
+                  <a href="https://github.com/etheralabs/platodata" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <Github className="w-3.5 h-3.5" /> GitHub
                   </a>
                 </li>
                 <li>
-                  <a href="https://discord.gg/hSjs2JxD" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                    Discord
+                  <a href="https://discord.gg/hSjs2JxD" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                    <MessageCircle className="w-3.5 h-3.5" /> Discord
                   </a>
                 </li>
               </ul>
