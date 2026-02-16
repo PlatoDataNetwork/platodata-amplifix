@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Activity, Users, Eye, MousePointerClick, RefreshCw,
   Monitor, Smartphone, Tablet, Globe, FileText,
-  TrendingUp, BarChart3, Calendar
+  TrendingUp, BarChart3, Calendar, Timer, ArrowDownUp
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -77,6 +77,8 @@ const CHART_COLORS = {
   totalUsers: "hsl(var(--chart-2, 160 60% 45%))",
   screenPageViews: "hsl(var(--chart-3, 30 80% 55%))",
   eventCount: "hsl(var(--chart-4, 280 65% 60%))",
+  bounceRate: "hsl(var(--destructive, 0 84% 60%))",
+  avgDuration: "hsl(var(--chart-5, 200 70% 50%))",
 };
 
 const AnalyticsDashboard = () => {
@@ -117,7 +119,7 @@ const AnalyticsDashboard = () => {
       fetchGAData("historical", {
         startDate: selectedRange.startDate,
         endDate: "today",
-        metrics: "sessions,totalUsers,screenPageViews,eventCount",
+        metrics: "sessions,totalUsers,screenPageViews,eventCount,bounceRate,averageSessionDuration",
         dimension: historicalDimension,
       }),
     staleTime: 60000,
@@ -170,6 +172,8 @@ const AnalyticsDashboard = () => {
     totalUsers: parseInt(row.metricValues[1]?.value || "0", 10),
     screenPageViews: parseInt(row.metricValues[2]?.value || "0", 10),
     eventCount: parseInt(row.metricValues[3]?.value || "0", 10),
+    bounceRate: parseFloat(row.metricValues[4]?.value || "0") * 100,
+    avgDuration: parseFloat(row.metricValues[5]?.value || "0"),
   }));
 
   // Historical totals
@@ -177,6 +181,14 @@ const AnalyticsDashboard = () => {
   const histTotalUsers = historicalData?.totals?.[0]?.metricValues?.[1]?.value || "0";
   const histTotalPageViews = historicalData?.totals?.[0]?.metricValues?.[2]?.value || "0";
   const histTotalEvents = historicalData?.totals?.[0]?.metricValues?.[3]?.value || "0";
+  const histBounceRate = parseFloat(historicalData?.totals?.[0]?.metricValues?.[4]?.value || "0") * 100;
+  const histAvgDuration = parseFloat(historicalData?.totals?.[0]?.metricValues?.[5]?.value || "0");
+
+  const formatDuration = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  };
 
   // Top pages for bar chart
   const pagesChartData = (historicalPages?.rows || [])
@@ -423,7 +435,7 @@ const AnalyticsDashboard = () => {
           </div>
 
           {/* Historical Overview Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -480,6 +492,36 @@ const AnalyticsDashboard = () => {
                       <p className="text-2xl font-bold text-foreground">{Number(histTotalEvents).toLocaleString()}</p>
                     )}
                     <p className="text-xs text-muted-foreground">Events</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                    <ArrowDownUp className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div>
+                    {historicalLoading ? <Skeleton className="h-7 w-16" /> : (
+                      <p className="text-2xl font-bold text-foreground">{histBounceRate.toFixed(1)}%</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">Bounce Rate</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Timer className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    {historicalLoading ? <Skeleton className="h-7 w-16" /> : (
+                      <p className="text-2xl font-bold text-foreground">{formatDuration(histAvgDuration)}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">Avg. Session Duration</p>
                   </div>
                 </div>
               </CardContent>
@@ -574,6 +616,47 @@ const AnalyticsDashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Bounce Rate & Avg Duration Trend */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ArrowDownUp className="w-4 h-4" />
+                Bounce Rate & Avg. Session Duration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {historicalLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : chartData.length ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} unit="%" />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} unit="s" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        color: "hsl(var(--card-foreground))",
+                      }}
+                      formatter={(value: number, name: string) => {
+                        if (name === "Bounce Rate") return [`${value.toFixed(1)}%`, name];
+                        if (name === "Avg. Duration") return [`${Math.floor(value / 60)}m ${Math.round(value % 60)}s`, name];
+                        return [value, name];
+                      }}
+                    />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="bounceRate" name="Bounce Rate" stroke={CHART_COLORS.bounceRate} strokeWidth={2} dot={false} />
+                    <Line yAxisId="right" type="monotone" dataKey="avgDuration" name="Avg. Duration" stroke={CHART_COLORS.avgDuration} strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-12">No trend data available</p>
+              )}
+            </CardContent>
+          </Card>
           {/* Top Pages & Countries */}
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
