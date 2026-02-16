@@ -250,16 +250,33 @@ const AnalyticsDashboard = () => {
 
       {/* Tabs: Realtime vs Historical */}
       <Tabs defaultValue="realtime" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="realtime" className="gap-1.5">
-            <Activity className="w-4 h-4" />
-            Real-Time
-          </TabsTrigger>
-          <TabsTrigger value="historical" className="gap-1.5">
-            <TrendingUp className="w-4 h-4" />
-            Historical
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <TabsList>
+            <TabsTrigger value="realtime" className="gap-1.5">
+              <Activity className="w-4 h-4" />
+              Real-Time
+            </TabsTrigger>
+            <TabsTrigger value="historical" className="gap-1.5">
+              <TrendingUp className="w-4 h-4" />
+              Historical
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <div className="flex gap-1.5">
+              {DATE_RANGES.map((range) => (
+                <Button
+                  key={range.value}
+                  variant={dateRange === range.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDateRange(range.value)}
+                >
+                  {range.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* ── REAL-TIME TAB ── */}
         <TabsContent value="realtime" className="space-y-6">
@@ -415,25 +432,6 @@ const AnalyticsDashboard = () => {
 
         {/* ── HISTORICAL TAB ── */}
         <TabsContent value="historical" className="space-y-6">
-          {/* Date range selector */}
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Date Range:</span>
-            </div>
-            <div className="flex gap-2">
-              {DATE_RANGES.map((range) => (
-                <Button
-                  key={range.value}
-                  variant={dateRange === range.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setDateRange(range.value)}
-                >
-                  {range.label}
-                </Button>
-              ))}
-            </div>
-          </div>
 
           {/* Historical Overview Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
