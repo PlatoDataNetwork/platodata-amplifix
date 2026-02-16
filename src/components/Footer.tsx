@@ -111,7 +111,7 @@ const Footer = () => {
           </div>
 
           <div className="pt-6 md:pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
-            <p className="text-xs md:text-sm text-muted-foreground text-center md:text-left">© 2024 Plato Technologies Inc. All rights reserved.</p>
+            <p className="text-xs md:text-sm text-muted-foreground text-center md:text-left">© 2026 Plato Technologies Inc. All rights reserved.</p>
             <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
                 Privacy Policy
