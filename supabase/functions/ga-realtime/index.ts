@@ -198,6 +198,7 @@ serve(async (req) => {
         dateRanges: [{ startDate, endDate }],
         metrics: metricsList,
         dimensions: [{ name: dimension }],
+        metricAggregations: ["TOTAL"],
         orderBys: [{ dimension: { dimensionName: dimension, orderType: "ALPHANUMERIC" }, desc: false }],
         limit: 100,
       };
