@@ -1,51 +1,64 @@
 
 
-## SEO Audit Fixes
+## PageSpeed Optimization Plan (Mobile Score: 60 -> Target: 75+)
 
-### 1. HTTP/2 Usage - No Code Change Needed
-HTTP/2 is a **server-level configuration**, not something controlled by application code. Since the site is deployed on **Vercel**, HTTP/2 is already enabled by default on Vercel's edge network. If the audit tool tested against the Lovable preview URL (`.lovable.app`) or a misconfigured custom domain, that would explain the false flag. **No code changes are needed** -- just ensure your custom domain DNS is properly pointed to Vercel (not proxied through a service that downgrades to HTTP/1.1, such as some Cloudflare free-tier configurations).
-
-### 2. Inline Styles - Remove Unnecessary `style` Attributes
-Several components use inline `style={}` where Tailwind classes already exist or can replace them:
-
-| File | Issue | Fix |
-|------|-------|-----|
-| `src/components/Hero.tsx` | `style={{ fontWeight: 700 }}` | Remove -- already has `font-bold` (700) via Tailwind |
-| `src/pages/ArticlePage.tsx` | `style={{ lineHeight: '1.2' }}` | Replace with Tailwind `leading-[1.2]` |
-| `src/components/Blog.tsx` | `style={{ animationDelay: ... }}` | Keep (dynamic value, no Tailwind equivalent) |
-| `src/components/Features.tsx` | `style={{ animationDelay: ... }}` | Keep (dynamic value) |
-| `src/components/Developers.tsx` | `style={{ animationDelay: ... }}` | Keep (dynamic value) |
-| `src/App.tsx` | `style={{ display: "none" }}` | Replace with Tailwind `className="hidden"` |
-| `index.html` | `style="display: none;"` on gtranslate wrapper | Replace with `class="hidden"` |
-
-Animation delays and UI library internals (sidebar, progress, chart) will be left as-is since they require dynamic values.
-
-### 3. Meta Description Tag
-The current meta description is 143 characters, which falls within the recommended 120-160 range. However, if the audit is flagging individual article pages, those get their description from `react-helmet-async` using the article's excerpt/content. We should ensure the **dynamic article meta descriptions** are trimmed to the 120-160 character sweet spot.
-
-- Review `ArticlePage.tsx` Helmet meta description logic and add truncation to 155 characters with ellipsis if needed.
-
-### 4. Image Alt Attributes - Fix Empty Alts
-Three images in admin components use `alt=""`:
-
-| File | Line | Fix |
-|------|------|-----|
-| `src/components/admin/ArticleManagement.tsx` | 332 | Change to `alt={article.title || "Article thumbnail"}` |
-| `src/components/admin/OGImageGenerator.tsx` | 192 | Change to `alt={article.title || "Article image"}` |
-| `src/components/admin/FeedsSyndicator.tsx` | 1153 | Change to `alt={feed.name || "Feed icon"}` |
-
-Note: While these are admin-only pages (not crawled), fixing them is good practice and satisfies the audit.
+The screenshot shows two main opportunities flagged by Google PageSpeed Insights, plus slow Core Web Vitals. Here is how to address each.
 
 ---
 
-### Technical Summary of Changes
+### 1. Reduce Unused JavaScript (saves ~1.56s)
 
-**Files to modify:**
-1. **`index.html`** -- Replace inline `style="display: none;"` with `class="hidden"`
-2. **`src/App.tsx`** -- Replace inline `style={{ display: "none" }}` with `className="hidden"`
-3. **`src/components/Hero.tsx`** -- Remove redundant `style={{ fontWeight: 700 }}`
-4. **`src/pages/ArticlePage.tsx`** -- Replace `style={{ lineHeight: '1.2' }}` with Tailwind class; ensure meta description is 120-160 chars
-5. **`src/components/admin/ArticleManagement.tsx`** -- Add meaningful alt text
-6. **`src/components/admin/OGImageGenerator.tsx`** -- Add meaningful alt text
-7. **`src/components/admin/FeedsSyndicator.tsx`** -- Add meaningful alt text
+Currently, all page routes (Intel, DataFeeds, ApiDocs, Login, Management, etc.) are **eagerly imported** in `App.tsx`. A visitor landing on the homepage downloads JavaScript for every page.
+
+**Fix**: Use `React.lazy()` and `Suspense` to code-split routes. Only the homepage components load immediately; all other pages load on demand.
+
+**File**: `src/App.tsx`
+- Convert all non-homepage route imports to `React.lazy()` (Solutions, Intel, IntelVertical, ArticlePage, DataFeeds, ApiDocs, Login, Management, NotFound)
+- Wrap `<Routes>` in a `<Suspense>` boundary with a minimal loading fallback
+
+---
+
+### 2. Avoid Multiple Page Redirects (saves ~1.11s)
+
+The `vercel.json` has a redirect rule that catches double language prefixes (e.g., `/nl/nl/page` -> `/nl/page`). While necessary, a second redirect adds `/lang` -> `/lang/` (appending trailing slash), which can create a chain:
+`/nl` -> `/nl/` -> serve page (2 redirects).
+
+**Fix**: Combine the trailing-slash redirect into the SPA rewrite so it is handled in a single hop rather than a redirect chain.
+
+**File**: `vercel.json`
+- Remove the separate trailing-slash redirect for language paths (line 9-12)
+- Add a rewrite rule for `/:lang` (without slash) that serves `index.html` directly, avoiding the redirect
+
+---
+
+### 3. Optimize Render-Blocking Resources (improves FCP/LCP)
+
+The Google Fonts stylesheet in `index.html` is render-blocking. The gtranslate script, while deferred, still adds weight.
+
+**File**: `index.html`
+- Change the Google Fonts `<link rel="stylesheet">` to `<link rel="preload" as="style" onload="this.rel='stylesheet'">` with a `<noscript>` fallback, so fonts load non-blocking
+- Add `fetchpriority="high"` is not needed since fonts are already preconnected
+
+---
+
+### 4. Lazy Load Below-the-Fold Images
+
+Blog article images and other below-fold images should use native lazy loading.
+
+**File**: `src/components/Blog.tsx`
+- Add `loading="lazy"` to the article `<img>` tags
+
+**File**: `src/components/Hero.tsx`
+- No images to optimize here (text only)
+
+---
+
+### Summary of File Changes
+
+| File | Change |
+|------|--------|
+| `src/App.tsx` | Lazy-load all non-homepage routes with `React.lazy` + `Suspense` |
+| `vercel.json` | Remove trailing-slash redirect to eliminate redirect chains |
+| `index.html` | Make Google Fonts non-render-blocking with preload pattern |
+| `src/components/Blog.tsx` | Add `loading="lazy"` to article images |
 
