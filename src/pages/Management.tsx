@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut, Shield, FileText, Settings, Layers, Rss, Tags, Plus, ArrowRight, Clock, BarChart3 } from "lucide-react";
+import { Loader2, LogOut, Shield, FileText, Settings, Layers, Rss, Plus, ArrowRight, Clock, BarChart3 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+
 import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -95,18 +95,7 @@ const Management = () => {
     enabled: !!user && isAdmin,
   });
 
-  // Fetch tags count
-  const { data: tagsCount } = useQuery({
-    queryKey: ["admin-tags-count"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("tags")
-        .select("*", { count: "exact", head: true });
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!user && isAdmin,
-  });
+
 
   // Fetch recent articles
   const { data: recentArticles } = useQuery({
@@ -138,25 +127,7 @@ const Management = () => {
     enabled: !!user && isAdmin,
   });
 
-  // Fetch top verticals with counts
-  const { data: topVerticals } = useQuery({
-    queryKey: ["admin-top-verticals"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("articles")
-        .select("vertical_slug");
-      if (error) throw error;
-      const counts: Record<string, number> = {};
-      data?.forEach((a) => {
-        counts[a.vertical_slug] = (counts[a.vertical_slug] || 0) + 1;
-      });
-      return Object.entries(counts)
-        .map(([slug, count]) => ({ slug, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 6);
-    },
-    enabled: !!user && isAdmin,
-  });
+
 
   // Redirect if not logged in or not admin
   useEffect(() => {
@@ -199,12 +170,12 @@ const Management = () => {
             </div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               {[
                 { label: "Total Articles", value: articleCount, icon: FileText, onClick: () => setCurrentView("articles") },
                 { label: "Verticals", value: verticalCount, icon: Layers, onClick: () => setCurrentView("verticals") },
                 { label: "RSS Feeds", value: feedsCount, icon: Rss, onClick: () => setCurrentView("feeds-syndicator") },
-                { label: "Tags", value: tagsCount, icon: Tags, onClick: () => setCurrentView("tags") },
+                
               ].map((stat) => (
                 <Card
                   key={stat.label}
@@ -340,35 +311,6 @@ const Management = () => {
               </CardContent>
             </Card>
 
-            {/* Top Verticals */}
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-foreground">Top Verticals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {topVerticals && topVerticals.length > 0 ? (
-                  topVerticals.map((v) => {
-                    const maxCount = topVerticals[0].count;
-                    const pct = Math.round((v.count / maxCount) * 100);
-                    return (
-                      <div
-                        key={v.slug}
-                        className="cursor-pointer hover:bg-muted/50 rounded-md px-2 py-1.5 -mx-2 transition-colors"
-                        onClick={() => handleViewChange("articles", v.slug)}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm font-medium text-foreground">{v.slug}</span>
-                          <span className="text-sm text-muted-foreground">{v.count.toLocaleString()}</span>
-                        </div>
-                        <Progress value={pct} className="h-2" />
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm text-muted-foreground">No verticals data yet.</p>
-                )}
-              </CardContent>
-            </Card>
           </>
         );
       case "analytics":
