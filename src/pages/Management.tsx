@@ -5,7 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut, Shield, Users, FileText, Settings } from "lucide-react";
+import { Loader2, LogOut, Shield, FileText, Settings, Layers, Rss, Tags, Plus, ArrowRight, Clock, BarChart3 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -92,6 +95,69 @@ const Management = () => {
     enabled: !!user && isAdmin,
   });
 
+  // Fetch tags count
+  const { data: tagsCount } = useQuery({
+    queryKey: ["admin-tags-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("tags")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user && isAdmin,
+  });
+
+  // Fetch recent articles
+  const { data: recentArticles } = useQuery({
+    queryKey: ["admin-recent-articles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("id, title, vertical_slug, author, published_at")
+        .order("published_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && isAdmin,
+  });
+
+  // Fetch recent feed syncs
+  const { data: recentFeeds } = useQuery({
+    queryKey: ["admin-recent-feeds"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rss_feeds")
+        .select("id, name, status, last_synced_at, last_error")
+        .order("last_synced_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && isAdmin,
+  });
+
+  // Fetch top verticals with counts
+  const { data: topVerticals } = useQuery({
+    queryKey: ["admin-top-verticals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("vertical_slug");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      data?.forEach((a) => {
+        counts[a.vertical_slug] = (counts[a.vertical_slug] || 0) + 1;
+      });
+      return Object.entries(counts)
+        .map(([slug, count]) => ({ slug, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 6);
+    },
+    enabled: !!user && isAdmin,
+  });
+
   // Redirect if not logged in or not admin
   useEffect(() => {
     if (!isLoading) {
@@ -132,87 +198,177 @@ const Management = () => {
               </p>
             </div>
 
-            {/* Dashboard Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card 
-                className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer"
-                onClick={() => setCurrentView("articles")}
-              >
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                    <FileText className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-foreground">Articles</CardTitle>
-                  <CardDescription>Manage articles and content</CardDescription>
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[
+                { label: "Total Articles", value: articleCount, icon: FileText, onClick: () => setCurrentView("articles") },
+                { label: "Verticals", value: verticalCount, icon: Layers, onClick: () => setCurrentView("verticals") },
+                { label: "RSS Feeds", value: feedsCount, icon: Rss, onClick: () => setCurrentView("feeds-syndicator") },
+                { label: "Tags", value: tagsCount, icon: Tags, onClick: () => setCurrentView("tags") },
+              ].map((stat) => (
+                <Card
+                  key={stat.label}
+                  className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer group"
+                  onClick={stat.onClick}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <stat.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">
+                      {stat.value != null ? stat.value.toLocaleString() : "--"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Quick Actions + Feed Sync Status */}
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-foreground">Quick Actions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    View, edit, and organize all published articles across verticals.
-                  </p>
+                <CardContent className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 h-auto py-3"
+                    onClick={() => setCurrentView("new-article")}
+                  >
+                    <Plus className="w-4 h-4 text-primary" />
+                    New Article
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 h-auto py-3"
+                    onClick={() => setCurrentView("new-feed")}
+                  >
+                    <Rss className="w-4 h-4 text-primary" />
+                    Add Feed
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 h-auto py-3"
+                    onClick={() => setCurrentView("analytics")}
+                  >
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                    Analytics
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 h-auto py-3"
+                    onClick={() => handleViewChange("settings-general")}
+                  >
+                    <Settings className="w-4 h-4 text-primary" />
+                    Settings
+                  </Button>
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer opacity-60">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                    <Users className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-foreground">Users</CardTitle>
-                  <CardDescription>Manage user accounts and roles</CardDescription>
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-foreground">Feed Sync Status</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    View user activity, manage roles, and handle permissions.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card 
-                className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer"
-                onClick={() => handleViewChange("settings-general")}
-              >
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                    <Settings className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-foreground">Settings</CardTitle>
-                  <CardDescription>Platform configuration</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Configure site settings, analytics, and sitemaps.
-                  </p>
+                <CardContent className="space-y-3">
+                  {recentFeeds && recentFeeds.length > 0 ? (
+                    recentFeeds.map((feed) => (
+                      <div
+                        key={feed.id}
+                        className="flex items-center justify-between text-sm cursor-pointer hover:bg-muted/50 rounded-md px-2 py-1.5 -mx-2 transition-colors"
+                        onClick={() => handleEditFeed(feed.id)}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                            feed.status === "active" ? "bg-green-500" : feed.status === "error" ? "bg-destructive" : "bg-muted-foreground"
+                          }`} />
+                          <span className="text-foreground truncate">{feed.name}</span>
+                        </div>
+                        <span className="text-muted-foreground text-xs flex-shrink-0 ml-2">
+                          {feed.last_synced_at
+                            ? formatDistanceToNow(new Date(feed.last_synced_at), { addSuffix: true })
+                            : "Never synced"}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No feeds configured yet.</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Stats Section */}
-            <div className="mt-12">
-              <h3 className="text-xl font-semibold text-foreground mb-4">Quick Stats</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div 
-                  className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setCurrentView("articles")}
-                >
-                  <p className="text-2xl font-bold text-primary">{articleCount ?? "--"}</p>
-                  <p className="text-sm text-muted-foreground">Total Articles</p>
+            {/* Recent Articles */}
+            <Card className="bg-card border-border mb-8">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg text-foreground">Recent Articles</CardTitle>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentView("articles")} className="text-primary">
+                    View All <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </div>
-                <div 
-                  className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setCurrentView("verticals")}
-                >
-                  <p className="text-2xl font-bold text-primary">{verticalCount ?? "--"}</p>
-                  <p className="text-sm text-muted-foreground">Verticals</p>
-                </div>
-                <div 
-                  className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setCurrentView("feeds-syndicator")}
-                >
-                  <p className="text-2xl font-bold text-primary">{feedsCount ?? "--"}</p>
-                  <p className="text-sm text-muted-foreground">RSS Feeds</p>
-                </div>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent>
+                {recentArticles && recentArticles.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentArticles.map((article) => (
+                      <div
+                        key={article.id}
+                        className="flex items-center justify-between gap-4 text-sm hover:bg-muted/50 rounded-md px-2 py-2 -mx-2 transition-colors cursor-pointer"
+                        onClick={() => setCurrentView("articles")}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-foreground font-medium truncate">{article.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">{article.vertical_slug}</Badge>
+                            {article.author && <span className="text-muted-foreground text-xs">{article.author}</span>}
+                          </div>
+                        </div>
+                        <span className="text-muted-foreground text-xs flex-shrink-0 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {formatDistanceToNow(new Date(article.published_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No articles yet.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top Verticals */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-foreground">Top Verticals</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {topVerticals && topVerticals.length > 0 ? (
+                  topVerticals.map((v) => {
+                    const maxCount = topVerticals[0].count;
+                    const pct = Math.round((v.count / maxCount) * 100);
+                    return (
+                      <div
+                        key={v.slug}
+                        className="cursor-pointer hover:bg-muted/50 rounded-md px-2 py-1.5 -mx-2 transition-colors"
+                        onClick={() => handleViewChange("articles", v.slug)}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-sm font-medium text-foreground">{v.slug}</span>
+                          <span className="text-sm text-muted-foreground">{v.count.toLocaleString()}</span>
+                        </div>
+                        <Progress value={pct} className="h-2" />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">No verticals data yet.</p>
+                )}
+              </CardContent>
+            </Card>
           </>
         );
       case "analytics":
