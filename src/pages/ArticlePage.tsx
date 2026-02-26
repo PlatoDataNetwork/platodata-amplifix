@@ -398,7 +398,7 @@ const ArticlePage = () => {
           {article.content ? (
             <div 
               className="article-content text-base md:text-lg"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(article.content) }}
             />
           ) : article.excerpt ? (
             <p className="text-base md:text-lg text-muted-foreground">{article.excerpt}</p>
