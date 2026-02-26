@@ -22,6 +22,36 @@ import {
 const DEFAULT_ARTICLE_IMAGE = "/images/article-default-img.jpg";
 const SITE_URL = "https://www.platodata.io";
 
+/**
+ * Clean article content that has double-encoded HTML entities.
+ * Uses string replacement to preserve real HTML tags (like <p>)
+ * while decoding entity-encoded tags (like &lt;b&gt; → <b>).
+ * Also strips Tiptap auto-generated link wrappers that corrupt original encoded links.
+ */
+const cleanArticleContent = (html: string): string => {
+  // Step 1: Remove Tiptap auto-generated <a> tags that wrap entity-encoded content
+  // These have target="_blank" rel="noopener noreferrer nofollow" class="text-primary underline"
+  let cleaned = html.replace(
+    /<a\s+target="_blank"\s+rel="noopener noreferrer nofollow"\s+class="text-primary underline"\s+href="[^"]*">[^<]*<\/a>/g,
+    (match) => {
+      // Extract just the text content of the auto-link
+      const textMatch = match.match(/>([^<]*)<\/a>/);
+      return textMatch ? textMatch[1] : match;
+    }
+  );
+  
+  // Step 2: String-based entity decoding to convert &lt; → <, &gt; → >, etc.
+  cleaned = cleaned
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+  
+  return cleaned;
+};
+
 const ArticlePage = () => {
   const { siteName } = useSiteSettings();
   const { withLang } = useLangRouting();
