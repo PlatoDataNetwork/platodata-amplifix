@@ -46,8 +46,8 @@ const Blog = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-6xl mx-auto space-y-8 md:space-y-12">
           <div className="text-center space-y-3 md:space-y-4">
-            <p className="text-primary text-xs md:text-sm font-medium tracking-wide uppercase">Blog</p>
-            <h2 className="text-3xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-tight px-2">Latest news on Plato</h2>
+            <p className="text-primary text-xs md:text-sm font-medium tracking-wide uppercase">Intel</p>
+            <h2 className="text-3xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-tight px-2">Latest Intelligence</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">

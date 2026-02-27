@@ -36,14 +36,6 @@ const Stats = () => {
             ))}
           </div>
 
-          <div className="text-center pt-8 md:pt-16">
-            <h3 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Trusted by millions</h3>
-            <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
-              Millions of users rely on our platform for secure, transparent, and reliable solutions. 
-              Our commitment to excellence has earned the trust of businesses and creators worldwide, 
-              empowering them to innovate with confidence.
-            </p>
-          </div>
         </div>
       </div>
     </section>
