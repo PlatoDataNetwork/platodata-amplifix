@@ -241,6 +241,45 @@ const GoogleTranslateLoader = () => {
       font[style*="vertical-align: inherit"] { 
         vertical-align: baseline !important; 
       }
+      
+      /* ── Robust: Hide Google Translate popups/overlays/loaders ── */
+      /* Target by known class fragments (wildcard) */
+      [class*="VIpgJd"],
+      [class*="ZVi9od"],
+      [class*="aZ2wEe"],
+      [class*="wOHMyf"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        position: fixed !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -1 !important;
+      }
+      
+      /* Target Google Translate iframes that act as overlays */
+      iframe[id^="goog-"],
+      iframe[class*="goog-"],
+      iframe[src*="translate.google"],
+      iframe[src*="translate_a"] {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+      }
+      
+      /* Hide any fixed/absolute positioned Google overlay divs */
+      div[id^="goog-gt-"],
+      div[class*="goog-te-ftab"],
+      div[class*="goog-te-spinner"],
+      div[class*="goog-te-menu2"] {
+        display: none !important;
+        visibility: hidden !important;
+      }
     `;
     document.head.appendChild(style);
 
