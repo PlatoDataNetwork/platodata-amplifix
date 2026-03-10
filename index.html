@@ -45,6 +45,35 @@
   </head>
 
   <body>
+    <script>
+      // CRITICAL: Clear googtrans cookie BEFORE Google Translate script loads
+      // URL is the single source of truth for language
+      (function() {
+        var segs = window.location.pathname.split('/').filter(Boolean);
+        var validLangs = ["ar","bn","zh-CN","zh-TW","da","nl","et","fi","fr","de","el","iw","hi","hu","id","it","ja","km","ko","no","fa","pl","pt","pa","ro","ru","sl","es","sv","th","tr","uk","ur","vi"];
+        var urlLang = (segs[0] && validLangs.indexOf(segs[0]) !== -1) ? segs[0] : "en";
+        var host = window.location.hostname;
+        var apex = host.indexOf("www.") === 0 ? host.slice(4) : host;
+        var domains = ["", host, "." + host];
+        if (apex !== host) { domains.push(apex, "." + apex); }
+
+        // Always clear first
+        domains.forEach(function(d) {
+          var c = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          if (d) c += "; domain=" + d;
+          document.cookie = c;
+        });
+
+        // Only re-set if URL has a non-English language prefix
+        if (urlLang !== "en") {
+          domains.forEach(function(d) {
+            var c = "googtrans=/en/" + urlLang + "; path=/";
+            if (d) c += "; domain=" + d;
+            document.cookie = c;
+          });
+        }
+      })();
+    </script>
     
 
     <div class="gtranslate_wrapper hidden"></div>
