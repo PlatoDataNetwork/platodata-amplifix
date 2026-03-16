@@ -40,6 +40,7 @@ const App = () => (
             <GoogleTranslateLoader />
             <div id="google_translate_element" className="hidden" />
             <GTranslateBridge />
+            <SeoHreflang />
             <Suspense fallback={<div className="min-h-screen" />}>
               <Routes>
                 {/* Non-prefixed routes (default language) */}
