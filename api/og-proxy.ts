@@ -6,8 +6,14 @@ export const config = {
 export default async function handler(request: Request) {
   const url = new URL(request.url);
   const postId = url.searchParams.get('postId');
+  const lang = url.searchParams.get('lang');
 
-  const supabaseUrl = `https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta${postId ? `?postId=${postId}` : ''}`;
+  const params = new URLSearchParams();
+  if (postId) params.set('postId', postId);
+  if (lang) params.set('lang', lang);
+
+  const qs = params.toString();
+  const supabaseUrl = `https://tmmerifhwscgicmncndl.supabase.co/functions/v1/og-meta${qs ? `?${qs}` : ''}`;
 
   const response = await fetch(supabaseUrl, {
     method: request.method,

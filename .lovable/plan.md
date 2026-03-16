@@ -1,42 +1,83 @@
 
 
-## Analysis: Korean Sitemap — 0 Discovered Pages in GSC
+# Full Redesign of the Management Dashboard
 
-### Investigation Findings
+## Overview
+Replace the current basic dashboard (3 cards + 3 stat counters) with a modern, data-rich dashboard featuring stat cards with icons and trends, a recent articles feed, feed sync status, top verticals breakdown, and quick action buttons.
 
-I verified the sitemap infrastructure is technically working:
-- `/ko/sitemap.xml` returns valid XML with 30+ child sitemaps
-- `/ko/post-sitemap1.xml` returns valid XML with correct `/ko/...` URLs and hreflang tags
-- Vercel routing correctly proxies all language-prefixed sitemap files to the edge function
+## New Dashboard Layout
 
-### Root Causes
+```text
++--------------------------------------------------+
+|  Welcome, Admin                                   |
+|  Manage your platform from this dashboard.        |
++--------------------------------------------------+
+|                                                    |
+|  [Articles]  [Verticals]  [RSS Feeds]  [Tags]    |
+|   611,357      20+          45          327,909   |
+|   4 stat cards with icons, formatted numbers      |
+|                                                    |
++-------------------------+-------------------------+
+|  Quick Actions          |  Feed Sync Status       |
+|  [New Article]          |  Feed 1 - synced 2m ago |
+|  [Add Feed]             |  Feed 2 - synced 5m ago |
+|  [View Analytics]       |  Feed 3 - synced 8m ago |
+|  [General Settings]     |                         |
++-------------------------+-------------------------+
+|  Recent Articles                                  |
+|  Title | Vertical | Author | Published            |
+|  ...5 most recent articles...                     |
++-------------------------+-------------------------+
+|  Top Verticals          |                         |
+|  blockchain  112,067    |                         |
+|  platohealth  66,550    |                         |
+|  gaming       49,526    |                         |
+|  ...progress bars...    |                         |
++-------------------------+-------------------------+
+```
 
-**1. Crawler pre-rendering missing for Korean URLs**
-The `vercel.json` crawler rewrite (line 86-95) only handles `/w3ai/:postId/:vertical/:slug` — it does NOT handle `/:lang/w3ai/:postId/:vertical/:slug`. When Googlebot visits a Korean article URL, it gets the raw SPA shell instead of the `og-meta` function's pre-rendered response. This may cause Google to deprioritize or skip these URLs.
+## Technical Details
 
-**2. Hardcoded `<html lang="en">`**
-The `index.html` has `<html lang="en">` regardless of the URL language prefix. This signals to Google that all pages are English, which contradicts the hreflang declarations in the sitemap.
+### File: `src/pages/Management.tsx` (lines 126-216)
 
-**3. No canonical or hreflang tags in HTML head**
-The HTML `<head>` has no `<link rel="canonical">` or `<link rel="alternate" hreflang="...">` tags. Google relies heavily on these in-page signals — sitemap hreflang alone is often insufficient.
+Replace the `case "dashboard"` content with:
 
-**4. Possible GSC timing**
-If the Korean sitemap was submitted recently, Google may still be processing it. The English sitemap likely had months of crawl history.
+**1. Stat Cards Row (4 cards)**
+- Total Articles (FileText icon) -- formatted with `toLocaleString()`
+- Verticals (Layers icon) -- count from `get_article_verticals` RPC
+- RSS Feeds (Rss icon) -- count from `rss_feeds` table
+- Tags (Tags icon) -- new query, count from `tags` table
+- Each card is clickable, navigating to the relevant section
+- Styled with gradient icon backgrounds and large bold numbers
 
-### Plan
+**2. Quick Actions + Feed Sync Status (2-column grid)**
+- Left: 4 quick action buttons (New Article, Add Feed, View Analytics, General Settings) with icons
+- Right: Card showing last 5 feed syncs with relative timestamps using `date-fns`'s `formatDistanceToNow`
 
-**Step 1 — Add crawler rewrite for lang-prefixed article URLs in `vercel.json`**
-Add a new rewrite rule before the catch-all that routes `/:lang/w3ai/:postId/:vertical/:slug` to the `og-meta` function for crawlers, passing the lang param. This ensures Googlebot gets pre-rendered metadata for Korean articles.
+**3. Recent Articles (full-width card)**
+- Table showing last 5 articles: title, vertical badge, author, published time (relative)
+- Each row clickable to navigate to articles view
 
-**Step 2 — Update `og-meta` edge function to accept and use `lang` parameter**
-Pass the language through so the og-meta response includes the correct `og:locale`, canonical URL with lang prefix, and hreflang alternate links.
+**4. Top Verticals (full-width card)**
+- List of top 6 verticals with article counts and progress bars showing relative proportion
+- Each row clickable to navigate to articles filtered by that vertical
 
-**Step 3 — Dynamically set `<html lang>` attribute in the React app**
-In `LangLayout.tsx` (or a shared hook), set `document.documentElement.lang` to the current URL language prefix so Google sees the correct language signal.
+### New Queries Added
+- **Tags count**: `supabase.from("tags").select("*", { count: "exact", head: true })`
+- **Recent articles**: `supabase.from("articles").select("title, vertical_slug, author, published_at").order("published_at", { ascending: false }).limit(5)`
+- **Recent feed syncs**: `supabase.from("rss_feeds").select("id, name, status, last_synced_at, last_error").order("last_synced_at", { ascending: false }).limit(5)`
+- **Top verticals**: `supabase.rpc("get_article_verticals")` (already exists, just display more data)
 
-**Step 4 — Inject canonical and hreflang `<link>` tags in `<head>` via React Helmet or DOM manipulation**
-Add `<link rel="canonical">` pointing to the current lang-prefixed URL, and `<link rel="alternate" hreflang="...">` for all supported languages. This gives Google in-page hreflang signals alongside the sitemap ones.
+### New Imports
+- `Tags, Layers, Rss, Plus, ArrowRight, Clock, TrendingUp` from `lucide-react`
+- `formatDistanceToNow` from `date-fns`
+- `Badge` from `@/components/ui/badge`
+- `Progress` from `@/components/ui/progress`
 
-**Step 5 — Deploy and resubmit**
-After deploying, request re-processing of the Korean sitemap in GSC.
+### Styling
+- Uses existing design tokens (bg-card, border-border, text-primary, etc.)
+- Stat cards have subtle gradient icon containers
+- Hover effects on all interactive elements
+- Responsive: 4-col stats on desktop, 2-col on tablet, 1-col on mobile
+- Cards use the existing Card component from shadcn
 

@@ -13,10 +13,27 @@ const DEFAULT_IMAGE = `${SITE_URL}/images/article-default-img.jpg`;
 const DEFAULT_DESCRIPTION =
   "Web3 AI code creation, automation, and vertical data intelligence. A decentralized, consensus-driven AI network ensuring trust & transparency.";
 
-/**
- * Build an HTML Response that forces the correct MIME type.
- * Using a Blob ensures the runtime cannot override Content-Type.
- */
+// Supported languages for hreflang alternates
+const SUPPORTED_LANGS = [
+  "en","ar","bn","zh-CN","zh-TW","da","nl","et","fi","fr","de","el","iw","hi",
+  "hu","id","it","ja","km","ko","no","fa","pl","pt","pa","ro","ru","sl","es",
+  "sv","th","tr","uk","ur","vi"
+];
+
+// Map language codes to og:locale format
+function langToOgLocale(lang: string): string {
+  const map: Record<string, string> = {
+    en: "en_US", ar: "ar_SA", bn: "bn_BD", "zh-CN": "zh_CN", "zh-TW": "zh_TW",
+    da: "da_DK", nl: "nl_NL", et: "et_EE", fi: "fi_FI", fr: "fr_FR",
+    de: "de_DE", el: "el_GR", iw: "he_IL", hi: "hi_IN", hu: "hu_HU",
+    id: "id_ID", it: "it_IT", ja: "ja_JP", km: "km_KH", ko: "ko_KR",
+    no: "nb_NO", fa: "fa_IR", pl: "pl_PL", pt: "pt_PT", pa: "pa_IN",
+    ro: "ro_RO", ru: "ru_RU", sl: "sl_SI", es: "es_ES", sv: "sv_SE",
+    th: "th_TH", tr: "tr_TR", uk: "uk_UA", ur: "ur_PK", vi: "vi_VN",
+  };
+  return map[lang] || "en_US";
+}
+
 function htmlResponse(html: string, isHead: boolean): Response {
   const blob = new Blob([html], { type: "text/html; charset=utf-8" });
   const headers = new Headers(corsHeaders);
@@ -38,7 +55,6 @@ serve(async (req) => {
 
   const isHead = req.method === "HEAD";
 
-  // Lightweight logging for debugging crawler traffic
   try {
     const ua = req.headers.get("user-agent") || "";
     const urlObj = new URL(req.url);
@@ -53,8 +69,8 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     let postId = url.searchParams.get("postId");
+    const lang = url.searchParams.get("lang") || "en";
 
-    // Also extract postId from path if present (e.g., /w3ai/123456/vertical/slug)
     if (!postId) {
       const pathMatch = url.pathname.match(/\/w3ai\/(\d+)/);
       if (pathMatch) {
@@ -62,7 +78,6 @@ serve(async (req) => {
       }
     }
 
-    // If no postId, return default meta tags
     if (!postId) {
       const html = generateMetaHtml({
         title: `${SITE_NAME} - Secure Network Protocol for the Next Web`,
@@ -70,11 +85,11 @@ serve(async (req) => {
         image: DEFAULT_IMAGE,
         url: SITE_URL,
         type: "website",
+        lang,
       });
       return htmlResponse(html, isHead);
     }
 
-    // Fetch article from database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -95,17 +110,22 @@ serve(async (req) => {
         image: DEFAULT_IMAGE,
         url: SITE_URL,
         type: "website",
+        lang,
       });
       return htmlResponse(html, isHead);
     }
 
-    // Generate excerpt from content if not available
     const excerpt = article.excerpt || generateExcerpt(article.content, 160);
     const titleSlug = article.title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-");
-    const articleUrl = `${SITE_URL}/w3ai/${postId}/${article.vertical_slug}/${titleSlug}`;
+
+    // Build URL with lang prefix if not English
+    const articlePath = `/w3ai/${postId}/${article.vertical_slug}/${titleSlug}`;
+    const articleUrl = lang !== "en"
+      ? `${SITE_URL}/${lang}${articlePath}`
+      : `${SITE_URL}${articlePath}`;
 
     const html = generateMetaHtml({
       title: decodeHtmlEntities(article.title),
@@ -116,6 +136,8 @@ serve(async (req) => {
       author: article.author,
       publishedTime: article.published_at,
       section: formatVerticalName(article.vertical_slug),
+      lang,
+      articlePath,
     });
 
     return htmlResponse(html, isHead);
@@ -132,10 +154,14 @@ function generateMetaHtml(meta: {
   image: string;
   url: string;
   type: string;
+  lang: string;
   author?: string;
   publishedTime?: string;
   section?: string;
+  articlePath?: string;
 }): string {
+  const ogLocale = langToOgLocale(meta.lang);
+
   const articleMeta =
     meta.type === "article"
       ? `
@@ -145,8 +171,19 @@ function generateMetaHtml(meta: {
   `
       : "";
 
+  // Generate hreflang alternate links
+  const basePath = meta.articlePath || "";
+  const hreflangLinks = basePath
+    ? SUPPORTED_LANGS.map((l) => {
+        const href = l === "en"
+          ? `${SITE_URL}${basePath}`
+          : `${SITE_URL}/${l}${basePath}`;
+        return `  <link rel="alternate" hreflang="${l}" href="${href}" />`;
+      }).join("\n") + `\n  <link rel="alternate" hreflang="x-default" href="${SITE_URL}${basePath}" />`
+    : "";
+
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${meta.lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -165,7 +202,7 @@ function generateMetaHtml(meta: {
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="${escapeHtml(meta.title)}" />
   <meta property="og:site_name" content="${SITE_NAME}" />
-  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale" content="${ogLocale}" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -179,6 +216,7 @@ function generateMetaHtml(meta: {
   ${articleMeta}
 
   <link rel="canonical" href="${meta.url}" />
+${hreflangLinks}
 </head>
 <body>
   <main>

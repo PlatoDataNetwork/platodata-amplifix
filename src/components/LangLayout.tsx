@@ -6,16 +6,26 @@ import NotFound from "@/pages/NotFound";
 
 const LangLayout = () => {
   const { lang } = useParams<{ lang: string }>();
-
-  if (!isSupportedLanguage(lang)) {
-    return <NotFound />;
-  }
+  const isSupported = isSupportedLanguage(lang);
 
   useEffect(() => {
+    if (!isSupported) return;
+
+    // Set <html lang="xx"> for SEO — crawlers use this signal
+    document.documentElement.lang = lang || "en";
+
     // Reset stale state before applying new language to prevent blocking
     resetTranslationState();
     applyGoogleTranslateLanguage(lang);
-  }, [lang]);
+
+    return () => {
+      document.documentElement.lang = "en";
+    };
+  }, [lang, isSupported]);
+
+  if (!isSupported) {
+    return <NotFound />;
+  }
 
   return <Outlet />;
 };
