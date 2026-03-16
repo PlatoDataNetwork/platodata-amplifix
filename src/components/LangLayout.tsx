@@ -12,9 +12,17 @@ const LangLayout = () => {
   }
 
   useEffect(() => {
+    // Set <html lang="xx"> for SEO — crawlers use this signal
+    document.documentElement.lang = lang || "en";
+
     // Reset stale state before applying new language to prevent blocking
     resetTranslationState();
     applyGoogleTranslateLanguage(lang);
+
+    return () => {
+      // Reset to English when leaving lang-prefixed routes
+      document.documentElement.lang = "en";
+    };
   }, [lang]);
 
   return <Outlet />;
