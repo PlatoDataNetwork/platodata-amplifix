@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import LangLayout from "@/components/LangLayout";
 import GTranslateBridge from "@/components/GTranslateBridge";
+import SeoHreflang from "@/components/SeoHreflang";
 import GoogleTranslateLoader from "@/components/GoogleTranslateLoader";
 
 import Index from "./pages/Index";
