@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye, X, Plus } from "lucide-react";
+import { ArrowLeft, Save, Eye, X, Plus, Sparkles, Loader2 } from "lucide-react";
 import RichTextEditor from "./RichTextEditor";
 import ImageUpload from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
@@ -44,6 +45,8 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
 
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [tagSelectOpen, setTagSelectOpen] = useState(false);
+  const [autoTagEnabled, setAutoTagEnabled] = useState(false);
+  const [autoTagging, setAutoTagging] = useState(false);
 
   // Fetch verticals for dropdown
   const { data: verticals } = useQuery({
@@ -89,6 +92,23 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
       setSelectedTagIds(existingArticleTags);
     }
   }, [existingArticleTags]);
+
+  // Auto-tag helper
+  const runAutoTag = async (articleId: string) => {
+    setAutoTagging(true);
+    try {
+      const { error } = await supabase.functions.invoke("extract-seo-tags", {
+        body: { article_ids: [articleId] },
+      });
+      if (error) throw error;
+      toast.success("Auto-tags generated successfully");
+    } catch (err: any) {
+      console.error("Auto-tag failed:", err);
+      toast.error("Failed to auto-generate tags");
+    } finally {
+      setAutoTagging(false);
+    }
+  };
 
   // Helper to get next sequential post_id
   const getNextPostId = async (): Promise<number> => {
@@ -137,6 +157,11 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
           console.error("Failed to save tags:", error);
           toast.error("Article created but failed to save tags");
         }
+      }
+
+      // Auto-tag if enabled
+      if (autoTagEnabled && newArticle?.id) {
+        await runAutoTag(newArticle.id);
       }
       
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
@@ -190,6 +215,11 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
             toast.error("Article updated but failed to save tags");
           }
         }
+      }
+
+      // Auto-tag if enabled
+      if (autoTagEnabled && articleId) {
+        await runAutoTag(articleId);
       }
 
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
@@ -393,6 +423,18 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
             {/* Tags Section */}
             <div className="bg-card border border-border rounded-lg p-4 space-y-4">
               <h3 className="font-semibold text-foreground">Tags</h3>
+
+              {/* Auto-Tagger Toggle */}
+              <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Auto-Tagger</p>
+                    <p className="text-xs text-muted-foreground">AI generates tags on save</p>
+                  </div>
+                </div>
+                <Switch checked={autoTagEnabled} onCheckedChange={setAutoTagEnabled} />
+              </div>
               
               {/* Selected Tags */}
               {selectedTagIds.length > 0 && (
