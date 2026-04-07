@@ -22,6 +22,7 @@ interface RssFeed {
   default_author: string | null;
   source_link_text: string | null;
   source_link_url: string | null;
+  auto_tag: boolean;
 }
 
 interface FeedItem {
@@ -539,6 +540,42 @@ Deno.serve(async (req) => {
       }
     }
     
+    // Auto-tag new articles if enabled
+    if (rssFeed.auto_tag && articlesImported > 0) {
+      try {
+        // Collect IDs of newly imported articles from sync logs
+        const { data: recentLogs } = await supabase
+          .from("feed_sync_logs")
+          .select("article_id")
+          .eq("feed_id", feedId)
+          .not("article_id", "is", null)
+          .order("synced_at", { ascending: false })
+          .limit(articlesImported);
+        
+        const articleIds = recentLogs?.map((l: { article_id: string }) => l.article_id).filter(Boolean) || [];
+        
+        if (articleIds.length > 0) {
+          console.log(`Auto-tagging ${articleIds.length} articles...`);
+          // Process in batches of 5
+          for (let i = 0; i < articleIds.length; i += 5) {
+            const batch = articleIds.slice(i, i + 5);
+            const extractUrl = `${supabaseUrl}/functions/v1/extract-seo-tags`;
+            await fetch(extractUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify({ article_ids: batch }),
+            });
+          }
+          console.log("Auto-tagging complete");
+        }
+      } catch (tagError) {
+        console.error("Auto-tagging failed (non-fatal):", tagError);
+      }
+    }
+
     // Update feed status
     await supabase.from("rss_feeds").update({
       last_synced_at: new Date().toISOString(),
