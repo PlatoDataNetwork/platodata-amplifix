@@ -157,7 +157,7 @@ html {
 }
 
 .article-content a {
-  @apply text-primary hover:text-primary/80 underline underline-offset-4 transition-colors;
+  @apply text-primary hover:text-primary/80 font-bold no-underline transition-colors;
 }
 
 .article-content strong,
