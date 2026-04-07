@@ -45,6 +45,8 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
 
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [tagSelectOpen, setTagSelectOpen] = useState(false);
+  const [autoTagEnabled, setAutoTagEnabled] = useState(false);
+  const [autoTagging, setAutoTagging] = useState(false);
 
   // Fetch verticals for dropdown
   const { data: verticals } = useQuery({
