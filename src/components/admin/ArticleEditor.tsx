@@ -93,6 +93,23 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
     }
   }, [existingArticleTags]);
 
+  // Auto-tag helper
+  const runAutoTag = async (articleId: string) => {
+    setAutoTagging(true);
+    try {
+      const { error } = await supabase.functions.invoke("extract-seo-tags", {
+        body: { article_ids: [articleId] },
+      });
+      if (error) throw error;
+      toast.success("Auto-tags generated successfully");
+    } catch (err: any) {
+      console.error("Auto-tag failed:", err);
+      toast.error("Failed to auto-generate tags");
+    } finally {
+      setAutoTagging(false);
+    }
+  };
+
   // Helper to get next sequential post_id
   const getNextPostId = async (): Promise<number> => {
     const { data, error } = await supabase
