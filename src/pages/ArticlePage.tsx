@@ -74,6 +74,20 @@ const ArticlePage = () => {
     enabled: !!postId,
   });
 
+  // Fetch article tags
+  const { data: articleTags } = useQuery({
+    queryKey: ["article-tags", article?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("article_tags")
+        .select("tag_id, tags(id, name, slug)")
+        .eq("article_id", article!.id);
+      if (error) throw error;
+      return (data || []).map((at: any) => at.tags).filter(Boolean);
+    },
+    enabled: !!article?.id,
+  });
+
 
   const formatLongDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -465,6 +479,9 @@ const ArticlePage = () => {
               {article.category && (
                 <Badge variant="outline">#{article.category}</Badge>
               )}
+              {articleTags && articleTags.map((tag: any) => (
+                <Badge key={tag.id} variant="outline">#{tag.name}</Badge>
+              ))}
             </div>
           </div>
         </div>
