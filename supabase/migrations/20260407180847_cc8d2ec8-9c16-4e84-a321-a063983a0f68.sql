@@ -1,0 +1,1 @@
+ALTER TABLE public.rss_feeds ADD COLUMN auto_tag boolean NOT NULL DEFAULT false;

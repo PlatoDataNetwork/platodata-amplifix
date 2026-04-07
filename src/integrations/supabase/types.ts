@@ -202,6 +202,7 @@ export type Database = {
       rss_feeds: {
         Row: {
           auto_sync: boolean
+          auto_tag: boolean
           check_duplicate_link: boolean
           check_duplicate_title: boolean
           created_at: string
@@ -226,6 +227,7 @@ export type Database = {
         }
         Insert: {
           auto_sync?: boolean
+          auto_tag?: boolean
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string
@@ -250,6 +252,7 @@ export type Database = {
         }
         Update: {
           auto_sync?: boolean
+          auto_tag?: boolean
           check_duplicate_link?: boolean
           check_duplicate_title?: boolean
           created_at?: string

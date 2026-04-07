@@ -93,6 +93,7 @@ interface RssFeed {
   default_author: string | null;
   source_link_text: string | null;
   source_link_url: string | null;
+  auto_tag: boolean;
 }
 
 interface FeedFormData {
@@ -112,6 +113,7 @@ interface FeedFormData {
   default_author: string;
   add_source_link: boolean;
   source_label: string;
+  auto_tag: boolean;
 }
 
 const defaultFormData: FeedFormData = {
@@ -131,6 +133,7 @@ const defaultFormData: FeedFormData = {
   default_author: "Republished By Plato",
   add_source_link: false,
   source_label: "Source",
+  auto_tag: false,
 };
 
 interface FeedsSyndicatorProps {
@@ -235,6 +238,7 @@ const FeedsSyndicator = ({
         default_author: editingFeed.default_author || "",
         add_source_link: !!(editingFeed.source_link_url),
         source_label: editingFeed.source_link_text || "Source",
+        auto_tag: (editingFeed as any).auto_tag ?? false,
       });
     }
   }, [editingFeed]);
@@ -293,6 +297,7 @@ const FeedsSyndicator = ({
         default_author: data.default_author || null,
         source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
+        auto_tag: data.auto_tag,
       });
       if (error) throw error;
     },
@@ -326,6 +331,7 @@ const FeedsSyndicator = ({
         default_author: data.default_author || null,
         source_link_text: data.add_source_link ? (data.source_label || "Source") : null,
         source_link_url: data.add_source_link ? "enabled" : null,
+        auto_tag: data.auto_tag,
       }).eq("id", id);
       if (error) throw error;
     },
@@ -967,6 +973,21 @@ const FeedsSyndicator = ({
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  {/* Auto-Tagger */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="auto_tag">AI Auto-Tagger</Label>
+                      <Switch
+                        id="auto_tag"
+                        checked={formData.auto_tag}
+                        onCheckedChange={(checked) => setFormData({ ...formData, auto_tag: checked })}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Automatically generate SEO tags for new articles using AI
+                    </p>
                   </div>
 
                   {/* Default Featured Image */}
