@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Search, Tags, Sparkles, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Search, Tags, Sparkles, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -17,8 +17,10 @@ const SeoAutoTagger = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [verticalFilter, setVerticalFilter] = useState<string>("all");
-  const [tagFilter, setTagFilter] = useState<string>("all"); // "all" | "untagged" | "tagged"
+  const [tagFilter, setTagFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
+  const [bulkVertical, setBulkVertical] = useState<string>("");
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
 
   // Fetch verticals
   const { data: verticals } = useQuery({
@@ -97,6 +99,47 @@ const SeoAutoTagger = () => {
     },
   });
 
+  // Bulk vertical auto-tag mutation
+  const bulkVerticalMutation = useMutation({
+    mutationFn: async (verticalSlug: string) => {
+      // Fetch all article IDs for this vertical
+      const { data: allArticles, error } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("vertical_slug", verticalSlug);
+      if (error) throw error;
+      if (!allArticles || allArticles.length === 0) throw new Error("No articles found for this vertical");
+
+      const ids = allArticles.map((a: any) => a.id);
+      const batchSize = 5;
+      const allResults: any[] = [];
+      setBulkProgress({ done: 0, total: ids.length });
+
+      for (let i = 0; i < ids.length; i += batchSize) {
+        const batch = ids.slice(i, i + batchSize);
+        const { data, error: fnErr } = await supabase.functions.invoke("extract-seo-tags", {
+          body: { article_ids: batch },
+        });
+        if (fnErr) throw fnErr;
+        if (data?.results) allResults.push(...data.results);
+        setBulkProgress({ done: Math.min(i + batchSize, ids.length), total: ids.length });
+      }
+      return allResults;
+    },
+    onSuccess: (results) => {
+      const successful = results.filter((r: any) => r.tags_added?.length > 0);
+      const failed = results.filter((r: any) => r.error);
+      const totalTags = successful.reduce((sum: number, r: any) => sum + r.tags_added.length, 0);
+      toast.success(`Tagged ${successful.length} articles with ${totalTags} keywords${failed.length > 0 ? ` (${failed.length} failed)` : ""}`);
+      setBulkProgress(null);
+      queryClient.invalidateQueries({ queryKey: ["seo-tagger-articles"] });
+    },
+    onError: (error: Error) => {
+      toast.error(`Bulk tagging failed: ${error.message}`);
+      setBulkProgress(null);
+    },
+  });
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -133,6 +176,59 @@ const SeoAutoTagger = () => {
           AI-powered keyword extraction — select articles and bulk auto-tag with high-value SEO keywords.
         </p>
       </div>
+
+      {/* Bulk Vertical Tagger */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Layers className="w-5 h-5 text-primary" />
+            Tag Entire Vertical
+          </CardTitle>
+          <CardDescription>Select a vertical to auto-generate tags for all its articles at once.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-end gap-3">
+            <div className="w-[220px]">
+              <Select value={bulkVertical} onValueChange={setBulkVertical}>
+                <SelectTrigger><SelectValue placeholder="Select vertical..." /></SelectTrigger>
+                <SelectContent>
+                  {verticals?.map((v: any) => (
+                    <SelectItem key={v.vertical_slug} value={v.vertical_slug}>
+                      {v.vertical_slug}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={() => bulkVertical && bulkVerticalMutation.mutate(bulkVertical)}
+              disabled={!bulkVertical || bulkVerticalMutation.isPending}
+              className="gap-2"
+            >
+              {bulkVerticalMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              Tag All Articles
+            </Button>
+          </div>
+          {bulkProgress && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
+                <span>Processing...</span>
+                <span>{bulkProgress.done} / {bulkProgress.total}</span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all"
+                  style={{ width: `${(bulkProgress.done / bulkProgress.total) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card className="bg-card border-border">
