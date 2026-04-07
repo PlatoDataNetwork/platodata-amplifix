@@ -283,7 +283,7 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
 
   const availableTags = allTags?.filter((t) => !selectedTagIds.includes(t.id)) || [];
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending = createMutation.isPending || updateMutation.isPending || autoTagging;
 
   return (
     <div className="space-y-6">
@@ -309,8 +309,13 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
             Preview
           </Button>
           <Button size="sm" onClick={handleSubmit} disabled={isPending}>
-            <Save className="w-4 h-4 mr-2" />
-            {isPending ? "Saving..." : isEditing ? "Update" : "Publish"}
+            {autoTagging ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating Tags...</>
+            ) : (createMutation.isPending || updateMutation.isPending) ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
+            ) : (
+              <><Save className="w-4 h-4 mr-2" />{isEditing ? "Update" : "Publish"}</>
+            )}
           </Button>
         </div>
       </div>
