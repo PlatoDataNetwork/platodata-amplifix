@@ -489,16 +489,6 @@ const ArticlePage = () => {
                 Plato Data Intelligence.
               </a>
             </p>
-            
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">#{formatVerticalName(article.vertical_slug)}</Badge>
-              {article.category && (
-                <Badge variant="outline">#{article.category}</Badge>
-              )}
-              {articleTags && articleTags.map((tag: any) => (
-                <Badge key={tag.id} variant="outline">#{tag.name}</Badge>
-              ))}
-            </div>
           </div>
         </div>
       </section>
