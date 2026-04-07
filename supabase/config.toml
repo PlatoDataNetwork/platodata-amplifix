@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.ga-realtime]
 verify_jwt = false
+
+[functions.extract-seo-tags]
+verify_jwt = false
