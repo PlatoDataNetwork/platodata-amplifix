@@ -423,6 +423,18 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
             {/* Tags Section */}
             <div className="bg-card border border-border rounded-lg p-4 space-y-4">
               <h3 className="font-semibold text-foreground">Tags</h3>
+
+              {/* Auto-Tagger Toggle */}
+              <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Auto-Tagger</p>
+                    <p className="text-xs text-muted-foreground">AI generates tags on save</p>
+                  </div>
+                </div>
+                <Switch checked={autoTagEnabled} onCheckedChange={setAutoTagEnabled} />
+              </div>
               
               {/* Selected Tags */}
               {selectedTagIds.length > 0 && (
