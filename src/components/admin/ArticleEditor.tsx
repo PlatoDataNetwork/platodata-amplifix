@@ -217,6 +217,11 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
         }
       }
 
+      // Auto-tag if enabled
+      if (autoTagEnabled && articleId) {
+        await runAutoTag(articleId);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
       queryClient.invalidateQueries({ queryKey: ["article-tags", articleId] });
       toast.success("Article updated successfully");
