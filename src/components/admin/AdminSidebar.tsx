@@ -36,7 +36,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "seo-auto-tagger" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 interface AdminSidebarProps {
   currentView: View;
@@ -236,6 +236,18 @@ const AdminSidebar = ({ currentView, onViewChange }: AdminSidebarProps) => {
                 >
                   <Globe className="w-6 h-6" />
                   <span>Social Preview</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* SEO Auto-Tagger */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onViewChange("seo-auto-tagger")}
+                  isActive={currentView === "seo-auto-tagger"}
+                  className="w-full text-base py-3"
+                >
+                  <Sparkles className="w-6 h-6" />
+                  <span>SEO Auto-Tagger</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
