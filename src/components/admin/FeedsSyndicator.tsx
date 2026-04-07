@@ -975,6 +975,21 @@ const FeedsSyndicator = ({
                     )}
                   </div>
 
+                  {/* Auto-Tagger */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="auto_tag">AI Auto-Tagger</Label>
+                      <Switch
+                        id="auto_tag"
+                        checked={formData.auto_tag}
+                        onCheckedChange={(checked) => setFormData({ ...formData, auto_tag: checked })}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Automatically generate SEO tags for new articles using AI
+                    </p>
+                  </div>
+
                   {/* Default Featured Image */}
                   <div className="space-y-2">
                     <Label>Default Featured Image</Label>
