@@ -141,6 +141,11 @@ const ArticleEditor = ({ article, onBack, onSave }: ArticleEditorProps) => {
           toast.error("Article created but failed to save tags");
         }
       }
+
+      // Auto-tag if enabled
+      if (autoTagEnabled && newArticle?.id) {
+        await runAutoTag(newArticle.id);
+      }
       
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-article-count"] });
