@@ -27,8 +27,9 @@ import OGImageGenerator from "@/components/admin/OGImageGenerator";
 import SocialPreviewDebugger from "@/components/admin/SocialPreviewDebugger";
 import BatchImageResizer from "@/components/admin/BatchImageResizer";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
+import SeoAutoTagger from "@/components/admin/SeoAutoTagger";
 
-type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
+type View = "dashboard" | "analytics" | "articles" | "new-article" | "tags" | "verticals" | "feeds-syndicator" | "new-feed" | "edit-feed" | "feeds-logs" | "default-images" | "batch-resize" | "og-generator" | "social-preview" | "seo-auto-tagger" | "settings-general" | "settings-analytics" | "settings-sitemaps" | "settings-robots";
 
 const Management = () => {
   const navigate = useNavigate();
@@ -366,6 +367,8 @@ const Management = () => {
         return <OGImageGenerator />;
       case "social-preview":
         return <SocialPreviewDebugger />;
+      case "seo-auto-tagger":
+        return <SeoAutoTagger />;
       case "settings-general":
         return <GeneralSettings />;
       case "settings-analytics":
