@@ -93,6 +93,7 @@ interface RssFeed {
   default_author: string | null;
   source_link_text: string | null;
   source_link_url: string | null;
+  auto_tag: boolean;
 }
 
 interface FeedFormData {
@@ -112,6 +113,7 @@ interface FeedFormData {
   default_author: string;
   add_source_link: boolean;
   source_label: string;
+  auto_tag: boolean;
 }
 
 const defaultFormData: FeedFormData = {
@@ -131,6 +133,7 @@ const defaultFormData: FeedFormData = {
   default_author: "Republished By Plato",
   add_source_link: false,
   source_label: "Source",
+  auto_tag: false,
 };
 
 interface FeedsSyndicatorProps {
