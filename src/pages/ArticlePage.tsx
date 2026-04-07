@@ -435,6 +435,22 @@ const ArticlePage = () => {
         </div>
       </section>
 
+      {/* Tags */}
+      {(articleTags && articleTags.length > 0 || article.category) && (
+        <section className="px-4 md:px-6 pb-4 md:pb-6">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">#{formatVerticalName(article.vertical_slug)}</Badge>
+              {article.category && (
+                <Badge variant="outline">#{article.category}</Badge>
+              )}
+              {articleTags && articleTags.map((tag: any) => (
+                <Badge key={tag.id} variant="outline">#{tag.name}</Badge>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Article Content */}
       <section className="px-4 md:px-6 pb-8 md:pb-12">
@@ -473,16 +489,6 @@ const ArticlePage = () => {
                 Plato Data Intelligence.
               </a>
             </p>
-            
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">#{formatVerticalName(article.vertical_slug)}</Badge>
-              {article.category && (
-                <Badge variant="outline">#{article.category}</Badge>
-              )}
-              {articleTags && articleTags.map((tag: any) => (
-                <Badge key={tag.id} variant="outline">#{tag.name}</Badge>
-              ))}
-            </div>
           </div>
         </div>
       </section>
