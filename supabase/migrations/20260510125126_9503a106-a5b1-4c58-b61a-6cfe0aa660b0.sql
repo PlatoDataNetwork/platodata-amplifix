@@ -1,0 +1,1 @@
+TRUNCATE TABLE public.article_tags, public.article_translations, public.feed_sync_logs, public.articles, public.tags RESTART IDENTITY CASCADE;
