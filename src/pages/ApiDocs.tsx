@@ -31,6 +31,7 @@ const ApiDocs = () => {
         size="sm"
         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={() => copyToClipboard(code, id)}
+        aria-label="Copy code"
       >
         {copiedCode === id ? (
           <Check className="w-4 h-4 text-green-500" />
