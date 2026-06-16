@@ -192,7 +192,7 @@ const IntelVertical = () => {
   const verticalName = formatVerticalName(vertical || "");
   const pageTitle = `${verticalName} Intelligence | ${siteName}`;
   const pageDescription = `Stay updated with the latest ${verticalName} news, insights, and intelligence from ${siteName}.`;
-  const pageUrl = `${SITE_URL}/intel/${vertical}`;
+  const pageUrl = `${SITE_URL}${withLang(`/w3ai/vertical/${vertical}`)}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -215,8 +215,7 @@ const IntelVertical = () => {
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={pageUrl} />
+        {/* Canonical handled by <SeoHreflang /> globally (lang-aware) */}
       </Helmet>
       
       <Navigation />

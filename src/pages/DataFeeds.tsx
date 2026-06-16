@@ -139,9 +139,6 @@ const DataFeeds = () => {
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={`${SITE_URL}/data-feeds`} />
-        
         {/* Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS Feed`} href={`${SITE_URL}/feed.xml`} />
         <link rel="alternate" type="application/json" title={`${siteName} JSON Feed`} href={`${SITE_URL}/feed.json`} />

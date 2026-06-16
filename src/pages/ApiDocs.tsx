@@ -60,8 +60,6 @@ const ApiDocs = () => {
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={`${SITE_URL}/api-docs`} />
       </Helmet>
       
       <Navigation />

@@ -144,8 +144,6 @@ const Solutions = () => {
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={`${SITE_URL}/solutions`} />
       </Helmet>
       
       <Navigation />

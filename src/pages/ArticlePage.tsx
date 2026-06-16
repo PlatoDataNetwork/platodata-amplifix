@@ -203,9 +203,6 @@ const ArticlePage = () => {
         {article.author && <meta property="article:author" content={article.author} />}
         <meta property="article:section" content={formatVerticalName(article.vertical_slug)} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={pageUrl} />
-        
         {/* JSON-LD Article Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
