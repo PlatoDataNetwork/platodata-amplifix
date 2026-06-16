@@ -37,9 +37,6 @@ const Index = () => {
         <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/images/article-default-img.jpg`} />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href={SITE_URL} />
-        
         {/* RSS/JSON Feed Autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS Feed`} href={`${SITE_URL}/feed.xml`} />
         <link rel="alternate" type="application/feed+json" title={`${siteName} JSON Feed`} href={`${SITE_URL}/feed.json`} />
