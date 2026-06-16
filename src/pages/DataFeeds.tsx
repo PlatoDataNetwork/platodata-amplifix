@@ -80,9 +80,9 @@ const DataFeeds = () => {
   const FeedCard = ({ vertical }: { vertical: string }) => (
     <div className="bg-card border border-border rounded-lg p-5 hover:border-primary/50 transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-foreground">
+        <h2 className="text-lg font-bold text-foreground">
           {formatVerticalName(vertical)}
-        </h3>
+        </h2>
         <span className="text-sm text-muted-foreground">
           {articleCounts?.[vertical] || 0} articles
         </span>
